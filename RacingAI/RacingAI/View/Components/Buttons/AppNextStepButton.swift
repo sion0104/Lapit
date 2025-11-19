@@ -14,7 +14,7 @@ struct AppNextStepButton: View {
             Text(title)
                 .foregroundStyle(.primary)
         }
-        .modifier(ButtonStyle())
+        .buttonStyle(PrimaryButtonStyle())
         .disabled(!isEnabled)
         .opacity(isEnabled ? 1 : 0.6)
         .accessibilityLabel(title)
