@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct AppNextStepButton: View {
-    var title: String = "다음 단계"
+struct AppButton: View {
+    var title: String
     var isEnabled: Bool
     var action: () -> Void
     
