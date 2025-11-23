@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 struct InformationView: View {
     
@@ -7,9 +8,9 @@ struct InformationView: View {
         case female
     }
      
-    @State private var name: String = ""
-    @State private var birth: String = ""
-    @State private var gender: Gender? = nil
+    @EnvironmentObject var store: UserInfoStore
+    
+    @State private var selectedItem: PhotosPickerItem?
     
     var body: some View {
         NavigationStack {
@@ -33,6 +34,7 @@ struct InformationView: View {
             }
             .padding()
         }
+        .navigationBarBackButtonHidden(true)
     }
 }
 
@@ -47,26 +49,46 @@ private extension InformationView {
             
             HStack {
                 ZStack {
-                    Circle()
-                        .fill(Color(.systemGray5))
-                        .frame(width: 72, height: 72)
-                    
-                    Image(systemName: "person.fill")
-                        .font(.system(size: 30))
-                        .foregroundStyle(.white.opacity(0.7))
+                    if let data = store.profileImageData,
+                       let uiImage = UIImage(data: data) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 72, height: 72)
+                            .clipShape(Circle())
+                            .clipped()
+                    } else {
+                        Circle()
+                            .fill(Color(.systemGray5))
+                            .frame(width: 72, height: 72)
+                            .overlay(
+                                Image(systemName: "person.fill")
+                                    .font(.system(size: 30))
+                                    .foregroundStyle(.white.opacity(0.7))
+                            )
+                    }
                 }
                 
-                Button {
-                    // 사진 등록 액션
-                } label: {
+                PhotosPicker(
+                    selection: $selectedItem,
+                    matching: .images
+                ) {
                     Text("사진 등록")
                         .font(.footnote)
                         .foregroundStyle(.black)
                         .fontWeight(.semibold)
-                    
+                }
+                .onChange(of: selectedItem) { oldValue, newValue in
+                    Task {
+                        guard let newValue else { return }
+                        if let data = try? await newValue.loadTransferable(type: Data.self) {
+                            await MainActor.run {
+                                store.profileImageData = data
+                            }
+                        }
+                    }
                 }
                 .padding()
-                Spacer()
             }
         }
     }
@@ -84,7 +106,7 @@ private extension InformationView {
                 Spacer()
             }
             
-            AppTextField(text: $name, placeholder: "사용하실 이름 또는 닉네임을 입력하세요", keyboard: .emailAddress, submitLabel: .next)
+            AppTextField(text: $store.name, placeholder: "사용하실 이름 또는 닉네임을 입력하세요", keyboard: .emailAddress, submitLabel: .next)
                 .font(.footnote)
             
             Text("이름은 저장 후 변경 불가능합니다.")
@@ -105,7 +127,7 @@ private extension InformationView {
                     .fontWeight(.medium)
                     .foregroundStyle(.red)
             }
-            AppTextField(text: $birth, placeholder: "YYYY.MM.DD", keyboard: .decimalPad, submitLabel: .done)
+            AppTextField(text: $store.birth, placeholder: "YYYY.MM.DD", keyboard: .decimalPad, submitLabel: .done)
                 .font(.footnote)
         }
     }
@@ -122,12 +144,12 @@ private extension InformationView {
                     .foregroundStyle(.red)
             }
             HStack {
-                GenderOptionView(title: "남성", isSelected: gender == .male) {
-                    gender = .male
+                GenderOptionView(title: "남성", isSelected: store.gender == .male) {
+                    store.gender = .male
                 }
                 
-                GenderOptionView(title: "여성", isSelected: gender == .female) {
-                    gender = .female
+                GenderOptionView(title: "여성", isSelected: store.gender == .female) {
+                    store.gender = .female
                 }
                 .padding(.leading, 16)
             }
@@ -154,4 +176,5 @@ private extension InformationView {
 
 #Preview {
     InformationView()
+        .environmentObject(UserInfoStore())
 }

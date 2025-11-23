@@ -12,6 +12,7 @@ struct RacingAIApp: App {
     var body: some Scene {
         WindowGroup {
             AuthenticationView()
+                .environmentObject(UserInfoStore())
         }
     }
 }
