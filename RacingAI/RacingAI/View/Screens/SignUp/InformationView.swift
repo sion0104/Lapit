@@ -12,6 +12,15 @@ struct InformationView: View {
     
     @State private var selectedItem: PhotosPickerItem?
     
+    @State private var showTermsSheet = false
+    @State private var showValidationAlert = false
+    
+    private var canGoNext: Bool {
+        !store.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !store.birth.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        store.gender != nil
+    }
+    
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading) {
@@ -35,6 +44,16 @@ struct InformationView: View {
             .padding()
         }
         .navigationBarBackButtonHidden(true)
+        .sheet(isPresented: $showTermsSheet) {
+            TermsView()
+                .environmentObject(store)
+                .presentationDetents([.medium, .large])
+        }
+        .alert("입력 확인", isPresented: $showValidationAlert) {
+            Button("확인", role: .cancel) {}
+        } message: {
+            Text("이름, 생년월일, 성별을 모두 입력/선택해야 다음 단계로 넘어갈 수 있어요.")
+        }
     }
 }
 
@@ -167,7 +186,11 @@ private extension InformationView {
                 }
                 .frame(width: 122, height: 48)
                 AppButton(title: "다음 단계", isEnabled: true) {
-                    // 다음 단계 액션
+                    if canGoNext {
+                        showTermsSheet = true
+                    } else {
+                        showValidationAlert = true
+                    }
                 }
             }
         }
