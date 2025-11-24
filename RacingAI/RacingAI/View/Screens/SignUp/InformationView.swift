@@ -182,7 +182,7 @@ private extension InformationView {
             Spacer()
             HStack {
                 AppButton(title: "뒤로 가기", isEnabled: true) {
-                    // 뒤로 가기 액션
+                    
                 }
                 .frame(width: 122, height: 48)
                 AppButton(title: "다음 단계", isEnabled: true) {

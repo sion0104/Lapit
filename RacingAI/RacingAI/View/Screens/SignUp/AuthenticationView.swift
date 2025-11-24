@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct AuthenticationView: View {
+    @EnvironmentObject var store: UserInfoStore
+    
     @State private var userId: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
@@ -57,6 +59,7 @@ struct AuthenticationView: View {
             .padding()
             .navigationDestination(isPresented: $canNavigate) {
                 InformationView()
+                    .environmentObject(store)
             }
         }
     }
@@ -106,7 +109,7 @@ extension AuthenticationView {
         passwordError = nil
         
         guard validateLocalUserId() else { return }
-        guard validateLocalUserId() else { return }
+        guard validatePasswords() else { return }
         
         isCheckingId = true
         defer { isCheckingId = false }
@@ -115,6 +118,8 @@ extension AuthenticationView {
             let isAvailable = try await checkDuplicateIdAPI.fetchCheckDuplicateID(username: userId)
             
             if isAvailable {
+                store.id = userId
+                store.password = password
                 canNavigate = true
             } else {
                 userIdError = "이미 사용 중인 아이디입니다."

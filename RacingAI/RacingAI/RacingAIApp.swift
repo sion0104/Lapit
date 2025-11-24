@@ -1,18 +1,13 @@
-//
-//  RacingAIApp.swift
-//  RacingAI
-//
-//  Created by 최시온 on 11/3/25.
-//
-
 import SwiftUI
 
 @main
 struct RacingAIApp: App {
+    @StateObject private var store = UserInfoStore()
+    
     var body: some Scene {
         WindowGroup {
             AuthenticationView()
-                .environmentObject(UserInfoStore())
+                .environmentObject(store)
         }
     }
 }
