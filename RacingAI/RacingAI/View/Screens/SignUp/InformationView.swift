@@ -154,7 +154,9 @@ private extension InformationView {
                 placeholder: "YYYY.MM.DD",
                 keyboard: .numberPad,
                 submitLabel: .done,
-                error: birthError
+                error: birthError,
+                maxLength: 10,
+                isNumberOnly: false
             )
                 .font(.footnote)
                 .onChange(of: store.birth) { _, newValue in

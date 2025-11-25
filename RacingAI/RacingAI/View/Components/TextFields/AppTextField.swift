@@ -9,6 +9,8 @@ struct AppTextField: View {
     var submitLabel: SubmitLabel = .done
     var error: String? = nil
     var onSubmit: (() -> Void)? = nil
+    var maxLength: Int? = nil
+    var isNumberOnly: Bool = false
     
     @FocusState private var isFocused: Bool
     @State private var revealSecure: Bool = false
@@ -57,6 +59,21 @@ struct AppTextField: View {
         }
         .onSubmit {
             onSubmit?()
+        }
+        .onChange(of: text) { _, newValue in
+            var value = newValue
+            
+            if isNumberOnly {
+                value = value.filter { $0.isNumber }
+            }
+            
+            if let maxLength {
+                value = String(value.prefix(maxLength))
+            }
+            
+            if value != newValue {
+                text = value
+            }
         }
         .accessibilityElement(children: .contain)
     }
