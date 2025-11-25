@@ -132,4 +132,5 @@ extension AuthenticationView {
 
 #Preview {
     AuthenticationView()
+        .environmentObject(UserInfoStore())
 }

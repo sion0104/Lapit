@@ -201,3 +201,9 @@ private extension TermsView {
         }
     }
 }
+
+#Preview {
+    TermsView()
+        .environmentObject(UserInfoStore())
+}
+
