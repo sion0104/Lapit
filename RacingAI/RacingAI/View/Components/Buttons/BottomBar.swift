@@ -1,18 +1,24 @@
-//
-//  BottomBar.swift
-//  RacingAI
-//
-//  Created by 최시온 on 12/1/25.
-//
-
 import SwiftUI
 
 struct BottomBar: View {
+    let leftTitle: String
+    let rightTitle: String
+    var isLeftEnabled: Bool = true
+    var isRightEnabled: Bool = true
+    let leftAction: () -> Void
+    let rightAction: () -> Void
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        HStack {
+            AppButton(title: leftTitle, isEnabled: isLeftEnabled) {
+                leftAction()
+            }
+            .frame(width: 122)
+            
+            AppButton(title: rightTitle, isEnabled: isRightEnabled) {
+                rightAction()
+            }
+        }
+        .padding()
     }
-}
-
-#Preview {
-    BottomBar()
 }
