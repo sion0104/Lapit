@@ -3,6 +3,7 @@ import SwiftUI
 struct AppButton: View {
     var title: String
     var isEnabled: Bool
+    var isLeading: Bool = false
     var action: () -> Void
     
     var body: some View {
@@ -11,8 +12,13 @@ struct AppButton: View {
                 action()
             }
         } label: {
-            Text(title)
-                .foregroundStyle(.primary)
+            HStack {
+                Text(title)
+                    .foregroundStyle(.primary)
+                if isLeading {
+                    Spacer()
+                }
+            }
         }
         .buttonStyle(PrimaryButtonStyle())
         .disabled(!isEnabled)
