@@ -4,6 +4,15 @@ struct FirstQuestionView: View {
     @EnvironmentObject var bodyInfoStore: BodyInfoStore
     @Environment(\.dismiss) private var dismiss
     
+    @State private var canNavigate: Bool = false
+    
+    private var isNextEnabled: Bool {
+        !bodyInfoStore.height.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !bodyInfoStore.weight.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !bodyInfoStore.bodyFatRate.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        bodyInfoStore.weightChange != nil
+    }
+    
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -99,17 +108,24 @@ struct FirstQuestionView: View {
         }
         .padding()
         .navigationBarBackButtonHidden(true)
+        .navigationDestination(isPresented: $canNavigate, destination: {
+            SecondQuestionView()
+                .environmentObject(bodyInfoStore)
+        })
         .safeAreaInset(edge: .bottom) {
-            HStack {
-                AppButton(title: "뒤로 가기", isEnabled: true) {
+            BottomBar(
+                leftTitle: "뒤로 가기",
+                rightTitle: "다음 단계",
+                isLeftEnabled: true,
+                isRightEnabled: isNextEnabled,
+                leftAction: {
                     dismiss()
+                },
+                rightAction: {
+                    guard isNextEnabled else { return }
+                    canNavigate = true
                 }
-                .frame(width: 122)
-                AppButton(title: "다음 단계", isEnabled: true) {
-                    // MARK: 다음 온보딩 뷰
-                }
-            }
-            .padding()
+            )
         }
     }
 }

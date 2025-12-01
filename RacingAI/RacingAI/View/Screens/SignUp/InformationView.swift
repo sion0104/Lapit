@@ -9,6 +9,7 @@ struct InformationView: View {
     }
      
     @EnvironmentObject var store: UserInfoStore
+    @Environment(\.dismiss) private var dismiss
     
     @State private var selectedItem: PhotosPickerItem?
     
@@ -40,13 +41,22 @@ struct InformationView: View {
                     .padding(.top, 16)
                 genderSection
                     .padding(.top, 16)
-                
-                bottomButtons
-                
             }
             .padding()
         }
         .navigationBarBackButtonHidden(true)
+        .safeAreaInset(edge: .bottom, content: {
+            BottomBar(
+                leftTitle: "뒤로 가기",
+                rightTitle: "다음 단계",
+                isLeftEnabled: true,
+                isRightEnabled: true,
+                leftAction: {
+                    dismiss()
+                }, rightAction: {
+                    dismiss()
+                })
+        })
         .sheet(isPresented: $showTermsSheet) {
             TermsView()
                 .environmentObject(store)
@@ -200,25 +210,6 @@ private extension InformationView {
             Spacer()
         }
     }
-    
-    var bottomButtons: some View {
-        VStack {
-            Spacer()
-            HStack {
-                AppButton(title: "뒤로 가기", isEnabled: true) {
-                    
-                }
-                .frame(width: 122, height: 48)
-                AppButton(title: "다음 단계", isEnabled: true) {
-                    if canGoNext {
-                        showTermsSheet = true
-                    } else {
-                        showValidationAlert = true
-                    }
-                }
-            }
-        }
-    }
 }
 
 private extension InformationView {
@@ -279,7 +270,7 @@ private extension InformationView {
             return "올바른 년도를 입력해주세요."
         }
         guard (1...12).contains(month) else {
-            return "올바른 워을 입력해주세요."
+            return "올바른 월을 입력해주세요."
         }
         guard (1...31).contains(day) else {
             return "올바른 일을 입력해주세요."

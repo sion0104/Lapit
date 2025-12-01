@@ -10,6 +10,7 @@ struct TermsView: View {
     private let termsAPI = TermsAPI()
     
     @State private var expandedIds: Set<Int> = []
+    @State private var showValidationAlert = false
     
     private var requiredTermsIds: [Int] {
         terms.filter { $0.required }.map { $0.id }
@@ -42,6 +43,26 @@ struct TermsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .task { await loadTerms() }
         }
+        .safeAreaInset(edge: .bottom) {
+            BottomBar(
+                leftTitle: "뒤로 가기",
+                rightTitle: "다음 단계",
+                leftAction: {
+                    dismiss()
+                },
+                rightAction: {
+                    if canGoNext {
+                        dismiss()
+                    } else {
+                        showValidationAlert = true
+                    }
+                })
+        }
+        .alert("약관 동의 필요", isPresented: $showValidationAlert) {
+            Button("확인", role: .cancel) { }
+        } message: {
+            Text("필수 약관에 모두 동의해야 다음 단계로 진행할 수 있어요.")
+        }
     }
 }
 
@@ -60,6 +81,7 @@ private extension TermsView {
             
             Divider()
                 .padding(.bottom, 20)
+                .foregroundStyle(.black)
             
             ScrollView {
                 VStack(alignment: .leading) {
@@ -71,17 +93,6 @@ private extension TermsView {
             }
             
             Spacer()
-            
-            HStack {
-                AppButton(title: "뒤로 가기", isEnabled: true) {
-                    dismiss()
-                }
-                .frame(width: 122, height: 48)
-                
-                AppButton(title: "다음 단계", isEnabled: canGoNext) {
-                    dismiss()
-                }
-            }
         }
         .padding()
     }
