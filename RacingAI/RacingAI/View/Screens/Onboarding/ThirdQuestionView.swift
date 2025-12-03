@@ -81,7 +81,8 @@ struct ThirdQuestionView: View {
             .padding()
         }
         .navigationDestination(isPresented: $canGoNext) {
-            // MARK: 다음 온보딩 화면
+            FourthQuestionView()
+                .environmentObject(bodyInfoStore)
         }
         .navigationBarBackButtonHidden(true)
         .safeAreaInset(edge: .bottom) {
