@@ -20,5 +20,6 @@ struct BottomBar: View {
             }
         }
         .padding()
+        .background(Color.white)
     }
 }
