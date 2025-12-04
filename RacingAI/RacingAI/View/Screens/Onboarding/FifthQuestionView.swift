@@ -46,24 +46,24 @@ struct FifthQuestionView: View {
                 }
             }
             .padding()
-        }
-        .navigationDestination(isPresented: $canGoNext) {
-            FourthQuestionView()
-                .environmentObject(bodyInfoStore)
-        }
-        .navigationBarBackButtonHidden(true)
-        .safeAreaInset(edge: .bottom) {
-            BottomBar(
-                leftTitle: "뒤로 가기",
-                rightTitle: "다음 단계",
-                isLeftEnabled: true,
-                isRightEnabled: isNextEnabled,
-                leftAction: {
-                    dismiss()
-                }, rightAction: {
-                    guard isNextEnabled else { return }
-                    canGoNext = true
-                })
+            .safeAreaInset(edge: .bottom) {
+                BottomBar(
+                    leftTitle: "뒤로 가기",
+                    rightTitle: "다음 단계",
+                    isLeftEnabled: true,
+                    isRightEnabled: isNextEnabled,
+                    leftAction: {
+                        dismiss()
+                    }, rightAction: {
+                        guard isNextEnabled else { return }
+                        canGoNext = true
+                    })
+            }
+            .navigationDestination(isPresented: $canGoNext) {
+                SixthQuestionView()
+                    .environmentObject(bodyInfoStore)
+            }
+            .navigationBarBackButtonHidden(true)
         }
     }
 }

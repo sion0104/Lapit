@@ -48,24 +48,24 @@ struct SecondQuestionView: View {
                 Spacer(minLength: 6)
             }
             .padding()
-        }
-        .navigationBarBackButtonHidden(true)
-        .navigationDestination(isPresented: $cangoNext, destination: {
-            ThirdQuestionView()
-                .environmentObject(bodyInfoStore)
-        })
-        .safeAreaInset(edge: .bottom) {
-            BottomBar(
-                leftTitle: "뒤로 가기",
-                rightTitle: "다음 단계",
-                isLeftEnabled: true,
-                isRightEnabled: bodyInfoStore.trainingPartner != nil, leftAction: {
-                    dismiss()
-                },
-                rightAction: {
-                    cangoNext = true
-                }
-            )
+            .safeAreaInset(edge: .bottom) {
+                BottomBar(
+                    leftTitle: "뒤로 가기",
+                    rightTitle: "다음 단계",
+                    isLeftEnabled: true,
+                    isRightEnabled: bodyInfoStore.trainingPartner != nil, leftAction: {
+                        dismiss()
+                    },
+                    rightAction: {
+                        cangoNext = true
+                    }
+                )
+            }
+            .navigationBarBackButtonHidden(true)
+            .navigationDestination(isPresented: $cangoNext, destination: {
+                ThirdQuestionView()
+                    .environmentObject(bodyInfoStore)
+            })
         }
     }
 }

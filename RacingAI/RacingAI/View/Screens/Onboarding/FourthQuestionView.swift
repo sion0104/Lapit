@@ -31,7 +31,9 @@ struct FourthQuestionView: View {
                         ForEach(Training.allCases) { training in
                             AppButton(
                                 title: training.rawValue,
-                                isEnabled: true) {
+                                isEnabled: true,
+                                isLeading: true
+                            ) {
                                     bodyInfoStore.preferredTraning = training
                                 }
                                 .font(.callout)
@@ -43,25 +45,24 @@ struct FourthQuestionView: View {
                 }
             }
             .padding()
-        }
-        .navigationDestination(isPresented: $canGoNext) {
-            // MARK: 다음 인보딩 화면
-//            FourthQuestionView()
-//                .environmentObject(bodyInfoStore)
-        }
-        .navigationBarBackButtonHidden(true)
-        .safeAreaInset(edge: .bottom) {
-            BottomBar(
-                leftTitle: "뒤로 가기",
-                rightTitle: "다음 단계",
-                isLeftEnabled: true,
-                isRightEnabled: isNextEnabled,
-                leftAction: {
-                    dismiss()
-                }, rightAction: {
-                    guard isNextEnabled else { return }
-                    canGoNext = true
-                })
+            .safeAreaInset(edge: .bottom) {
+                BottomBar(
+                    leftTitle: "뒤로 가기",
+                    rightTitle: "다음 단계",
+                    isLeftEnabled: true,
+                    isRightEnabled: isNextEnabled,
+                    leftAction: {
+                        dismiss()
+                    }, rightAction: {
+                        guard isNextEnabled else { return }
+                        canGoNext = true
+                    })
+            }
+            .navigationDestination(isPresented: $canGoNext) {
+                FifthQuestionView()
+                    .environmentObject(bodyInfoStore)
+            }
+            .navigationBarBackButtonHidden(true)
         }
     }
 }

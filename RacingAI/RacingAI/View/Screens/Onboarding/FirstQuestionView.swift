@@ -105,27 +105,27 @@ struct FirstQuestionView: View {
                 }
                 
             }
-        }
-        .padding()
-        .navigationBarBackButtonHidden(true)
-        .navigationDestination(isPresented: $canNavigate, destination: {
-            SecondQuestionView()
-                .environmentObject(bodyInfoStore)
-        })
-        .safeAreaInset(edge: .bottom) {
-            BottomBar(
-                leftTitle: "뒤로 가기",
-                rightTitle: "다음 단계",
-                isLeftEnabled: true,
-                isRightEnabled: isNextEnabled,
-                leftAction: {
-                    dismiss()
-                },
-                rightAction: {
-                    guard isNextEnabled else { return }
-                    canNavigate = true
-                }
-            )
+            .padding()
+            .safeAreaInset(edge: .bottom) {
+                BottomBar(
+                    leftTitle: "뒤로 가기",
+                    rightTitle: "다음 단계",
+                    isLeftEnabled: true,
+                    isRightEnabled: isNextEnabled,
+                    leftAction: {
+                        dismiss()
+                    },
+                    rightAction: {
+                        guard isNextEnabled else { return }
+                        canNavigate = true
+                    }
+                )
+            }
+            .navigationBarBackButtonHidden(true)
+            .navigationDestination(isPresented: $canNavigate, destination: {
+                SecondQuestionView()
+                    .environmentObject(bodyInfoStore)
+            })
         }
     }
 }

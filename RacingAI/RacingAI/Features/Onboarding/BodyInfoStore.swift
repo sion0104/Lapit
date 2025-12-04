@@ -9,6 +9,7 @@ final class BodyInfoStore: ObservableObject {
     @Published var weeklyExerciseFrequency: ExerciseFrequency? = nil
     @Published var preferredExerciseTime: ExerciseTime? = nil
     @Published var preferredTraning: Training? = nil
+    @Published var seasonGoal: SeasonGoal? = nil
     @Published var affiliation: Affiliation? = nil
 }
 
@@ -76,6 +77,16 @@ enum Training: String, CaseIterable, Identifiable {
     case indoor = "실내 파워 트레이닝"
     case track = "트랙 중심 주행 훈련"
     case muscleBalance = "근력 및 밸런스 보강"
+    
+    var id: Self { self }
+}
+
+enum SeasonGoal: String, CaseIterable, Identifiable {
+    case ImprovedAgility = "순발력 향상 / 스프린트 스타터 중심"
+    case StrengtheningDurabiliy = "지속력 강화 / 중장거리 대응력 향상"
+    case FasterFatigueRecovery = "피로 회복 속도 향상"
+    case StaregyRace = "레이스 전략 적용"
+    case ReturnTraining = "복귀 훈련 / 부상 이후 조정기"
     
     var id: Self { self }
 }
