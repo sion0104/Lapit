@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct FifthQuestionView: View {
+struct SixthQuestionView: View {
     @EnvironmentObject var bodyInfoStore: BodyInfoStore
     
     @Environment(\.dismiss) private var dismiss
@@ -70,6 +70,6 @@ struct FifthQuestionView: View {
 }
 
 #Preview {
-    FifthQuestionView()
+    SixthQuestionView()
         .environmentObject(BodyInfoStore())
 }
