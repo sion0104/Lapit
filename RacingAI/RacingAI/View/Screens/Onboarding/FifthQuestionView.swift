@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct FourthQuestionView: View {
+struct FifthQuestionView: View {
     @EnvironmentObject var bodyInfoStore: BodyInfoStore
     
     @Environment(\.dismiss) private var dismiss
@@ -8,18 +8,18 @@ struct FourthQuestionView: View {
     @State private var canGoNext = false
     
     private var isNextEnabled: Bool {
-        bodyInfoStore.preferredTraning != nil
+        bodyInfoStore.affiliation != nil
     }
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 30) {
-                    ProgressView(value: 40, total: 90)
+                    ProgressView(value: 50, total: 90)
                         .tint(.black)
                     
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("선호하는 훈련은 무엇인가요?")
+                        Text("현재 소속을 알려주세요")
                             .font(.title2)
                             .fontWeight(.bold)
                     }
@@ -28,15 +28,17 @@ struct FourthQuestionView: View {
                 
                 VStack(alignment: .leading, spacing: 10) {
                     VStack(spacing: 10) {
-                        ForEach(Training.allCases) { training in
+                        ForEach(Affiliation.allCases) { affiliation in
                             AppButton(
-                                title: training.rawValue,
-                                isEnabled: true) {
-                                    bodyInfoStore.preferredTraning = training
+                                title: affiliation.rawValue,
+                                isEnabled: true,
+                                isLeading: true
+                            ) {
+                                    bodyInfoStore.affiliation = affiliation
                                 }
                                 .font(.callout)
                                 .fontWeight(.medium)
-                                .opacity(bodyInfoStore.preferredTraning == training ? 1.0 : 0.7)
+                                .opacity(bodyInfoStore.affiliation == affiliation ? 1.0 : 0.7)
 
                         }
                     }
@@ -61,12 +63,13 @@ struct FourthQuestionView: View {
                 }, rightAction: {
                     guard isNextEnabled else { return }
                     canGoNext = true
-                })
+                }
+            )
         }
     }
 }
 
 #Preview {
-    FourthQuestionView()
+    FifthQuestionView()
         .environmentObject(BodyInfoStore())
 }
