@@ -11,6 +11,13 @@ final class BodyInfoStore: ObservableObject {
     @Published var preferredTraning: Training? = nil
     @Published var seasonGoal: SeasonGoal? = nil
     @Published var affiliation: Affiliation? = nil
+    @Published var painArea: PainArea? = nil
+    @Published var otherPainArea: String = ""
+    @Published var fatigue: Fatigue? = nil
+    
+    var hasPainInfo: Bool {
+        painArea != nil || !otherPainArea.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 }
 
 enum WeightChange: String, CaseIterable, Identifiable {
@@ -95,6 +102,25 @@ enum Affiliation: String, CaseIterable, Identifiable {
     case nationalTeamStandingSquad = "선수단 상비군"
     case trainer = "훈련생"
     case personalTraining = "개인 훈련 중"
+    
+    var id: Self { self }
+}
+
+enum PainArea: String, CaseIterable, Identifiable {
+    case Hamstring = "햄스트링"
+    case Quadriceps = "대퇴사두근"
+    case waist = "허리"
+    case knee = "무릎"
+    case ankle = "발목"
+    case shoulderArm = "어깨, 팔"
+    
+    var id: Self { self }
+}
+
+enum Fatigue: String, CaseIterable, Identifiable {
+    case low = "거의 없음"
+    case medium = "가끔 있음"
+    case high = "자주 있음"
     
     var id: Self { self }
 }
