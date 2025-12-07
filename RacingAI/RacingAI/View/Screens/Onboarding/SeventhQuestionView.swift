@@ -17,7 +17,7 @@ struct SeventhQuestionView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 30) {
-                    ProgressView(value: 50, total: 90)
+                    ProgressView(value: 70, total: 90)
                         .tint(.black)
                     
                     VStack(alignment: .leading, spacing: 10) {
@@ -115,18 +115,12 @@ struct SeventhQuestionView: View {
             }
             .padding()
             .safeAreaInset(edge: .bottom) {
-                BottomBar(
-                    leftTitle: "뒤로 가기",
-                    rightTitle: "다음 단계",
-                    isLeftEnabled: true,
-                    isRightEnabled: isNextEnabled,
-                    leftAction: {
-                        dismiss()
-                    }, rightAction: {
+                AppButton(
+                    title: "설문 완료",
+                    isEnabled: isNextEnabled) {
                         guard isNextEnabled else { return }
                         canGoNext = true
                     }
-                )
             }
             .navigationDestination(isPresented: $canGoNext) {
                 // MARK: 다음 인보딩 화면

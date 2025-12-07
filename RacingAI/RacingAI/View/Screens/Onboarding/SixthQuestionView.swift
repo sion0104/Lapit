@@ -15,7 +15,7 @@ struct SixthQuestionView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 30) {
-                    ProgressView(value: 50, total: 90)
+                    ProgressView(value: 60, total: 90)
                         .tint(.black)
                     
                     VStack(alignment: .leading, spacing: 10) {
@@ -60,9 +60,8 @@ struct SixthQuestionView: View {
                 )
             }
             .navigationDestination(isPresented: $canGoNext) {
-                // MARK: 다음 인보딩 화면
-    //            FourthQuestionView()
-    //                .environmentObject(bodyInfoStore)
+                SeventhQuestionView()
+                    .environmentObject(bodyInfoStore)
             }
             .navigationBarBackButtonHidden(true)
         }
