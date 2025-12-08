@@ -93,7 +93,7 @@ extension AuthenticationView {
         }
         
         guard password == confirmPassword else {
-            password = "비밀번호와 비밀번호 확인 값이 일치하지 않습니다."
+            passwordError = "비밀번호와 비밀번호 확인 값이 일치하지 않습니다."
             return false
         }
         
