@@ -50,11 +50,15 @@ struct InformationView: View {
                 leftTitle: "뒤로 가기",
                 rightTitle: "다음 단계",
                 isLeftEnabled: true,
-                isRightEnabled: true,
+                isRightEnabled: canGoNext,
                 leftAction: {
                     dismiss()
                 }, rightAction: {
-                    dismiss()
+                    if canGoNext {
+                        showTermsSheet = true
+                    } else {
+                        showValidationAlert = true
+                    }
                 })
         })
         .sheet(isPresented: $showTermsSheet) {

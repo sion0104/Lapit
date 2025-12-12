@@ -55,5 +55,126 @@ final class APIClient {
             throw APIError.decoding(error)
         }
     }
+}
 
+extension APIClient {
+    
+    func postMultipartWithParam<T: Decodable, Param: Encodable>(
+        _ path: String,
+        param: Param,
+        profileImageData: Data?,
+        fileFieldName: String = "profileImg"
+    ) async throws -> T {
+        
+        guard let url = URL(string: path, relativeTo: baseURL) else {
+            throw APIError.invalidURL
+        }
+        
+        let boundary = "Boundary-\(UUID().uuidString)"
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("multipart/form-data; boundary=\(boundary)",
+                         forHTTPHeaderField: "Content-Type")
+        
+        var body = Data()
+        
+        // param(JSON) 파트
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .withoutEscapingSlashes 
+        
+        let jsonData = try encoder.encode(param)
+        
+        print("📨 [APIClient] PARAM JSON:\n\(String(data: jsonData, encoding: .utf8) ?? "")")
+        
+        body.append("--\(boundary)\r\n")
+        body.append("Content-Disposition: form-data; name=\"param\"\r\n")
+        body.append("Content-Type: application/json; charset=utf-8\r\n\r\n")
+        body.append(jsonData)
+        body.append("\r\n")
+        
+        // 이미지(선택)
+        if let data = profileImageData {
+            body.append("--\(boundary)\r\n")
+            body.append("Content-Disposition: form-data; name=\"\(fileFieldName)\"; filename=\"profile.jpg\"\r\n")
+            body.append("Content-Type: image/jpeg\r\n\r\n")
+            body.append(data)
+            body.append("\r\n")
+            
+            print("🖼 [APIClient] profileImg attached (\(data.count) bytes)")
+        } else {
+            print("🖼 [APIClient] No profileImg")
+        }
+        
+        // 종료
+        body.append("--\(boundary)--\r\n")
+        
+        request.httpBody = body
+        
+        print("➡️ [APIClient] POST multipart to \(url)")
+        
+        let (data, response) = try await session.data(for: request)
+        
+        guard let http = response as? HTTPURLResponse else {
+            throw APIError.unknown
+        }
+        
+        print("⬅️ [APIClient] status: \(http.statusCode)")
+        
+        guard (200..<300).contains(http.statusCode) else {
+            throw APIError.serverStatusCode(http.statusCode, data)
+        }
+        
+        let decoder = JSONDecoder()
+        do {
+            let decoded = try decoder.decode(T.self, from: data)
+            return decoded
+        } catch {
+            print("❌ decode error:", error)
+            print("📦 raw json:", String(data: data, encoding: .utf8) ?? "")
+            throw APIError.decoding(error)
+        }
+    }
+}
+
+// MARK: - Multipart Logging Helper
+private extension APIClient {
+    func logMultipartFormRequest(
+        path: String,
+        params: [String: String],
+        profileImageData: Data?
+    ) {
+        print("📡 [APIClient] MultipartForm Request")
+        print("➡️ Endpoint: \(path)")
+        
+        print("📨 Fields:")
+        for (key, value) in params {
+            if key == "password" {
+                print("  - \(key): ********")
+            } else {
+                print("  - \(key): \(value)")
+            }
+        }
+        
+        if let terms = params["termsList"] {
+            print("  - termsList(raw): \(terms)")
+        }
+        
+        if let imageData = profileImageData {
+            let sizeKB = Double(imageData.count) / 1024.0
+            print("🖼️ profileImg: \(String(format: "%.2f", sizeKB)) KB 포함")
+        } else {
+            print("🖼️ profileImg: 없음")
+        }
+        
+        print("──────────────────────────────────────────────")
+    }
+}
+
+private extension Data {
+    mutating func append(_ string: String) {
+        if let data = string.data(using: .utf8) {
+            append(data)
+        }
+    }
 }

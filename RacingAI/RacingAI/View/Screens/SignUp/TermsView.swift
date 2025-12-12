@@ -12,6 +12,12 @@ struct TermsView: View {
     @State private var expandedIds: Set<Int> = []
     @State private var showValidationAlert = false
     
+    @State private var isSigningUp = false
+    @State private var showSignUpErrorAlert = false
+    @State private var signUpErrorMessage: String = ""
+    
+    private let signUpAPI: SignUpAPIProtocol = SignUpAPI()
+    
     private var requiredTermsIds: [Int] {
         terms.filter { $0.required }.map { $0.id }
     }
@@ -52,7 +58,9 @@ struct TermsView: View {
                 },
                 rightAction: {
                     if canGoNext {
-                        dismiss()
+                        Task {
+                            await signUp()
+                        }
                     } else {
                         showValidationAlert = true
                     }
@@ -208,6 +216,39 @@ private extension TermsView {
             await MainActor.run {
                 self.errorMessage = message
                 self.isLoading = false
+            }
+        }
+    }
+    
+    func signUp() async {
+        guard let req = store.makeSignUpRequ(terms: terms) else {
+            await MainActor.run {
+                signUpErrorMessage = "회원가입 정보가 완전하지 않습니다."
+                showValidationAlert = true
+            }
+            return
+        }
+        
+        await MainActor.run { isSigningUp = true }
+        
+        do {
+            let response = try await signUpAPI.signUp(
+                param: req,
+                profileImageData: store.profileImageData
+            )
+            
+            await MainActor.run {
+                isSigningUp = false
+                print("회원가입 성공 userId: \(response.data.userId)")
+                dismiss()
+            }
+        } catch {
+            let message = describeAPIError(error)
+            
+            await MainActor.run {
+                isSigningUp = false
+                signUpErrorMessage = message
+                showValidationAlert = true
             }
         }
     }
