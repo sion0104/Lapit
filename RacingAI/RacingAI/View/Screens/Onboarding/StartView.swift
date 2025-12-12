@@ -28,6 +28,7 @@ struct StartView: View {
                 FirstQuestionView()
             }
         }
+        .navigationBarBackButtonHidden(true)
 
     }
 }

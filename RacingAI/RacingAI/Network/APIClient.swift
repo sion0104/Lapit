@@ -81,7 +81,7 @@ extension APIClient {
         
         // param(JSON) 파트
         let encoder = JSONEncoder()
-        encoder.outputFormatting = .withoutEscapingSlashes 
+        encoder.outputFormatting = .withoutEscapingSlashes
         
         let jsonData = try encoder.encode(param)
         

@@ -10,6 +10,7 @@ struct RacingAIApp: App {
         WindowGroup {
             AuthenticationView()
                 .environmentObject(userInfoStore)
+                .environmentObject(bodyInfoStore)
         }
     }
 }

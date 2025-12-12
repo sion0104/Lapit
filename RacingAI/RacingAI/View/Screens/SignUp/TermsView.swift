@@ -16,6 +16,8 @@ struct TermsView: View {
     @State private var showSignUpErrorAlert = false
     @State private var signUpErrorMessage: String = ""
     
+    let onSingUpSuccess: (() -> Void)?
+    
     private let signUpAPI: SignUpAPIProtocol = SignUpAPI()
     
     private var requiredTermsIds: [Int] {
@@ -70,6 +72,12 @@ struct TermsView: View {
             Button("확인", role: .cancel) { }
         } message: {
             Text("필수 약관에 모두 동의해야 다음 단계로 진행할 수 있어요.")
+        }
+        
+        .alert("회원가입 오류", isPresented: $showSignUpErrorAlert) {
+            Button("확인", role: .cancel) { }
+        } message: {
+            Text(signUpErrorMessage)
         }
     }
 }
@@ -223,8 +231,8 @@ private extension TermsView {
     func signUp() async {
         guard let req = store.makeSignUpRequ(terms: terms) else {
             await MainActor.run {
-                signUpErrorMessage = "회원가입 정보가 완전하지 않습니다."
-                showValidationAlert = true
+                signUpErrorMessage = "회원가입 정보가 완전하지 않습니다. 이전 단계 입력을 다시 확인해주세요."
+                showSignUpErrorAlert = true
             }
             return
         }
@@ -240,6 +248,7 @@ private extension TermsView {
             await MainActor.run {
                 isSigningUp = false
                 print("회원가입 성공 userId: \(response.data.userId)")
+                onSingUpSuccess?()
                 dismiss()
             }
         } catch {
@@ -248,14 +257,14 @@ private extension TermsView {
             await MainActor.run {
                 isSigningUp = false
                 signUpErrorMessage = message
-                showValidationAlert = true
+                showSignUpErrorAlert = true
             }
         }
     }
 }
 
 #Preview {
-    TermsView()
+    TermsView(onSingUpSuccess: nil)
         .environmentObject(UserInfoStore())
 }
 

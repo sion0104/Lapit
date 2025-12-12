@@ -9,6 +9,7 @@ struct InformationView: View {
     }
      
     @EnvironmentObject var store: UserInfoStore
+    @EnvironmentObject var bodyInfoStore: BodyInfoStore
     @Environment(\.dismiss) private var dismiss
     
     @State private var selectedItem: PhotosPickerItem?
@@ -17,6 +18,8 @@ struct InformationView: View {
     @State private var showValidationAlert = false
     
     @State private var birthError: String? = nil
+    
+    @State private var navigationToOnboarding = false
     
     private var canGoNext: Bool {
         !store.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
@@ -43,6 +46,10 @@ struct InformationView: View {
                     .padding(.top, 16)
             }
             .padding()
+            .navigationDestination(isPresented: $navigationToOnboarding) {
+                StartView()
+                    .environmentObject(bodyInfoStore)
+            }
         }
         .navigationBarBackButtonHidden(true)
         .safeAreaInset(edge: .bottom, content: {
@@ -62,7 +69,9 @@ struct InformationView: View {
                 })
         })
         .sheet(isPresented: $showTermsSheet) {
-            TermsView()
+            TermsView(onSingUpSuccess: {
+                navigationToOnboarding = true
+            })
                 .environmentObject(store)
                 .presentationDetents([.medium, .large])
         }
