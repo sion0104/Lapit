@@ -8,9 +8,10 @@ struct RacingAIApp: App {
     
     var body: some Scene {
         WindowGroup {
-            AuthenticationView()
-                .environmentObject(userInfoStore)
-                .environmentObject(bodyInfoStore)
+//            AuthenticationView()
+//                .environmentObject(userInfoStore)
+//                .environmentObject(bodyInfoStore)
+            MypageSettingView()
         }
     }
 }
