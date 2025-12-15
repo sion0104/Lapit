@@ -23,6 +23,8 @@ final class APIClient {
         request.httpMethod = "GET"
 
         print("➡️ [APIClient] Request: \(request.httpMethod ?? "GET") \(url.absoluteString)")
+        
+        attachAuthorizationIfNeeded(to: &request)
 
         let (data, response): (Data, URLResponse)
         do {
@@ -68,6 +70,8 @@ extension APIClient {
         
         print("➡️ [APIClient] Request: DELETE \(url.absoluteString)")
         
+        attachAuthorizationIfNeeded(to: &request)
+        
         let (data, response): (Data, URLResponse)
         
         do {
@@ -102,7 +106,6 @@ extension APIClient {
 }
 
 extension APIClient {
-    
     func postMultipartWithParam<T: Decodable, Param: Encodable>(
         _ path: String,
         param: Param,
@@ -157,6 +160,8 @@ extension APIClient {
         
         print("➡️ [APIClient] POST multipart to \(url)")
         
+        attachAuthorizationIfNeeded(to: &request)
+        
         let (data, response) = try await session.data(for: request)
         
         guard let http = response as? HTTPURLResponse else {
@@ -180,6 +185,122 @@ extension APIClient {
         }
     }
 }
+
+extension APIClient {
+    func post<T: Decodable, Body: Encodable>(
+        _ path: String,
+        body: Body
+    ) async throws -> T {
+        guard let url = URL(string: path, relativeTo: baseURL) else {
+            throw APIError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(body)
+        
+        attachAuthorizationIfNeeded(to: &request)
+        
+        let (data, response) = try await session.data(for: request)
+        
+        guard let http = response as? HTTPURLResponse else {
+            throw APIError.unknown
+        }
+        
+        guard (200..<300).contains(http.statusCode) else {
+            throw APIError.serverStatusCode(http.statusCode, data)
+        }
+        
+        return try JSONDecoder().decode(T.self, from: data)
+    }
+}
+
+extension APIClient {
+    func postWithQuery<T: Decodable>(
+        _ path: String,
+        queryItems: [URLQueryItem]
+    ) async throws -> T {
+        guard let base = URL(string: path, relativeTo: baseURL) else {
+            throw APIError.invalidURL
+        }
+        
+        var components = URLComponents(url: base, resolvingAgainstBaseURL: true)
+        components?.queryItems = queryItems
+        
+        guard let url = components?.url else {
+            throw APIError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        
+        print("➡️ [APIClient] Request: POST \(url.absoluteString)")
+        
+        attachAuthorizationIfNeeded(to: &request)
+
+        let (data, response) = try await session.data(for: request)
+        
+        guard let http = response as? HTTPURLResponse else {
+            throw APIError.unknown
+        }
+        
+        print("⬅️ [APIClient] Response statusCode: \(http.statusCode)")
+
+        guard (200..<300).contains(http.statusCode) else {
+           throw APIError.serverStatusCode(http.statusCode, data)
+       }
+
+       return try JSONDecoder().decode(T.self, from: data)
+    }
+}
+
+extension APIClient {
+    func postForm<T: Decodable>(
+        _ path: String,
+        form: [String: String]
+    ) async throws -> T {
+
+        guard let url = URL(string: path, relativeTo: baseURL) else {
+            throw APIError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        let bodyString = form
+            .map { key, value in
+                "\(key)=\(value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+            }
+            .joined(separator: "&")
+
+        request.httpBody = bodyString.data(using: .utf8)
+
+        print("➡️ [APIClient] Request: POST \(url.absoluteString)")
+        print("📨 [APIClient] FormBody: \(bodyString)")
+        
+        attachAuthorizationIfNeeded(to: &request)
+
+        let (data, response) = try await session.data(for: request)
+
+        guard let http = response as? HTTPURLResponse else {
+            throw APIError.unknown
+        }
+
+        print("⬅️ [APIClient] Response statusCode: \(http.statusCode)")
+
+        guard (200..<300).contains(http.statusCode) else {
+            throw APIError.serverStatusCode(http.statusCode, data)
+        }
+
+        return try JSONDecoder().decode(T.self, from: data)
+    }
+}
+
 
 // MARK: - Multipart Logging Helper
 private extension APIClient {
@@ -221,6 +342,15 @@ private extension Data {
     mutating func append(_ string: String) {
         if let data = string.data(using: .utf8) {
             append(data)
+        }
+    }
+}
+
+private extension APIClient {
+    func attachAuthorizationIfNeeded(to request: inout URLRequest) {
+        if let auth = TokenStore.shared.loadAuthorizationValue() {
+            request.setValue(auth, forHTTPHeaderField: "Authorization")
+            print("🔐 [APIClient] Authorization attached")
         }
     }
 }

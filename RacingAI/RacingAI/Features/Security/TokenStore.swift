@@ -7,9 +7,10 @@ final class TokenStore {
     private let accessTokenKey = "accessToken"
     private let refreshTokenKey = "refreshToken"
     
-    func save(accessToken: String, refreshToken: String) {
-        UserDefaults.standard.set(accessToken, forKey: accessTokenKey)
-        UserDefaults.standard.set(refreshToken, forKey: refreshTokenKey)
+    func save(grantType: String, accessToken: String, refreshToken: String) {
+        UserDefaults.standard.set(grantType, forKey: "grantType")
+        UserDefaults.standard.set(accessToken, forKey: "accessToken")
+        UserDefaults.standard.set(refreshToken, forKey: "refreshToken")
     }
     
     func loadAccessToken() -> String? {
@@ -19,5 +20,15 @@ final class TokenStore {
     func clear() {
         UserDefaults.standard.removeObject(forKey: accessTokenKey)
         UserDefaults.standard.removeObject(forKey: refreshTokenKey)
+    }
+    
+    func loadAuthorizationValue() -> String? {
+        guard
+            let grantType = UserDefaults.standard.string(forKey: "grantType"),
+            let accessToken = UserDefaults.standard.string(forKey: "accessToken"),
+            !accessToken.isEmpty
+        else { return nil }
+
+        return "\(grantType) \(accessToken)"
     }
 }

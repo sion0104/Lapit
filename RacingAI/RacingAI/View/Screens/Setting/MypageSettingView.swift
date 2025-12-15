@@ -40,4 +40,5 @@ struct MypageSettingView: View {
 
 #Preview {
     MypageSettingView()
+        .environmentObject(UserSessionStore())
 }

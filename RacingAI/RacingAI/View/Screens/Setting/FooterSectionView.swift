@@ -72,8 +72,7 @@ struct FooterSectionView: View {
     private var loggedOutButtons: some View {
         VStack(alignment: .leading, spacing: 10) {
             NavigationLink {
-                // 로그인 화면
-                Text("로그인 화면")
+                LoginView()
             } label: {
                  Text("로그인")
                     .font(.footnote)
@@ -108,4 +107,5 @@ struct FooterSectionView: View {
 
 #Preview {
     FooterSectionView()
+        .environmentObject(UserSessionStore())
 }

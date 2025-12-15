@@ -15,18 +15,13 @@ struct SignUpTerms: Encodable {
     let agreeYn: String
 }
 
-struct CommonResponseSignUpRes: Decodable {
-    let status: String
-    let message: String
-    let data: SignUpRes
-}
 
 struct SignUpRes: Decodable {
     let userId: Int64
 }
 
 protocol SignUpAPIProtocol {
-    func signUp(param: SignUpReq, profileImageData: Data?) async throws -> CommonResponseSignUpRes
+    func signUp(param: SignUpReq, profileImageData: Data?) async throws -> CommonResponse<SignUpRes>
 }
 
 struct SignUpAPI: SignUpAPIProtocol {
@@ -36,7 +31,7 @@ struct SignUpAPI: SignUpAPIProtocol {
         self.client = client
     }
     
-    func signUp(param: SignUpReq, profileImageData: Data?) async throws -> CommonResponseSignUpRes {
+    func signUp(param: SignUpReq, profileImageData: Data?) async throws -> CommonResponse<SignUpRes> {
         return try await client.postMultipartWithParam(
             "/v1/auth/sign-up",
             param: param,
