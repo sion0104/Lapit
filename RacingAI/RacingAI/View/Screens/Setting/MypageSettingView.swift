@@ -1,6 +1,9 @@
 import SwiftUI
 
 struct MypageSettingView: View {
+    
+    @EnvironmentObject private var userSession: UserSessionStore
+    
     var body: some View {
         NavigationStack{
             ScrollView {
@@ -26,9 +29,12 @@ struct MypageSettingView: View {
                     
                     FooterSectionView()
                 }
+                .padding()
+            }
+            .task {
+                await userSession.fetchUserIfNeeded()
             }
         }
-        .padding()
     }
 }
 
