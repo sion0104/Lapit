@@ -17,7 +17,7 @@ struct CheckDuplicateIDAPI: CheckDuplicateIdAPIProtocol {
         let path = "/v1/auth/check-id?username=\(encoded)"
         
         do {
-            let _: CommonResponseListGetCheckDuplicateIdRes = try await client.get(path)
+            let _: CommonResponse<EmptyData> = try await client.get(path)
             return true
         } catch let APIError.serverStatusCode(status, _) {
             print("[CheckDuplicatedIDAPI] 중복 아이디: \(status)")

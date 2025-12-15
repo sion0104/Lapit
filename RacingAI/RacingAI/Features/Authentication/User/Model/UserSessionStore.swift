@@ -24,6 +24,13 @@ final class UserSessionStore: ObservableObject {
     }
     
     func logout() {
+        TokenStore.shared.clear()
         user = nil
+        errorMessage = nil
+    }
+    
+    func withdraw() async throws {
+        try await APIClient.shared.deleteUser()
+        logout()
     }
 }

@@ -12,3 +12,9 @@ extension APIClient {
         return response.data
     }
 }
+
+extension APIClient {
+    func deleteUser() async throws {
+        let _: CommonResponse<EmptyData> = try await delete("/v1/user")
+    }
+}

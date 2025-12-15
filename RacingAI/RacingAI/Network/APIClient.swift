@@ -58,6 +58,50 @@ final class APIClient {
 }
 
 extension APIClient {
+    func delete<T: Decodable>(_ path: String) async throws -> T {
+        guard let url = URL(string: path, relativeTo: baseURL) else {
+            throw APIError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        
+        print("➡️ [APIClient] Request: DELETE \(url.absoluteString)")
+        
+        let (data, response): (Data, URLResponse)
+        
+        do {
+            (data, response) = try await session.data(for: request)
+        } catch {
+            print("❌ [APIClient] Network error: \(error.localizedDescription)")
+            throw APIError.network(error)
+        }
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            print("❌ [APIClient] Not HTTPURLResponse")
+           throw APIError.unknown
+        }
+        
+        print("⬅️ [APIClient] Response statusCode: \(httpResponse.statusCode)")
+
+        guard (200..<300).contains(httpResponse.statusCode) else {
+            throw APIError.serverStatusCode(httpResponse.statusCode, data)
+        }
+        
+        let decoder = JSONDecoder()
+        do {
+            return try decoder.decode(T.self, from: data)
+        } catch {
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("❌ [APIClient] Decoding error: \(error.localizedDescription)")
+                print("📦 [APIClient] Raw JSON: \(jsonString)")
+            }
+            throw APIError.decoding(error)
+        }
+    }
+}
+
+extension APIClient {
     
     func postMultipartWithParam<T: Decodable, Param: Encodable>(
         _ path: String,
@@ -170,6 +214,8 @@ private extension APIClient {
         print("──────────────────────────────────────────────")
     }
 }
+
+
 
 private extension Data {
     mutating func append(_ string: String) {
