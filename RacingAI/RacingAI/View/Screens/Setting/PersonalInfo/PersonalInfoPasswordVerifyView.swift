@@ -3,6 +3,8 @@ import SwiftUI
 struct PersonalInfoPasswordVerifyView: View {
     @Environment(\.dismiss) private var dismiss
     
+    private let checkPasswordAPI: CheckPasswordAPIProtocol = CheckPasswordAPI()
+    
     @State private var password: String = ""
     @State private var errorMessage: String? = nil
     @State private var isVerified: Bool = false
@@ -74,7 +76,7 @@ struct PersonalInfoPasswordVerifyView: View {
                 .font(.subheadline)
                 .foregroundStyle(Color("SecondaryFont"))
             
-            HStack(spacing: 10) {
+            HStack(alignment: .top, spacing: 10) {
                 AppTextField(
                     text: $password,
                     placeholder: "비밀번호 입력",
@@ -94,7 +96,7 @@ struct PersonalInfoPasswordVerifyView: View {
                         .background(Color(.systemGray5))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
-                .disabled(password.isEmpty || isVerifying)
+                .disabled(password.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isVerifying)
                 .foregroundStyle((password.isEmpty || isVerifying) ? .gray : .primary)
             }
             
@@ -109,7 +111,8 @@ struct PersonalInfoPasswordVerifyView: View {
     private func verifyPassword() {
         errorMessage = nil
         
-        guard !password.isEmpty else {
+        let trimmed = password.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
             errorMessage = "비밀번호를 입력해주세요."
             isVerified = false
             return
@@ -117,14 +120,14 @@ struct PersonalInfoPasswordVerifyView: View {
         
         isVerifying = true
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            defer { isVerifying = false}
+        Task {
+            defer { isVerifying = false }
             
-            let success = (password == "1234")
-            
-            if success {
+            do {
+                try await checkPasswordAPI.checkPassword(password: trimmed)
                 isVerified = true
-            } else {
+                errorMessage = nil
+            } catch {
                 isVerified = false
                 errorMessage = "비밀번호가 일치하지 않습니다."
             }
