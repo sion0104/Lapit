@@ -19,7 +19,7 @@ struct ProfileSectionView: View {
                     .font(.callout)
                     .fontWeight(.medium)
                 
-                Text(userSession.user?.username ?? "")
+                Text(userSession.user?.id ?? "")
                     .font(.caption)
             }
             
@@ -39,4 +39,5 @@ struct ProfileSectionView: View {
 
 #Preview {
     ProfileSectionView()
+        .environmentObject(UserSessionStore())
 }
