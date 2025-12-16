@@ -50,7 +50,7 @@ struct PersonalInfoPasswordVerifyView: View {
             }
         }
         .navigationDestination(isPresented: $goNext) {
-//            PersonalInfoEditView()
+            PersonalInfoEditView(onComplete: {})
         }
         .onChange(of: password) {
             errorMessage = nil

@@ -8,7 +8,7 @@ struct GetUserInfoRes: Decodable {
 
 extension APIClient {
     func getUserInfo() async throws -> User {
-        let response: GetUserInfoRes = try await get("/v1/user")
+        let response: CommonResponse<User> = try await get("/v1/user")
         return response.data
     }
 }

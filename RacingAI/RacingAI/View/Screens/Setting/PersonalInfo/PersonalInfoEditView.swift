@@ -10,7 +10,7 @@ struct PersonalInfoEditView: View {
     @State private var selectedItem: PhotosPickerItem?
     @State private var profileImageData: Data?
 
-    @State private var id: String = ""   // 변경 불가
+    @State private var username: String = ""
     @State private var name: String = ""
     @State private var birth: String = ""
     @State private var gender: InformationView.Gender? = nil
@@ -72,7 +72,7 @@ struct PersonalInfoEditView: View {
         }
         .onAppear {
             if let user = userSession.user {
-                id = user.id
+                username = user.username
                 name = user.name
                 birth = user.birthDate.replacingOccurrences(of: "-", with: ".")
                 if user.gender.uppercased().contains("M") {
@@ -146,7 +146,7 @@ private extension PersonalInfoEditView {
                 .fontWeight(.medium)
 
                 AppTextField(
-                    text: .constant(id),
+                    text: $username,
                     placeholder: "아이디",
                     keyboard: .default,
                     submitLabel: .done
