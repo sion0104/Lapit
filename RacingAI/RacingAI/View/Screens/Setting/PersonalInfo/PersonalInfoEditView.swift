@@ -5,6 +5,7 @@ struct PersonalInfoEditView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var userSession: UserSessionStore
 
+    let onBack: () -> Void
     let onComplete: () -> Void
 
     @State private var selectedItem: PhotosPickerItem?
@@ -53,7 +54,7 @@ struct PersonalInfoEditView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 HStack(spacing: 5) {
-                    Button { dismiss() } label: {
+                    Button { onBack() } label: {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundStyle(.black)
@@ -98,7 +99,6 @@ struct PersonalInfoEditView: View {
         .alert("완료", isPresented: $showSuccessAlert) {
             Button("확인") {
                 onComplete()
-                dismiss()
             }
         } message: {
             Text("회원정보가 변경되었습니다.")
@@ -334,12 +334,10 @@ private extension PersonalInfoEditView {
         )
         
         do {
-            _ = try await modifyUserInfoAPI.modifyUser(
+            try await modifyUserInfoAPI.modifyUser(
                 param: req,
                 profileImageData: profileImageData
             )
-            
-            let user = try await APIClient.shared.getUserInfo()
             
             try await userSession.refreshUser()
             
@@ -352,6 +350,6 @@ private extension PersonalInfoEditView {
 }
 
 #Preview {
-    PersonalInfoEditView(onComplete: {})
+    PersonalInfoEditView(onBack: {}, onComplete: {})
         .environmentObject(UserSessionStore())
 }

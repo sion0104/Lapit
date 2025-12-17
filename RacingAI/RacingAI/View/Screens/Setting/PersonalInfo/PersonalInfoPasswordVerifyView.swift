@@ -1,8 +1,6 @@
 import SwiftUI
 
 struct PersonalInfoPasswordVerifyView: View {
-    @Environment(\.dismiss) private var dismiss
-    
     private let checkPasswordAPI: CheckPasswordAPIProtocol = CheckPasswordAPI()
     
     @State private var password: String = ""
@@ -10,7 +8,8 @@ struct PersonalInfoPasswordVerifyView: View {
     @State private var isVerified: Bool = false
     @State private var isVerifying: Bool = false
     
-    @State private var goNext: Bool = false
+    let onBack: () -> Void
+    let onGoNext: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -24,7 +23,7 @@ struct PersonalInfoPasswordVerifyView: View {
                 title: "다음 단계",
                 isEnabled: isVerified
             ) {
-                goNext = true
+                onGoNext()
             }
         }
         .padding()
@@ -35,7 +34,7 @@ struct PersonalInfoPasswordVerifyView: View {
             ToolbarItem(placement: .topBarLeading) {
                 HStack(spacing: 5) {
                     Button {
-                        dismiss()
+                        onBack()
                     } label: {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 15, weight: .semibold))
@@ -49,10 +48,7 @@ struct PersonalInfoPasswordVerifyView: View {
                 }
             }
         }
-        .navigationDestination(isPresented: $goNext) {
-            PersonalInfoEditView(onComplete: {})
-        }
-        .onChange(of: password) {
+        .onChange(of: password) { _, _ in
             errorMessage = nil
             isVerified = false
         }
@@ -136,5 +132,5 @@ struct PersonalInfoPasswordVerifyView: View {
 }
 
 #Preview {
-    PersonalInfoPasswordVerifyView()
+    PersonalInfoPasswordVerifyView(onBack: {}, onGoNext: {})
 }

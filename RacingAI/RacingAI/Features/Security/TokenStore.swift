@@ -7,11 +7,13 @@ final class TokenStore {
     private enum Key {
         static let accessToken = "accessToken"
         static let refreshToken = "refreshToken"
+        static let grantType = "grantType"
     }
 
-    func save(accessToken: String, refreshToken: String) {
+    func save(grantType: String, accessToken: String, refreshToken: String) {
         UserDefaults.standard.set(accessToken, forKey: Key.accessToken)
         UserDefaults.standard.set(refreshToken, forKey: Key.refreshToken)
+        UserDefaults.standard.set(grantType, forKey: Key.grantType)
     }
 
     func loadAccessToken() -> String? {
@@ -28,9 +30,26 @@ final class TokenStore {
     }
 
     func loadAuthorizationValue() -> String? {
-        guard let accessToken = loadAccessToken(), !accessToken.isEmpty else {
+        guard
+            let accessToken = loadAccessToken(),
+            !accessToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        else {
             return nil
         }
-        return "Bearer \(accessToken)"
+
+        let grantType = UserDefaults.standard.string(forKey: Key.grantType) ?? "Bearer"
+        return "\(grantType) \(accessToken)"
     }
 }
+
+extension TokenStore {
+    func debugPrintTokenStatus(context: String = "") {
+        let access = loadAccessToken()
+        let refresh = loadRefreshToken()
+
+        print("🧪 [TokenStore DEBUG] \(context)")
+        print("  - accessToken:", access == nil ? "nil" : "exists (\(access!.count) chars)")
+        print("  - refreshToken:", refresh == nil ? "nil" : "exists (\(refresh!.count) chars)")
+    }
+}
+

@@ -11,19 +11,23 @@ final class UserSessionStore: ObservableObject {
     var isLoggedIn: Bool { user != nil }
     
     func fetchUserIfNeeded() async {
-        guard user == nil else { return }
-        
+        guard TokenStore.shared.loadAccessToken() != nil else {
+            self.user = nil
+            return
+        }
+
         isLoading = true
         defer { isLoading = false }
-        
+
         do {
             let user = try await APIClient.shared.getUserInfo()
             self.user = user
         } catch {
             self.user = nil
-            errorMessage = describeAPIError(error)
+            self.errorMessage = describeAPIError(error)
         }
     }
+
     
     func logout() {
         TokenStore.shared.clear()
@@ -44,7 +48,7 @@ final class UserSessionStore: ObservableObject {
         let token = response.data
         
         TokenStore.shared.save(
-            accessToken: token.accessToken,
+            grantType: token.grantType, accessToken: token.accessToken,
             refreshToken: token.refreshToken
         )
         

@@ -25,6 +25,7 @@ final class APIClient {
         print("➡️ [APIClient] Request: \(request.httpMethod ?? "GET") \(url.absoluteString)")
         
         attachAuthorizationIfNeeded(to: &request)
+        
 
         let (data, response): (Data, URLResponse)
         do {
@@ -42,8 +43,14 @@ final class APIClient {
         print("⬅️ [APIClient] Response statusCode: \(httpResponse.statusCode)")
 
         guard (200..<300).contains(httpResponse.statusCode) else {
+            if let body = String(data: data, encoding: .utf8) {
+                print("❌ [APIClient] Server error body: \(body)")
+            } else {
+                print("❌ [APIClient] Server error body: <non-utf8> \(data.count) bytes")
+            }
             throw APIError.serverStatusCode(httpResponse.statusCode, data)
         }
+
         let decoder = JSONDecoder()
 
         do {
@@ -464,7 +471,14 @@ private extension APIClient {
     func attachAuthorizationIfNeeded(to request: inout URLRequest) {
         if let auth = TokenStore.shared.loadAuthorizationValue() {
             request.setValue(auth, forHTTPHeaderField: "Authorization")
-            print("🔐 [APIClient] Authorization attached")
+
+            let tokenLength = auth.count
+            print("🔐 [APIClient] Authorization attached (length: \(tokenLength))")
+        } else {
+            request.setValue(nil, forHTTPHeaderField: "Authorization")
+            print("🔐 [APIClient] Authorization removed (no token)")
         }
     }
 }
+
+
