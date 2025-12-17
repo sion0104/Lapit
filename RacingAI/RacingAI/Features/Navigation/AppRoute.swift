@@ -1,6 +1,12 @@
 import Foundation
 
-enum AppRoute: Hashable {
-    case passwordVerify
+enum PasswordVerifyFlow: Hashable {
     case editInfo
+    case changePassword
+}
+
+enum AppRoute: Hashable {
+    case passwordVerify(PasswordVerifyFlow)
+    case editInfo
+    case changePassword
 }

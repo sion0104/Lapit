@@ -17,19 +17,21 @@ struct MypageSettingView: View {
                     SettingSection(title: "설정") {
                         VStack(spacing: 0) {
                             Button {
-                                path.append(AppRoute.passwordVerify)
+                                path.append(AppRoute.passwordVerify(.editInfo))
                             } label: {
                                 SettingRowContentView(title: "회원정보 변경")
                             }
                             Divider().padding(.leading)
-                        }
-//                        SettingRowView(title: "사용자 비밀번호 설정")
-//                        SettingRowView(title: "Push 알림 설정")
-                    }
+                            
+                            Button {
+                                path.append(AppRoute.passwordVerify(.changePassword))
+                            } label: {
+                                SettingRowContentView(title: "사용자 비밀번호 설정")
+                            }
+                            Divider().padding(.leading)
+                        }                    }
                     
                     SettingSection(title: "약관 및 정책") {
-//                        SettingRowView(title: "이용 약관")
-//                        SettingRowView(title: "개인정보 처리 방침")
                     }
                     
                     Spacer()
@@ -40,15 +42,27 @@ struct MypageSettingView: View {
             }
             .navigationDestination(for: AppRoute.self) { route in
                 switch route {
-                case.passwordVerify:
+                case.passwordVerify(let flow):
                     PersonalInfoPasswordVerifyView(
                         onBack: { path.removeLast() },
-                        onGoNext: { path.append(AppRoute.editInfo) }
+                        onGoNext: {
+                            switch flow {
+                            case .editInfo:
+                                path.append(AppRoute.editInfo)
+                            case .changePassword:
+                                path.append(AppRoute.changePassword)
+                            }
+                        }
                     )
                 case .editInfo:
                     PersonalInfoEditView(
                         onBack: { path.removeLast() },
                         onComplete: { path.removeLast(path.count) }
+                    )
+                case .changePassword:
+                    ChangePasswordView(
+                        onBack: { path.removeLast() },
+                        onComplete: { path.removeLast(path.count)}
                     )
                 }
             }
