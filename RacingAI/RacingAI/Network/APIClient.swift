@@ -339,6 +339,77 @@ extension APIClient {
     }
 }
 
+extension APIClient {
+    func putMultiPartWithParamVoid<Param: Encodable>(
+        _ path: String,
+        param: Param,
+        profileImageData: Data?,
+        fileFieldName: String = "profileImg"
+    ) async throws {
+        guard let url = URL(string: path, relativeTo: baseURL) else {
+            throw APIError.invalidURL
+        }
+        
+        let boundary = "Boundary-\(UUID().uuidString)"
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.setValue("multipart/form-data; boundary=\(boundary)",
+                         forHTTPHeaderField: "Content-Type")
+        
+        var body = Data()
+        
+        // param(JSON) 파트
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .withoutEscapingSlashes
+        
+        let jsonData = try encoder.encode(param)
+        
+        print("📨 [APIClient] PARAM JSON:\n\(String(data: jsonData, encoding: .utf8) ?? "")")
+        
+        body.append("--\(boundary)\r\n")
+        body.append("Content-Disposition: form-data; name=\"param\"\r\n")
+        body.append("Content-Type: application/json; charset=utf-8\r\n\r\n")
+        body.append(jsonData)
+        body.append("\r\n")
+        
+        // 이미지(선택)
+        if let data = profileImageData {
+            body.append("--\(boundary)\r\n")
+            body.append("Content-Disposition: form-data; name=\"\(fileFieldName)\"; filename=\"profile.jpg\"\r\n")
+            body.append("Content-Type: image/jpeg\r\n\r\n")
+            body.append(data)
+            body.append("\r\n")
+            
+            print("🖼 [APIClient] profileImg attached (\(data.count) bytes)")
+        } else {
+            print("🖼 [APIClient] No profileImg")
+        }
+        
+        // 종료
+        body.append("--\(boundary)--\r\n")
+        
+        request.httpBody = body
+        
+        print("➡️ [APIClient] Put multipart to \(url)")
+        
+        attachAuthorizationIfNeeded(to: &request)
+        
+        let (data, response) = try await session.data(for: request)
+        
+        guard let http = response as? HTTPURLResponse else {
+            throw APIError.unknown
+        }
+        
+        print("⬅️ [APIClient] status: \(http.statusCode)")
+        
+        
+        guard (200..<300).contains(http.statusCode) else {
+            throw APIError.serverStatusCode(http.statusCode, data)
+        }
+    }
+}
+
 
 // MARK: - Multipart Logging Helper
 private extension APIClient {
@@ -374,7 +445,12 @@ private extension APIClient {
     }
 }
 
-
+extension APIClient {
+    func getUserInfo() async throws -> User {
+        let response: CommonResponse<User> = try await get("/v1/user")
+        return response.data
+    }
+}
 
 private extension Data {
     mutating func append(_ string: String) {

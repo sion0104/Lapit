@@ -16,6 +16,12 @@ struct PersonalInfoEditView: View {
     @State private var gender: InformationView.Gender? = nil
 
     @State private var birthError: String? = nil
+    
+    private let modifyUserInfoAPI: ModifyUserInfoAPIProtocol = ModifyUserInfoAPI()
+    
+    @State private var isSaving = false
+    @State private var showSuccessAlert = false
+    @State private var saveError: String? = nil
 
     private var canSave: Bool {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
@@ -62,11 +68,10 @@ struct PersonalInfoEditView: View {
         }
         .safeAreaInset(edge: .bottom) {
             AppButton(
-                title: "저장",
-                isEnabled: canSave
+                title: isSaving ? "저장 중..." : "저장",
+                isEnabled: canSave && !isSaving
             ) {
-                onComplete()
-                dismiss()
+                Task { await save() }
             }
             .padding()
         }
@@ -89,6 +94,19 @@ struct PersonalInfoEditView: View {
                     await MainActor.run { profileImageData = data }
                 }
             }
+        }
+        .alert("완료", isPresented: $showSuccessAlert) {
+            Button("확인") {
+                onComplete()
+                dismiss()
+            }
+        } message: {
+            Text("회원정보가 변경되었습니다.")
+        }
+        .alert("오류", isPresented: .constant(saveError != nil)) {
+            Button("확인", role: .cancel) { saveError = nil}
+        } message: {
+            Text(saveError ?? "" )
         }
     }
 }
@@ -289,6 +307,47 @@ private extension PersonalInfoEditView {
 
         if date > Date() { return "생년월일은 미래일 수 없습니다." }
         return nil
+    }
+    
+    @MainActor
+    private func save() async {
+        guard canSave else { return }
+        
+        isSaving = true
+        defer { isSaving = false }
+        
+        let birthForAPI = birth.replacingOccurrences(of: ".", with: "-")
+        
+        let genderCode: String
+        switch gender {
+        case .male: genderCode = "M"
+            case .female: genderCode = "F"
+        case .none:
+            saveError = "성별을 선택해주세요."
+            return
+        }
+        
+        let req = ModifyUserInfoReq(
+            name: name.trimmingCharacters(in: .whitespacesAndNewlines),
+            birthDate: birthForAPI,
+            gender: genderCode
+        )
+        
+        do {
+            _ = try await modifyUserInfoAPI.modifyUser(
+                param: req,
+                profileImageData: profileImageData
+            )
+            
+            let user = try await APIClient.shared.getUserInfo()
+            
+            try await userSession.refreshUser()
+            
+            showSuccessAlert = true
+        } catch {
+            print(describeAPIError(error))
+            saveError = describeAPIError(error)
+        }
     }
 }
 

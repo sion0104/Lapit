@@ -44,11 +44,16 @@ final class UserSessionStore: ObservableObject {
         let token = response.data
         
         TokenStore.shared.save(
-            grantType: token.grantType,
             accessToken: token.accessToken,
             refreshToken: token.refreshToken
         )
         
+        let user = try await APIClient.shared.getUserInfo()
+        self.user = user
+    }
+    
+    @MainActor
+    func refreshUser() async throws {
         let user = try await APIClient.shared.getUserInfo()
         self.user = user
     }
