@@ -7,14 +7,11 @@ final class TokenStore {
     private enum Key {
         static let accessToken = "accessToken"
         static let refreshToken = "refreshToken"
-        static let grantType = "grantType"
     }
 
     func save(accessToken: String, refreshToken: String) {
         UserDefaults.standard.set(accessToken, forKey: Key.accessToken)
         UserDefaults.standard.set(refreshToken, forKey: Key.refreshToken)
-        
-        UserDefaults.standard.set("Bearer", forKey: Key.grantType)
     }
 
     func loadAccessToken() -> String? {
@@ -28,7 +25,6 @@ final class TokenStore {
     func clear() {
         UserDefaults.standard.removeObject(forKey: Key.accessToken)
         UserDefaults.standard.removeObject(forKey: Key.refreshToken)
-        UserDefaults.standard.removeObject(forKey: Key.grantType)
     }
 
     func loadAuthorizationValue() -> String? {
