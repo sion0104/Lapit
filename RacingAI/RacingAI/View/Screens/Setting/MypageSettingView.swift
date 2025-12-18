@@ -29,9 +29,22 @@ struct MypageSettingView: View {
                                 SettingRowContentView(title: "사용자 비밀번호 설정")
                             }
                             Divider().padding(.leading)
-                        }                    }
+                        }
+                    }
                     
                     SettingSection(title: "약관 및 정책") {
+                        VStack(spacing: 0) {
+                            Button {
+                                path.append(AppRoute.termOfUse)
+                            } label: {
+                                SettingRowContentView(title: "이용 약관")
+                            }
+                            Button {
+                                path.append(AppRoute.privacyPolicy)
+                            } label: {
+                                SettingRowContentView(title: "개인정보 처리 방침")
+                            }
+                        }
                     }
                     
                     Spacer()
@@ -63,6 +76,14 @@ struct MypageSettingView: View {
                     ChangePasswordView(
                         onBack: { path.removeLast() },
                         onComplete: { path.removeLast(path.count)}
+                    )
+                case .termOfUse:
+                    TermOfUserView(
+                        onBack: { path.removeLast() }
+                    )
+                case .privacyPolicy:
+                    PrivacyPolicyView(
+                        onBack: { path.removeLast() }
                     )
                 }
             }

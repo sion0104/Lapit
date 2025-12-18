@@ -9,4 +9,6 @@ enum AppRoute: Hashable {
     case passwordVerify(PasswordVerifyFlow)
     case editInfo
     case changePassword
+    case termOfUse
+    case privacyPolicy
 }
