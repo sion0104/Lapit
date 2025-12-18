@@ -39,11 +39,15 @@ struct MypageSettingView: View {
                             } label: {
                                 SettingRowContentView(title: "이용 약관")
                             }
+                            Divider().padding(.leading)
+
                             Button {
                                 path.append(AppRoute.privacyPolicy)
                             } label: {
                                 SettingRowContentView(title: "개인정보 처리 방침")
                             }
+                            Divider().padding(.leading)
+
                         }
                     }
                     

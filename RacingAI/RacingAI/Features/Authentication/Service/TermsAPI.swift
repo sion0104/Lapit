@@ -12,8 +12,15 @@ struct GetTermsListRes: Decodable, Identifiable {
     let effectiveDate: String
 }
 
+struct GetTermRes: Decodable {
+    let id: Int
+    let title: String
+    let content: String
+}
+
 protocol TermsAPIProtocol {
     func fetchTerms() async throws -> [GetTermsListRes]
+    func fetchTerm(termsId: Int64) async throws -> GetTermRes
 }
 
 struct TermsAPI: TermsAPIProtocol {
@@ -27,6 +34,12 @@ struct TermsAPI: TermsAPIProtocol {
     func fetchTerms() async throws -> [GetTermsListRes] {
         let path = "/v1/auth/terms"
         let response: CommonResponse<[GetTermsListRes]> = try await client.get(path)
+        return response.data
+    }
+    
+    func fetchTerm(termsId: Int64) async throws -> GetTermRes {
+        let path = "/v1/auth/terms/\(termsId)"
+        let response: CommonResponse<GetTermRes> = try await client.get(path)
         return response.data
     }
 }
