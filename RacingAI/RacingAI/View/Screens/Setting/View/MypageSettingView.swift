@@ -53,7 +53,11 @@ struct MypageSettingView: View {
                     
                     Spacer()
                     
-                    FooterSectionView()
+                    FooterSectionView(
+                        onWithdrawTap: {
+                            path.append(AppRoute.withdrawal)
+                        }
+                    )
                 }
                 .padding()
             }
@@ -88,6 +92,11 @@ struct MypageSettingView: View {
                 case .privacyPolicy:
                     PrivacyPolicyView(
                         onBack: { path.removeLast() }
+                    )
+                case .withdrawal:
+                    WithdrawalView(
+                        onBack: { path.removeLast() },
+                        onComplete: { path.removeLast(path.count) }
                     )
                 }
             }

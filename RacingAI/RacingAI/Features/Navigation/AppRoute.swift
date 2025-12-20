@@ -11,4 +11,5 @@ enum AppRoute: Hashable {
     case changePassword
     case termOfUse
     case privacyPolicy
+    case withdrawal
 }

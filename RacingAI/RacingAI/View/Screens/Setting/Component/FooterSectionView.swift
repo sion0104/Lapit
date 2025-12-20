@@ -4,11 +4,9 @@ struct FooterSectionView: View {
     
     @EnvironmentObject private var userSession: UserSessionStore
     
-    @State private var showLogoutAlert: Bool = false
+    let onWithdrawTap: () -> Void
     
-    @State private var showWithdrawAlert: Bool = false
-    @State private var isWithdrawing: Bool = false
-    @State private var toastMessage: String? = nil
+    @State private var showLogoutAlert: Bool = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -28,19 +26,6 @@ struct FooterSectionView: View {
         } message: {
             Text("정말 로그아웃 하시겠습니까?")
         }
-        .alert("회원 탈퇴", isPresented: $showWithdrawAlert) {
-            Button("취소", role: .cancel) {}
-            Button("탈퇴", role: .destructive) {
-                Task { await withdraw() }
-            }
-        } message: {
-            Text("탈퇴 시 계정 정보가 삭제되며 복구할 수 없습니다.\n정말 탈퇴하시겠습니까?")
-        }
-        .alert("안내", isPresented: .constant(toastMessage != nil)) {
-            Button("확인") { toastMessage = nil }
-        } message: {
-            Text(toastMessage ?? "")
-        }
     }
     
     private var loggedInButtons: some View {
@@ -54,18 +39,14 @@ struct FooterSectionView: View {
             }
             
             Button(role: .destructive) {
-                showWithdrawAlert = true
+                onWithdrawTap()
             } label: {
                 HStack {
                     Text("회원 탈퇴")
                         .font(.footnote)
                         .foregroundStyle(Color("SecondaryFont"))
-                    if isWithdrawing {
-                        ProgressView().scaleEffect(0.8)
-                    }
                 }
             }
-            .disabled(isWithdrawing)
         }
     }
     
@@ -92,20 +73,9 @@ struct FooterSectionView: View {
                 .foregroundStyle(Color("Footer"))
         }
     }
-    
-    private func withdraw() async {
-        isWithdrawing = true
-        defer { isWithdrawing = false }
-        
-        do {
-            try await userSession.withdraw()
-        } catch {
-            toastMessage = describeAPIError(error)
-        }
-    }
 }
 
 #Preview {
-    FooterSectionView()
+    FooterSectionView(onWithdrawTap: {})
         .environmentObject(UserSessionStore())
 }
