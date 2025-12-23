@@ -4,6 +4,9 @@ struct CyclingDashboardView: View {
     @State private var state: CyclingDashboardState = MockCyclingDashboardState.loggedIn
     @State private var showLoginSheet: Bool = false
     
+    @Environment(\.scenePhase) private var scenePhase
+    @StateObject private var rideVM = CyclingRideViewModel()
+    
     var body: some View {
         VStack {
             ScrollView(showsIndicators: false) {
@@ -19,7 +22,12 @@ struct CyclingDashboardView: View {
                             )
                             
                             CDSessionHeroCard(
-                                durationText: state.rideDurationText
+                                durationText: rideVM.duration,
+                                status: rideVM.status,
+                                onStart: { rideVM.startWith3SecDelay() },
+                                onPauseResume: { rideVM.togglePauseResume() },
+                                onStop: { rideVM.stopWorkout() },
+                                onCancelCountdown: { rideVM.cancelCountdown() }
                             )
                             
                             CDMetricGrid(
@@ -121,6 +129,18 @@ struct CyclingDashboardView: View {
             // - 토큰 확인
             // - 오늘 날짜 문자열 세팅
             // - WeatherKit/HealthKit/백엔드 연동 시작
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            switch newPhase {
+            case .active:
+                rideVM.handleScenePhaseChange(.active)
+            case .inactive:
+                rideVM.handleScenePhaseChange(.inactive)
+            case .background:
+                rideVM.handleScenePhaseChange(.background)
+            @unknown default:
+                break
+            }
         }
     }
 }

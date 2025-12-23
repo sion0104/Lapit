@@ -16,6 +16,8 @@ struct RacingAIApp: App {
 
             MypageSettingView()
                 .environmentObject(userSessionStore)
+            
+            CyclingDashboardView()
         }
     }
 }

@@ -2,6 +2,12 @@ import SwiftUI
 
 struct CDSessionHeroCard: View {
     let durationText: String
+    let status: CyclingRideViewModel.RideStatus
+    
+    let onStart: () -> Void
+    let onPauseResume: () -> Void
+    let onStop: () -> Void
+    let onCancelCountdown: () -> Void
     
     var body: some View {
         CDCard() {
@@ -13,10 +19,13 @@ struct CDSessionHeroCard: View {
                     
                     Spacer()
                     
-                    HStack(spacing: 6) {
-                        Circle().fill(Color("Circle")).frame(width: 23.54, height: 23.54)
-                        Circle().fill(Color("Circle")).frame(width: 23.54, height: 23.54)
-                    }
+                    CDSessionControlButtons(
+                        status: status,
+                        onStart: onStart,
+                        onPauseResume: onPauseResume,
+                        onStop: onStop,
+                        onCancelCountdown: onCancelCountdown
+                    )
                 }
             }
         }
@@ -40,7 +49,4 @@ struct CDSessionHeroCard: View {
     }
 }
 
-#Preview {
-    CDSessionHeroCard(durationText: "01H 20M 45S")
-        .frame(width: 289, height: 68.75)
-}
+
