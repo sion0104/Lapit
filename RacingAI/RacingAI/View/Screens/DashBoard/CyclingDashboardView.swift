@@ -1,17 +1,33 @@
 import SwiftUI
 
 struct CyclingDashboardView: View {
-    @State private var state: CyclingDashboardState = MockCyclingDashboardState.loggedIn
-    @State private var showLoginSheet: Bool = false
+    @EnvironmentObject private var userSession: UserSessionStore
+    
+    @State private var state: CyclingDashboardState = MockCyclingDashboardState.loggedIn // MockData
+    
+    @State private var showLogin: Bool = false
+    @State private var showSettings: Bool = false
     
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var rideVM = CyclingRideViewModel()
+    
+    private var needsLogin: Bool { !userSession.isLoggedIn }
     
     var body: some View {
         VStack {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading) {
-                    CDHeaderBar(userName: state.userName)
+                    CDHeaderBar(
+                        onProfileTap: {
+                            if needsLogin {
+                                showLogin = true
+                            } else {
+                                showSettings = true
+                            }
+                        }, onSettingsTap: {
+                            showSettings = true
+                        }
+                    )
                     
                     VStack {
                         CDCard {
@@ -46,7 +62,7 @@ struct CyclingDashboardView: View {
                                 .foregroundStyle(.circle)
                             
                             Button {
-                                // 나중에 상세 화면 연결
+                                guard !needsLogin else { showLogin = true; return}
                             } label: {
                                 Text("자세히 보기")
                                     .font(.caption)
@@ -55,7 +71,11 @@ struct CyclingDashboardView: View {
                                     .foregroundColor(.secondaryFont)
                             }
                         }
-                        
+                        .fullScreenCover(isPresented: $showLogin) {
+                            NavigationStack {
+                                LoginView()
+                            }
+                        }
                     }
                     .padding()
                     .background(
@@ -89,51 +109,43 @@ struct CyclingDashboardView: View {
                 }
                 .padding()
             }
-            // 토큰 없으면 오버레이로 로그인 유도(UI만)
-            if !state.hasToken {
-                Color.black.opacity(0.25)
-                    .ignoresSafeArea()
-                
-                LoginRequiredView {
-                    showLoginSheet = true
-                }
-            }
         }
         .background(Color("HomeBackground"))
-        .sheet(isPresented: $showLoginSheet) {
+        .fullScreenCover(isPresented: $showLogin) {
+            NavigationStack {
+                LoginView()
+            }
+        }
+        .navigationDestination(isPresented: $showSettings, destination: {
+            MypageSettingView()
+        })
+        .sheet(isPresented: $showLogin) {
             // UI만: 임시 로그인 시트
             VStack(spacing: 16) {
                 Text("로그인 화면(임시)")
                     .font(.title2.weight(.bold))
-                Text("여기서 실제 로그인/토큰 저장을 나중에 붙일 예정입니다.")
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                
+            
                 Button("로그인 성공(목데이터)") {
-                    state = MockCyclingDashboardState.loggedIn
-                    showLoginSheet = false
+                    showLogin = false
                 }
                 .buttonStyle(.borderedProminent)
                 
                 Button("닫기") {
-                    showLoginSheet = false
+                    showLogin = false
                 }
                 .buttonStyle(.bordered)
             }
             .padding()
             .presentationDetents([.medium])
         }
-        .navigationBarHidden(true)
-        .onAppear {
-            // 여기서 나중에:
-            // - 토큰 확인
-            // - 오늘 날짜 문자열 세팅
-            // - WeatherKit/HealthKit/백엔드 연동 시작
+        .task {
+            await userSession.fetchUserIfNeeded()
         }
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
             case .active:
                 rideVM.handleScenePhaseChange(.active)
+                Task { await userSession.fetchUserIfNeeded()}
             case .inactive:
                 rideVM.handleScenePhaseChange(.inactive)
             case .background:
