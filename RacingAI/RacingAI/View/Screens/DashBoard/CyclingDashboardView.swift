@@ -10,7 +10,7 @@ struct CyclingDashboardView: View {
     
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var rideVM = CyclingRideViewModel()
-    
+        
     private var needsLogin: Bool { !userSession.isLoggedIn }
     
     var body: some View {
@@ -31,11 +31,7 @@ struct CyclingDashboardView: View {
                     
                     VStack {
                         CDCard {
-                            CDDateWeatherBarView(
-                                dateText: state.dateText,
-                                todayText: state.todayText,
-                                weatherText: state.weatherText
-                            )
+                            CDDateWeatherBarView()
                             
                             CDSessionHeroCard(
                                 durationText: rideVM.duration,

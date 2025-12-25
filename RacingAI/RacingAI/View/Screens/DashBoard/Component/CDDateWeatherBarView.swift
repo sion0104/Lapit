@@ -1,26 +1,31 @@
 import SwiftUI
 
 struct CDDateWeatherBarView: View {
-    let dateText: String
-    let todayText: String
-    let weatherText: String
-    
+//    @StateObject private var vm = DateWeatherViewModel()
+    @StateObject private var vm = DateWeatherAPIViewModel()
+
+
     var body: some View {
         HStack {
-            Text(dateText)
+            Text(vm.dateText)
                 .font(.subheadline)
                 .fontWeight(.medium)
-            Text(todayText)
+
+            Text(vm.todayText)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+
             Spacer()
-            Text(weatherText)
+
+            Text(vm.weatherText)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
+        .task {
+            await vm.onAppear()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
+            vm.refreshDateOnly()
+        }
     }
-}
-
-#Preview {
-    CDDateWeatherBarView(dateText: "11월 3일 오늘", todayText: "오늘", weatherText: "맑음 22C")
 }
