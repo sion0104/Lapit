@@ -12,6 +12,8 @@ final class CyclingRideViewModel: ObservableObject {
 
     @Published private(set) var status: RideStatus = .idle
     @Published private(set) var elapsedSeconds: Int = 0
+    
+    var onRunningStarted: (() -> Void)?
 
     private var startDate: Date?
     private var accumulatedSeconds: Int = 0
@@ -129,6 +131,8 @@ final class CyclingRideViewModel: ObservableObject {
         status = .running
         startTicker()
         elapsedSeconds = 0
+        
+        onRunningStarted?()
     }
 
     private func pause() {

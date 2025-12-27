@@ -2,7 +2,7 @@ import SwiftUI
 
 struct CyclingDashboardView: View {
     @EnvironmentObject private var userSession: UserSessionStore
-    
+        
     @State private var state: CyclingDashboardState = MockCyclingDashboardState.loggedIn // MockData
     
     @State private var showLogin: Bool = false
@@ -10,7 +10,26 @@ struct CyclingDashboardView: View {
     
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var rideVM = CyclingRideViewModel()
-        
+    
+    @StateObject private var receiver = PhoneWorkoutReceiver.shared
+    @StateObject private var live = CyclingDashboardLiveState()
+    
+    private var distanceText: String {
+        MetricFormatter.metersToKmText(receiver.latest?.distanceMeters)
+    }
+
+    private var speedText: String {
+        MetricFormatter.speedMpsToKmhText(receiver.latest?.speedMps)
+    }
+
+    private var caloriesText: String {
+        MetricFormatter.kcalText(receiver.latest?.activeEnergyKcal)
+    }
+
+    private var currentBPM: Int {
+        MetricFormatter.bpmInt(receiver.latest?.heartRateBPM)
+    }
+    
     private var needsLogin: Bool { !userSession.isLoggedIn }
     
     var body: some View {
@@ -36,22 +55,37 @@ struct CyclingDashboardView: View {
                             CDSessionHeroCard(
                                 durationText: rideVM.duration,
                                 status: rideVM.status,
-                                onStart: { rideVM.startWith3SecDelay() },
-                                onPauseResume: { rideVM.togglePauseResume() },
-                                onStop: { rideVM.stopWorkout() },
+                                onStart: {
+                                    rideVM.startWith3SecDelay()
+                                },
+                                onPauseResume: {
+                                    rideVM.togglePauseResume()
+                                    switch rideVM.status {
+                                    case .paused:
+                                        receiver.sendCommand(.pause)
+                                    case .running:
+                                        receiver.sendCommand(.resume)
+                                    default:
+                                        break
+                                    }
+                                },
+                                onStop: {
+                                    rideVM.stopWorkout()
+                                    receiver.sendCommand(.stop)
+                                },
                                 onCancelCountdown: { rideVM.cancelCountdown() }
                             )
                             
                             CDMetricGrid(
-                                distanceText: state.distanceText,
-                                distanceHint: state.distanceGoalHint,
-                                speedText: state.speedText,
-                                paceHint: state.paceHint,
-                                currentBPM: state.currentBPM,
-                                previousBPM: state.previousBPM,
-                                previousLabel: state.previousBPMLabel,
-                                bpmDeltaText: state.bpmDeltaText,
-                                caloriesText: state.caloriesText
+                                distanceText: distanceText,
+                                distanceHint: "",
+                                speedText: speedText,
+                                paceHint: "",
+                                currentBPM: currentBPM,
+                                previousBPM: live.previousBPM,
+                                previousLabel: "",
+                                bpmDeltaText: "",
+                                caloriesText: caloriesText
                             )
                             
                             Divider()
@@ -150,9 +184,18 @@ struct CyclingDashboardView: View {
                 break
             }
         }
+        .onReceive(receiver.$latest.compactMap { $0 }) { live.update(with: $0) }
+        .onAppear {
+            rideVM.onRunningStarted = { [weak receiver = receiver] in
+                receiver?.sendCommand(.startCycling)
+            }
+        }
     }
+    
+    
 }
 
 #Preview {
     CyclingDashboardView()
+        .environmentObject(UserSessionStore())
 }
