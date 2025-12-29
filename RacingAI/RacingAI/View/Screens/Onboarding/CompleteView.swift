@@ -12,6 +12,7 @@ struct CompleteView: View {
             Text("맞춤형 운동 플래너를 사용해보세요")
                 .font(.callout)
         }
+        .navigationBarBackButtonHidden(true)
         
         Spacer()
     }
