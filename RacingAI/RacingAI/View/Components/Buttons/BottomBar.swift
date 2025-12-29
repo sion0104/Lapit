@@ -14,10 +14,12 @@ struct BottomBar: View {
                 leftAction()
             }
             .frame(width: 122)
+            .buttonStyle(SecondaryButtonStyle())
             
             AppButton(title: rightTitle, isEnabled: isRightEnabled) {
                 rightAction()
             }
+            .buttonStyle(PrimaryButtonStyle())
         }
         .padding()
         .background(Color.white)

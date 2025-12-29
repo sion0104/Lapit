@@ -3,20 +3,30 @@ import Foundation
 final class BodyInfoStore: ObservableObject {
     @Published var height: String = ""
     @Published var weight: String = ""
-    @Published var bodyFatRate: String = ""
+    @Published var bmi: String = ""
     @Published var weightChange: WeightChange? = nil
     @Published var trainingPartner: TrainingPartner? = nil
     @Published var weeklyExerciseFrequency: ExerciseFrequency? = nil
     @Published var preferredExerciseTime: ExerciseTime? = nil
-    @Published var preferredTraning: Training? = nil
-    @Published var seasonGoal: SeasonGoal? = nil
-    @Published var affiliation: Affiliation? = nil
-    @Published var painArea: PainArea? = nil
-    @Published var otherPainArea: String = ""
-    @Published var fatigue: Fatigue? = nil
+    @Published var ridingExperience: RidingExperience? = nil
+    @Published var todayCondition: TodayCondition? = nil
     
-    var hasPainInfo: Bool {
-        painArea != nil || !otherPainArea.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    
+    func updateBMI() {
+        let heihtText = height.trimmingCharacters(in: .whitespacesAndNewlines)
+        let weightText = weight.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        let h = Double(heihtText.replacingOccurrences(of: ",", with: "."))
+        let w = Double(weightText.replacingOccurrences(of: ",", with: "."))
+        
+        guard let heightCm = h, let weightKg = w, heightCm > 0, weightKg > 0 else {
+            return
+        }
+        
+        let heightM = heightCm / 100.0
+        let value = weightKg / (heightM * heightM)
+        
+        bmi = String(format: "%.1f", value)
     }
 }
 
@@ -80,47 +90,19 @@ enum ExerciseTime: CaseIterable, Identifiable {
     }
 }
 
-enum Training: String, CaseIterable, Identifiable {
-    case indoor = "실내 파워 트레이닝"
-    case track = "트랙 중심 주행 훈련"
-    case muscleBalance = "근력 및 밸런스 보강"
+enum RidingExperience: String, CaseIterable, Identifiable {
+    case beginner = "사이클을 막 시작했어요"
+    case intermediate = "어느정도 탈 줄 알아요"
+    case expert = "사이클을 오래 했어요"
     
     var id: Self { self }
 }
 
-enum SeasonGoal: String, CaseIterable, Identifiable {
-    case ImprovedAgility = "순발력 향상 / 스프린트 스타터 중심"
-    case StrengtheningDurabiliy = "지속력 강화 / 중장거리 대응력 향상"
-    case FasterFatigueRecovery = "피로 회복 속도 향상"
-    case StaregyRace = "레이스 전략 적용"
-    case ReturnTraining = "복귀 훈련 / 부상 이후 조정기"
+enum TodayCondition: String, CaseIterable, Identifiable {
+    case good = "좋아요"
+    case regular = "보통이에요"
+    case notGood = "별로에요"
     
     var id: Self { self }
 }
 
-enum Affiliation: String, CaseIterable, Identifiable {
-    case nationalTeamStandingSquad = "선수단 상비군"
-    case trainer = "훈련생"
-    case personalTraining = "개인 훈련 중"
-    
-    var id: Self { self }
-}
-
-enum PainArea: String, CaseIterable, Identifiable {
-    case Hamstring = "햄스트링"
-    case Quadriceps = "대퇴사두근"
-    case waist = "허리"
-    case knee = "무릎"
-    case ankle = "발목"
-    case shoulderArm = "어깨, 팔"
-    
-    var id: Self { self }
-}
-
-enum Fatigue: String, CaseIterable, Identifiable {
-    case low = "거의 없음"
-    case medium = "가끔 있음"
-    case high = "자주 있음"
-    
-    var id: Self { self }
-}

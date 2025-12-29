@@ -10,8 +10,8 @@ struct SecondQuestionView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 30) {
-                    ProgressView(value: 20, total: 90)
-                        .tint(.black)
+                    ProgressView(value: 2, total: 5)
+                        .tint(Color("MainColor"))
                     
                     VStack(alignment: .leading, spacing: 10) {
                         Text("주로 누구와 훈련하나요?")

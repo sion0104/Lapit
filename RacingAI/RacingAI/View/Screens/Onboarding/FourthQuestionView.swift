@@ -8,18 +8,18 @@ struct FourthQuestionView: View {
     @State private var canGoNext = false
     
     private var isNextEnabled: Bool {
-        bodyInfoStore.preferredTraning != nil
+        bodyInfoStore.ridingExperience != nil
     }
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 30) {
-                    ProgressView(value: 40, total: 90)
-                        .tint(.black)
+                    ProgressView(value: 4, total: 5)
+                        .tint(Color("MainColor"))
                     
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("선호하는 훈련은 무엇인가요?")
+                        Text("라이딩 경력을 알려주세요")
                             .font(.title2)
                             .fontWeight(.bold)
                     }
@@ -28,17 +28,18 @@ struct FourthQuestionView: View {
                 
                 VStack(alignment: .leading, spacing: 10) {
                     VStack(spacing: 10) {
-                        ForEach(Training.allCases) { training in
+                        ForEach(RidingExperience.allCases) { experience in
                             AppButton(
-                                title: training.rawValue,
+                                title: experience.rawValue,
                                 isEnabled: true,
                                 isLeading: true
                             ) {
-                                    bodyInfoStore.preferredTraning = training
+                                bodyInfoStore.ridingExperience = experience
                                 }
+                            .buttonStyle(SecondaryButtonStyle())
                                 .font(.callout)
                                 .fontWeight(.medium)
-                                .opacity(bodyInfoStore.preferredTraning == training ? 1.0 : 0.7)
+                                .opacity(bodyInfoStore.ridingExperience == experience ? 1.0 : 0.7)
 
                         }
                     }

@@ -7,18 +7,37 @@ struct FirstQuestionView: View {
     @State private var canNavigate: Bool = false
     
     private var isNextEnabled: Bool {
-        !bodyInfoStore.height.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !bodyInfoStore.weight.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !bodyInfoStore.bodyFatRate.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        heightValue != nil &&
+        weightValue != nil &&
+        !bodyInfoStore.bmi.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
         bodyInfoStore.weightChange != nil
+    }
+
+    
+    private var heightValue: Double? {
+        Double(bodyInfoStore.height)
+    }
+
+    private var weightValue: Double? {
+        Double(bodyInfoStore.weight)
+    }
+
+    private var heightError: String? {
+        if bodyInfoStore.height.isEmpty { return nil }
+        return heightValue == nil ? "숫자(예: 170 또는 170.5)만 입력해주세요." : nil
+    }
+
+    private var weightError: String? {
+        if bodyInfoStore.weight.isEmpty { return nil }
+        return weightValue == nil ? "숫자(예: 70 또는 70.2)만 입력해주세요." : nil
     }
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 30) {
-                    ProgressView(value: 10, total: 90)
-                        .tint(.black)
+                    ProgressView(value: 1, total: 5)
+                        .tint(Color("MainColor"))
                     
                     VStack(alignment: .leading, spacing: 10) {
                         Text("현재 몸 상태는 어떤가요?")
@@ -46,8 +65,12 @@ struct FirstQuestionView: View {
                                 placeholder: "키를 입력해주세요",
                                 keyboard: .decimalPad,
                                 submitLabel: .next,
+                                error: heightError,
                                 maxLength: 5
                             )
+                            .onChange(of: bodyInfoStore.height) { _, _ in
+                                bodyInfoStore.updateBMI()
+                            }
                         }
                         
                         VStack(alignment: .leading) {
@@ -59,21 +82,27 @@ struct FirstQuestionView: View {
                                 placeholder: "몸무게를 입력해주세요",
                                 keyboard: .decimalPad,
                                 submitLabel: .next,
+                                error: weightError,
                                 maxLength: 5
                             )
+                            .onChange(of: bodyInfoStore.weight) { _, _ in
+                                bodyInfoStore.updateBMI()
+                            }
                         }
                         
                         VStack(alignment: .leading) {
-                            Text("체지방률")
+                            Text("BMI")
                                 .font(.callout)
                             
                             AppTextField (
-                                text: $bodyInfoStore.bodyFatRate,
-                                placeholder: "체지방률을 입력해주세요.",
+                                text: $bodyInfoStore.bmi,
+                                placeholder: "자동 계산 됩니다.",
                                 keyboard: .decimalPad,
                                 submitLabel: .next,
                                 maxLength: 5
                             )
+                            .disabled(true)
+                            .opacity(0.8)
                         }
                     }
                     .padding()
@@ -100,6 +129,7 @@ struct FirstQuestionView: View {
                                 }
                                 .opacity(bodyInfoStore.weightChange == option ? 1 : 0.7)
                                 .frame(maxHeight: .infinity, alignment: .leading)
+                                .buttonStyle(SecondaryButtonStyle())
                         }
                     }
                 }
@@ -126,9 +156,44 @@ struct FirstQuestionView: View {
                 SecondQuestionView()
                     .environmentObject(bodyInfoStore)
             })
+            .onChange(of: bodyInfoStore.height) { _, newValue in
+                let sanitized = newValue.sanitizedDecimal(maxFractionDigits: 1)
+                if sanitized != newValue { bodyInfoStore.height = sanitized }
+            }
+
+            .onChange(of: bodyInfoStore.weight) { _, newValue in
+                let sanitized = newValue.sanitizedDecimal(maxFractionDigits: 1)
+                if sanitized != newValue { bodyInfoStore.weight = sanitized }
+            }
+
         }
     }
 }
+
+extension String {
+    func sanitizedDecimal(maxFractionDigits: Int? = nil) -> String {
+        var s = self.replacingOccurrences(of: ",", with: ".")
+        s = s.filter { $0.isNumber || $0 == "." }
+
+        if let firstDot = s.firstIndex(of: ".") {
+            let after = s.index(after: firstDot)
+            let beforePart = s[..<after]
+            let rest = s[after...].replacingOccurrences(of: ".", with: "")
+            s = String(beforePart) + rest
+        }
+
+        if let maxFractionDigits,
+           let dotIndex = s.firstIndex(of: ".") {
+            let afterDot = s.index(after: dotIndex)
+            let intPart = s[..<afterDot]
+            let fracPart = s[afterDot...]
+            s = String(intPart) + String(fracPart.prefix(maxFractionDigits))
+        }
+
+        return s
+    }
+}
+
 
 #Preview {
     FirstQuestionView()

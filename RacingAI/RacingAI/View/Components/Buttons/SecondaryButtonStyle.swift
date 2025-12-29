@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct PrimaryButtonStyle: ButtonStyle {
+struct SecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .frame(maxWidth: .infinity)
@@ -8,7 +8,7 @@ struct PrimaryButtonStyle: ButtonStyle {
             .padding(.vertical, 17)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(Color("MainColor"))
+                    .fill(Color("Button"))
             )
             .foregroundStyle(.black)
             .font(.headline)

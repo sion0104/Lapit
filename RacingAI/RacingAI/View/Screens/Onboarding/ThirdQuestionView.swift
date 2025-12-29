@@ -15,8 +15,8 @@ struct ThirdQuestionView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 30) {
-                    ProgressView(value: 30, total: 90)
-                        .tint(.black)
+                    ProgressView(value: 3, total: 5)
+                        .tint(Color("MainColor"))
                     
                     VStack(alignment: .leading, spacing: 10) {
                         Text("평소 운동 습관을 알려주세요")
@@ -46,6 +46,7 @@ struct ThirdQuestionView: View {
                                 isEnabled: true) {
                                     bodyInfoStore.weeklyExerciseFrequency = frequency
                                 }
+                                .buttonStyle(SecondaryButtonStyle())
                                 .font(.callout)
                                 .fontWeight(.medium)
                                 .frame(maxWidth: .infinity, minHeight: 45)
@@ -69,6 +70,7 @@ struct ThirdQuestionView: View {
                                     isLeading: true) {
                                         bodyInfoStore.preferredExerciseTime = time
                                     }
+                                    .buttonStyle(SecondaryButtonStyle())
                                     .font(.callout)
                                     .fontWeight(.medium)
                                     .opacity(bodyInfoStore.preferredExerciseTime == time ? 1.0 : 0.7)

@@ -16,16 +16,21 @@ struct StartView: View {
                 
                 Spacer()
                 
+                
+            }
+            .padding()
+            .navigationDestination(isPresented: $canNavigate) {
+                FirstQuestionView()
+            }
+            .safeAreaInset(edge: .bottom) {
                 AppButton(
                     title: "설문 시작하기",
                     isEnabled: true
                 ) {
                     canNavigate = true
                 }
-            }
-            .padding()
-            .navigationDestination(isPresented: $canNavigate) {
-                FirstQuestionView()
+                .buttonStyle(PrimaryButtonStyle())
+                .padding()
             }
         }
         .navigationBarBackButtonHidden(true)
