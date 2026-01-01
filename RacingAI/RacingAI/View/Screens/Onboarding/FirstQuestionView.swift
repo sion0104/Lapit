@@ -121,7 +121,7 @@ struct FirstQuestionView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         ForEach(WeightChange.allCases) { option in
                             AppButton(
-                                title: option.rawValue,
+                                title: option.title,
                                 isEnabled: true,
                                 isLeading: true
                                 ) {

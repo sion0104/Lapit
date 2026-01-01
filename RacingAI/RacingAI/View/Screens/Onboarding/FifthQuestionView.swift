@@ -29,7 +29,7 @@ struct FifthQuestionView: View {
                     VStack(spacing: 10) {
                         ForEach(TodayCondition.allCases) { condition in
                             AppButton(
-                                title: condition.rawValue,
+                                title: condition.title,
                                 isEnabled: true,
                                 isLeading: true
                             ) {

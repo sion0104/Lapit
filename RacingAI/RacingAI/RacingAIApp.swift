@@ -17,11 +17,14 @@ struct RacingAIApp: App {
 //            MypageSettingView()
 //                .environmentObject(userSessionStore)
             
-            CyclingDashboardView()
-                .environmentObject(userSessionStore)
-                .task {
-                    await userSessionStore.fetchUserIfNeeded()
-                }
+//            CyclingDashboardView()
+//                .environmentObject(userSessionStore)
+//                .task {
+//                    await userSessionStore.fetchUserIfNeeded()
+//                }
+            
+            StartView()
+                .environmentObject(bodyInfoStore)
         }
     }
 }

@@ -30,7 +30,7 @@ struct FourthQuestionView: View {
                     VStack(spacing: 10) {
                         ForEach(RidingExperience.allCases) { experience in
                             AppButton(
-                                title: experience.rawValue,
+                                title: experience.title,
                                 isEnabled: true,
                                 isLeading: true
                             ) {

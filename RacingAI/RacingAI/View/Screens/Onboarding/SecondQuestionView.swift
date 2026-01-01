@@ -29,7 +29,7 @@ struct SecondQuestionView: View {
                         } label: {
                             VStack {
                                 Spacer()
-                                Text(option.rawValue)
+                                Text(option.title)
                                     .font(.callout)
                                     .multilineTextAlignment(.center)
                                     .foregroundStyle(.black)

@@ -42,7 +42,7 @@ struct ThirdQuestionView: View {
                     LazyVGrid(columns: columns, spacing: 10) {
                         ForEach(ExerciseFrequency.allCases) { frequency in
                             AppButton(
-                                title: frequency.rawValue,
+                                title: frequency.title,
                                 isEnabled: true) {
                                     bodyInfoStore.weeklyExerciseFrequency = frequency
                                 }
