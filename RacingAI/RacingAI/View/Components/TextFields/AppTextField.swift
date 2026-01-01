@@ -50,12 +50,6 @@ struct AppTextField: View {
             }
             .modifier(TextFieldStyle(isFoucused: isFocused, isError: error != nil))
             
-            if let error {
-                Text(error)
-                    .font(.footnote)
-                    .foregroundStyle(.red)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
         }
         .onSubmit {
             onSubmit?()

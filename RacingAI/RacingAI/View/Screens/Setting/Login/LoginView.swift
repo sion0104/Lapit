@@ -143,7 +143,7 @@ struct LoginView: View {
                 
                 dismiss()
             } catch {
-                errorMessage = describeAPIError(error)
+                errorMessage = error.userMessage
             }
         }
 
