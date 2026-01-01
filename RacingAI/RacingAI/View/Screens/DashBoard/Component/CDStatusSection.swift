@@ -32,7 +32,6 @@ struct CDStatusSection: View {
                 let visibleCards: CGFloat = 2.35
                 let sideInset: CGFloat = 0
                 
-                // (보이는 카드 수 - 1) 만큼은 카드 간격 필요
                 let totalSpacing = cardSpacing * (visibleCards - 1)
                 let cardSize = (available - sideInset * 2 - totalSpacing) / visibleCards
                     

@@ -9,22 +9,10 @@ struct RacingAIApp: App {
     
     var body: some Scene {
         WindowGroup {
-//            AuthenticationView()
-//                .environmentObject(userInfoStore)
-//                .environmentObject(bodyInfoStore)
-            
-
-//            MypageSettingView()
-//                .environmentObject(userSessionStore)
-            
-//            CyclingDashboardView()
-//                .environmentObject(userSessionStore)
-//                .task {
-//                    await userSessionStore.fetchUserIfNeeded()
-//                }
-            
-            StartView()
+            TabContainerView()
+                .environmentObject(userInfoStore)
                 .environmentObject(bodyInfoStore)
+                .environmentObject(userSessionStore)
         }
     }
 }

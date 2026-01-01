@@ -104,6 +104,7 @@ struct CyclingDashboardView: View {
                         .fullScreenCover(isPresented: $showLogin) {
                             NavigationStack {
                                 LoginView()
+                                    .tabBarHidden(true)
                             }
                         }
                     }

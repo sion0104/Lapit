@@ -25,6 +25,7 @@ struct LoginView: View {
             ) {
                 login()
             }
+            .buttonStyle(PrimaryButtonStyle())
         }
         .padding()
         .navigationTitle("")
