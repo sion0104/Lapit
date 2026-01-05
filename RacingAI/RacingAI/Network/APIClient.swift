@@ -482,3 +482,11 @@ private extension APIClient {
 }
 
 
+
+extension APIClient {
+    func registerOnboard(_ req: RegisterOnboardReq) async throws -> CommonResponse<UserIdPayload> {
+        try await post("/v1/auth/onboard", body: req)
+    }
+}
+
+

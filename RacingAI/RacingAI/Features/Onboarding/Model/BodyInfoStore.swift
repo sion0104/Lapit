@@ -28,16 +28,6 @@ final class BodyInfoStore: ObservableObject {
         
         bmi = String(format: "%.1f", value)
     }
-    
-    func trainingPartnerPayload() -> AnswerPayload? {
-        guard let partner = trainingPartner else { return nil }
-
-        return AnswerPayload(
-            questionId: OnboardingQuestion.trainingPartner.rawValue,
-            answerId: partner.id
-        )
-    }
-    
 }
 
 enum WeightChange: Int, CaseIterable, Identifiable {
@@ -156,3 +146,74 @@ enum TodayCondition: Int, CaseIterable, Identifiable {
     }
 }
 
+extension BodyInfoStore {
+    var heightDouble: Double? { Double(height.replacingOccurrences(of: ",", with: ".")) }
+    var weightDouble: Double? { Double(weight.replacingOccurrences(of: ",", with: ".")) }
+    var bmiDouble: Double? { Double(bmi.replacingOccurrences(of: ",", with: ".")) }
+
+    func makeOnboardList() -> [SignUpOnboardItem] {
+        var list: [SignUpOnboardItem] = []
+
+        if let v = weightChange {
+            list.append(.init(
+                questionCodedId: OnboardingQuestion.weightChange.rawValue,
+                answerCodeId: v.id,
+                answerText: nil
+            ))
+        }
+
+        if let v = trainingPartner {
+            list.append(.init(
+                questionCodedId: OnboardingQuestion.trainingPartner.rawValue,
+                answerCodeId: v.id,
+                answerText: nil
+            ))
+        }
+
+        if let v = weeklyExerciseFrequency {
+            list.append(.init(
+                questionCodedId: OnboardingQuestion.weeklyExerciseFrequency.rawValue,
+                answerCodeId: v.id,
+                answerText: nil
+            ))
+        }
+
+        if let v = preferredExerciseTime {
+            list.append(.init(
+                questionCodedId: OnboardingQuestion.preferredExerciseTime.rawValue,
+                answerCodeId: v.id,
+                answerText: nil
+            ))
+        }
+
+        if let v = ridingExperience {
+            list.append(.init(
+                questionCodedId: OnboardingQuestion.ridingExperience.rawValue,
+                answerCodeId: v.id,
+                answerText: nil
+            ))
+        }
+
+        if let v = todayCondition {
+            list.append(.init(
+                questionCodedId: OnboardingQuestion.todayCondition.rawValue,
+                answerCodeId: v.id,
+                answerText: nil
+            ))
+        }
+
+        return list
+    }
+
+    func makeRegisterOnboardReq(userId: Int) -> RegisterOnboardReq? {
+        guard let h = heightDouble, let w = weightDouble, let b = bmiDouble else { return nil }
+
+        return RegisterOnboardReq(
+            userId: userId,
+            height: h,
+            weight: w,
+            bmi: b,
+            onboardList: makeOnboardList()
+        )
+    }
+}
