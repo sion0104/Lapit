@@ -314,4 +314,5 @@ private extension InformationView {
 #Preview {
     InformationView()
         .environmentObject(UserInfoStore())
+        .environmentObject(BodyInfoStore())
 }

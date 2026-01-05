@@ -46,21 +46,23 @@ struct AuthenticationView: View {
                     AppTextField(text: $confirmPassword, placeholder: "비밀번호를 다시 입력해 주세요.", isSecure: true, submitLabel: .done, error: passwordError)
                 }
                 .padding(.top, 16)
-                
                 Spacer()
-                
-                AppButton(title: "다음 단계", isEnabled: isFormInputFilled && !isCheckingId) {
-                    Task {
-                        await validateAndProceed()
-                    }
-                }
-                .padding(.top, 16)
             }
             .padding()
             .navigationDestination(isPresented: $canNavigate) {
                 InformationView()
                     .environmentObject(store)
             }
+            
+        }
+        .safeAreaInset(edge: .bottom) {
+            AppButton(title: "다음 단계", isEnabled: isFormInputFilled && !isCheckingId) {
+                Task {
+                    await validateAndProceed()
+                }
+            }
+            .padding()
+            .buttonStyle(PrimaryButtonStyle())
         }
     }
     

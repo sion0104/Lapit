@@ -8,7 +8,7 @@ struct GenderOptionView: View {
     var body: some View {
         Button(action: action) {
             HStack {
-                AppCheckBox(isOn: .constant(isSelected), size: 24, isTapEnabled: false)
+                AppRadiobBox(isOn: .constant(isSelected), size: 24, isTapEnabled: false)
                 Text(title)
                     .foregroundStyle(.black)
                     .fontWeight(.medium)

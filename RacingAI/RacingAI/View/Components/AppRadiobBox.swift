@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct AppCheckBox: View {
+struct AppRadiobBox: View {
     @Binding var isOn: Bool
     var size: CGFloat = 24
     var isTapEnabled: Bool = true
@@ -25,18 +25,15 @@ struct AppCheckBox: View {
     
     private var box: some View {
         ZStack {
+            Circle()
+                .fill(.white)
+                .stroke(.button)
+                .frame(width: 24, height: 24)
             if isOn {
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(.selectedCheckBox)
-                    .frame(width: 24, height: 24)
-                Image(systemName: "checkmark")
-                    .foregroundStyle(.select)
-            } else {
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(.checkBox)
-                    .frame(width: 24, height: 24)
+                Circle()
+                    .fill(.main)
+                    .frame(width: 12, height: 12)
             }
         }
     }
 }
-
