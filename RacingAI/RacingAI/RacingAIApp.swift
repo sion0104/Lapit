@@ -9,7 +9,7 @@ struct RacingAIApp: App {
     
     var body: some Scene {
         WindowGroup {
-            TabContainerView()
+            AppRootView()
                 .environmentObject(userInfoStore)
                 .environmentObject(bodyInfoStore)
                 .environmentObject(userSessionStore)

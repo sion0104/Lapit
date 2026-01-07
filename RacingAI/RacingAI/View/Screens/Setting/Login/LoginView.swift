@@ -3,6 +3,7 @@ import SwiftUI
 struct LoginView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var userSession: UserSessionStore
+    @EnvironmentObject private var userInfoStore: UserInfoStore
 
     @State private var userId: String = ""
     @State private var password: String = ""
@@ -16,8 +17,12 @@ struct LoginView: View {
 
             idRow
             passwordRow
-
+            
             Spacer()
+            
+            signupButton
+                .padding(.bottom, 6)
+
 
             AppButton(
                 title: isLoggingIn ? "로그인 중..." : "로그인",
@@ -148,10 +153,38 @@ struct LoginView: View {
         }
 
     }
+    
+    private var signupButton: some View {
+        HStack(spacing: 6) {
+            Spacer()
+            
+            Text("계정이 없으신가요?")
+                .font(.footnote)
+                .foregroundStyle(Color("SecondaryFont"))
+            
+            NavigationLink {
+                AuthenticationView()
+                    .environmentObject(userInfoStore)
+            } label: {
+                Text("회원가입")
+                    .font(.footnote)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.footer)
+                    .underline()
+            }
+            .disabled(isLoggingIn)
+            .opacity(isLoggingIn ? 0.4 : 1)
+            
+            Spacer()
+        }
+        .contentShape(Rectangle())
+    }
 }
 
 #Preview {
     NavigationStack {
         LoginView()
+            .environmentObject(UserSessionStore())
+            .environmentObject(UserInfoStore())
     }
 }

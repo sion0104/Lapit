@@ -16,44 +16,41 @@ struct AuthenticationView: View {
     private let checkDuplicateIdAPI: CheckDuplicateIdAPIProtocol = CheckDuplicateIDAPI()
     
     var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading) {
-                
-                Text("AI 운동 플래너")
-                    .padding(.top, 32)
-                
-                Text("사용자 인증")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                
-                VStack (alignment: .leading){
-                    Text("아이디")
-                        .fontWeight(.medium)
-                    AppTextField(text: $userId, placeholder: "아이디를 입력해 주세요.", keyboard: .emailAddress, submitLabel: .next, error: userIdError)
-                }
-                .padding(.top, 32)
-                
-                VStack(alignment: .leading){
-                    Text("비밀번호")
-                        .fontWeight(.medium)
-                    AppTextField(text: $password, placeholder: "비밀번호를 입력해 주세요.", isSecure: true, submitLabel: .next)
-                }
-                .padding(.top, 16)
-                
-                VStack(alignment: .leading){
-                    Text("비밀번호 확인")
-                        .fontWeight(.medium)
-                    AppTextField(text: $confirmPassword, placeholder: "비밀번호를 다시 입력해 주세요.", isSecure: true, submitLabel: .done, error: passwordError)
-                }
-                .padding(.top, 16)
-                Spacer()
-            }
-            .padding()
-            .navigationDestination(isPresented: $canNavigate) {
-                InformationView()
-                    .environmentObject(store)
-            }
+        VStack(alignment: .leading) {
             
+            Text("AI 운동 플래너")
+                .padding(.top, 32)
+            
+            Text("사용자 인증")
+                .font(.title2)
+                .fontWeight(.bold)
+            
+            VStack (alignment: .leading){
+                Text("아이디")
+                    .fontWeight(.medium)
+                AppTextField(text: $userId, placeholder: "아이디를 입력해 주세요.", keyboard: .emailAddress, submitLabel: .next, error: userIdError)
+            }
+            .padding(.top, 32)
+            
+            VStack(alignment: .leading){
+                Text("비밀번호")
+                    .fontWeight(.medium)
+                AppTextField(text: $password, placeholder: "비밀번호를 입력해 주세요.", isSecure: true, submitLabel: .next)
+            }
+            .padding(.top, 16)
+            
+            VStack(alignment: .leading){
+                Text("비밀번호 확인")
+                    .fontWeight(.medium)
+                AppTextField(text: $confirmPassword, placeholder: "비밀번호를 다시 입력해 주세요.", isSecure: true, submitLabel: .done, error: passwordError)
+            }
+            .padding(.top, 16)
+            Spacer()
+        }
+        .padding()
+        .navigationDestination(isPresented: $canNavigate) {
+            InformationView()
+                .environmentObject(store)
         }
         .safeAreaInset(edge: .bottom) {
             AppButton(title: "다음 단계", isEnabled: isFormInputFilled && !isCheckingId) {
@@ -64,6 +61,7 @@ struct AuthenticationView: View {
             .padding()
             .buttonStyle(PrimaryButtonStyle())
         }
+        .navigationBarBackButtonHidden(true)
     }
     
     private var isFormInputFilled: Bool {
