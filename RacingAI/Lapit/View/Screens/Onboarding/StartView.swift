@@ -16,7 +16,10 @@ struct StartView: View {
                 
                 Spacer()
                 
-                
+                Image("OnboardStart")
+                    .frame(width: 127.3531, height: 159.19139)
+
+                Spacer()
             }
             .padding()
             .navigationDestination(isPresented: $canNavigate) {

@@ -7,18 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AD475B192EFDCC43007A7A82 /* LapitWatchApp Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = AD475B0C2EFDCC42007A7A82 /* LapitWatchApp Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		AD475B452F005448007A7A82 /* LapitWatchAppExtentsion.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = AD475B3C2F005447007A7A82 /* LapitWatchAppExtentsion.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		AD475B172EFDCC43007A7A82 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = ADDB57E62EB8E1B600131F3C /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = AD475B0B2EFDCC42007A7A82;
-			remoteInfo = "LapitWatchApp Watch App";
-		};
 		AD475B432F005448007A7A82 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = ADDB57E62EB8E1B600131F3C /* Project object */;
@@ -29,17 +21,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		AD475B1D2EFDCC43007A7A82 /* Embed Watch Content */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
-			dstSubfolderSpec = 16;
-			files = (
-				AD475B192EFDCC43007A7A82 /* LapitWatchApp Watch App.app in Embed Watch Content */,
-			);
-			name = "Embed Watch Content";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		AD475B4A2F005448007A7A82 /* Embed ExtensionKit Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -56,27 +37,18 @@
 /* Begin PBXFileReference section */
 		AD475B0C2EFDCC42007A7A82 /* LapitWatchApp Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LapitWatchApp Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD475B3C2F005447007A7A82 /* LapitWatchAppExtentsion.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = LapitWatchAppExtentsion.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		ADDB57EE2EB8E1B600131F3C /* Lapit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lapit.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		ADFCCF2F2F0EBA6C00265C0E /* Lapit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lapit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		AD475B052EFC5E5C007A7A82 /* Exceptions for "RacingAI" folder in "Lapit" target */ = {
+		ADAF23ED2F0EC03D004DCB6C /* Exceptions for "Lapit" folder in "Lapit" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = ADDB57ED2EB8E1B600131F3C /* Lapit */;
+			target = ADFCCF2E2F0EBA6C00265C0E /* Lapit */;
 		};
-		AD475B372F004ECC007A7A82 /* Exceptions for "RacingAI" folder in "LapitWatchApp Watch App" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Features/CyclingDashBoard/CyclingDashboardLiveState.swift,
-				Features/Formatters/MetricFormatter.swift,
-				Features/Health/HealthKitAuthorizationManager.swift,
-			);
-			target = AD475B0B2EFDCC42007A7A82 /* LapitWatchApp Watch App */;
-		};
-		AD475B492F005448007A7A82 /* Exceptions for "LapitWatchAppExtentsion" folder in "LapitWatchAppExtentsion" target */ = {
+		ADFCCEC62F0EB08C00265C0E /* Exceptions for "LapitWatchAppExtentsion" folder in "LapitWatchAppExtentsion" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -99,18 +71,17 @@
 		AD475B3D2F005447007A7A82 /* LapitWatchAppExtentsion */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				AD475B492F005448007A7A82 /* Exceptions for "LapitWatchAppExtentsion" folder in "LapitWatchAppExtentsion" target */,
+				ADFCCEC62F0EB08C00265C0E /* Exceptions for "LapitWatchAppExtentsion" folder in "LapitWatchAppExtentsion" target */,
 			);
 			path = LapitWatchAppExtentsion;
 			sourceTree = "<group>";
 		};
-		ADDB57F02EB8E1B600131F3C /* RacingAI */ = {
+		ADFCCF302F0EBA6C00265C0E /* Lapit */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				AD475B052EFC5E5C007A7A82 /* Exceptions for "RacingAI" folder in "Lapit" target */,
-				AD475B372F004ECC007A7A82 /* Exceptions for "RacingAI" folder in "LapitWatchApp Watch App" target */,
+				ADAF23ED2F0EC03D004DCB6C /* Exceptions for "Lapit" folder in "Lapit" target */,
 			);
-			path = RacingAI;
+			path = Lapit;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -130,7 +101,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		ADDB57EB2EB8E1B600131F3C /* Frameworks */ = {
+		ADFCCF2C2F0EBA6C00265C0E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -144,9 +115,9 @@
 			isa = PBXGroup;
 			children = (
 				AD475B212F00492C007A7A82 /* Shared */,
-				ADDB57F02EB8E1B600131F3C /* RacingAI */,
 				AD475B0D2EFDCC42007A7A82 /* LapitWatchApp Watch App */,
 				AD475B3D2F005447007A7A82 /* LapitWatchAppExtentsion */,
+				ADFCCF302F0EBA6C00265C0E /* Lapit */,
 				ADDB57EF2EB8E1B600131F3C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -154,9 +125,9 @@
 		ADDB57EF2EB8E1B600131F3C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				ADDB57EE2EB8E1B600131F3C /* Lapit.app */,
 				AD475B0C2EFDCC42007A7A82 /* LapitWatchApp Watch App.app */,
 				AD475B3C2F005447007A7A82 /* LapitWatchAppExtentsion.appex */,
+				ADFCCF2F2F0EBA6C00265C0E /* Lapit.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -211,29 +182,27 @@
 			productReference = AD475B3C2F005447007A7A82 /* LapitWatchAppExtentsion.appex */;
 			productType = "com.apple.product-type.extensionkit-extension";
 		};
-		ADDB57ED2EB8E1B600131F3C /* Lapit */ = {
+		ADFCCF2E2F0EBA6C00265C0E /* Lapit */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = ADDB57FC2EB8E1B700131F3C /* Build configuration list for PBXNativeTarget "Lapit" */;
+			buildConfigurationList = ADFCCF3A2F0EBA6D00265C0E /* Build configuration list for PBXNativeTarget "Lapit" */;
 			buildPhases = (
-				ADDB57EA2EB8E1B600131F3C /* Sources */,
-				ADDB57EB2EB8E1B600131F3C /* Frameworks */,
-				ADDB57EC2EB8E1B600131F3C /* Resources */,
-				AD475B1D2EFDCC43007A7A82 /* Embed Watch Content */,
+				ADFCCF2B2F0EBA6C00265C0E /* Sources */,
+				ADFCCF2C2F0EBA6C00265C0E /* Frameworks */,
+				ADFCCF2D2F0EBA6C00265C0E /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				AD475B182EFDCC43007A7A82 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				AD475B212F00492C007A7A82 /* Shared */,
-				ADDB57F02EB8E1B600131F3C /* RacingAI */,
+				ADFCCF302F0EBA6C00265C0E /* Lapit */,
 			);
 			name = Lapit;
 			packageProductDependencies = (
 			);
-			productName = RacingAI;
-			productReference = ADDB57EE2EB8E1B600131F3C /* Lapit.app */;
+			productName = Lapit;
+			productReference = ADFCCF2F2F0EBA6C00265C0E /* Lapit.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -252,7 +221,7 @@
 					AD475B3B2F005447007A7A82 = {
 						CreatedOnToolsVersion = 16.2;
 					};
-					ADDB57ED2EB8E1B600131F3C = {
+					ADFCCF2E2F0EBA6C00265C0E = {
 						CreatedOnToolsVersion = 16.2;
 					};
 				};
@@ -271,9 +240,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				ADDB57ED2EB8E1B600131F3C /* Lapit */,
 				AD475B0B2EFDCC42007A7A82 /* LapitWatchApp Watch App */,
 				AD475B3B2F005447007A7A82 /* LapitWatchAppExtentsion */,
+				ADFCCF2E2F0EBA6C00265C0E /* Lapit */,
 			);
 		};
 /* End PBXProject section */
@@ -293,7 +262,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		ADDB57EC2EB8E1B600131F3C /* Resources */ = {
+		ADFCCF2D2F0EBA6C00265C0E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -317,7 +286,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		ADDB57EA2EB8E1B600131F3C /* Sources */ = {
+		ADFCCF2B2F0EBA6C00265C0E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -327,11 +296,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		AD475B182EFDCC43007A7A82 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = AD475B0B2EFDCC42007A7A82 /* LapitWatchApp Watch App */;
-			targetProxy = AD475B172EFDCC43007A7A82 /* PBXContainerItemProxy */;
-		};
 		AD475B442F005448007A7A82 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = AD475B3B2F005447007A7A82 /* LapitWatchAppExtentsion */;
@@ -349,7 +313,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LapitWatchApp Watch App/Preview Content\"";
-				DEVELOPMENT_TEAM = 59FP2PXRXK;
+				DEVELOPMENT_TEAM = Z64WN83V4Y;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = LapitWatchApp;
@@ -382,7 +346,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LapitWatchApp Watch App/Preview Content\"";
-				DEVELOPMENT_TEAM = 59FP2PXRXK;
+				DEVELOPMENT_TEAM = Z64WN83V4Y;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = LapitWatchApp;
@@ -412,7 +376,7 @@
 				CODE_SIGN_ENTITLEMENTS = LapitWatchAppExtentsion/LapitWatchAppExtentsion.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 59FP2PXRXK;
+				DEVELOPMENT_TEAM = Z64WN83V4Y;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LapitWatchAppExtentsion/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = LapitWatchAppExtentsion;
@@ -441,7 +405,7 @@
 				CODE_SIGN_ENTITLEMENTS = LapitWatchAppExtentsion/LapitWatchAppExtentsion.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 59FP2PXRXK;
+				DEVELOPMENT_TEAM = Z64WN83V4Y;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LapitWatchAppExtentsion/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = LapitWatchAppExtentsion;
@@ -583,22 +547,17 @@
 			};
 			name = Release;
 		};
-		ADDB57FD2EB8E1B700131F3C /* Debug */ = {
+		ADFCCF3B2F0EBA6D00265C0E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = RacingAI/RacingAI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"RacingAI/Preview Content\"";
-				DEVELOPMENT_TEAM = 59FP2PXRXK;
+				DEVELOPMENT_ASSET_PATHS = "\"Lapit/Preview Content\"";
+				DEVELOPMENT_TEAM = Z64WN83V4Y;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = RacingAI/Info.plist;
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "운동 기록 및 건강 데이터를 읽기 위해 필요합니다.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "운동 기록 및 건강 데이터를 읽기 위해 필요합니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "현재 위치 기반 날씨/운동 기록을 위해 위치가 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -617,22 +576,17 @@
 			};
 			name = Debug;
 		};
-		ADDB57FE2EB8E1B700131F3C /* Release */ = {
+		ADFCCF3C2F0EBA6D00265C0E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = RacingAI/RacingAI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"RacingAI/Preview Content\"";
-				DEVELOPMENT_TEAM = 59FP2PXRXK;
+				DEVELOPMENT_ASSET_PATHS = "\"Lapit/Preview Content\"";
+				DEVELOPMENT_TEAM = Z64WN83V4Y;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = RacingAI/Info.plist;
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "운동 기록 및 건강 데이터를 읽기 위해 필요합니다.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "운동 기록 및 건강 데이터를 읽기 위해 필요합니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "현재 위치 기반 날씨/운동 기록을 위해 위치가 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -681,11 +635,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		ADDB57FC2EB8E1B700131F3C /* Build configuration list for PBXNativeTarget "Lapit" */ = {
+		ADFCCF3A2F0EBA6D00265C0E /* Build configuration list for PBXNativeTarget "Lapit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				ADDB57FD2EB8E1B700131F3C /* Debug */,
-				ADDB57FE2EB8E1B700131F3C /* Release */,
+				ADFCCF3B2F0EBA6D00265C0E /* Debug */,
+				ADFCCF3C2F0EBA6D00265C0E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
