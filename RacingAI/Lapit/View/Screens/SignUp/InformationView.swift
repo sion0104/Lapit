@@ -21,6 +21,8 @@ struct InformationView: View {
     
     @State private var navigationToOnboarding = false
     
+    @State private var showBirthDatePicker: Bool = false
+    
     private var canGoNext: Bool {
         !store.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
         !store.birth.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
@@ -179,7 +181,9 @@ private extension InformationView {
                 submitLabel: .done,
                 error: birthError,
                 maxLength: 10,
-                isNumberOnly: false
+                isNumberOnly: false,
+                isDate: true,
+                isDatePickerPresented: $showBirthDatePicker
             )
                 .font(.footnote)
                 .onChange(of: store.birth) { _, newValue in
@@ -196,6 +200,7 @@ private extension InformationView {
                     }
                 }
         }
+        .zIndex(showBirthDatePicker ? 10 : 0)
     }
     
     var genderSection: some View {
@@ -222,6 +227,7 @@ private extension InformationView {
             
             Spacer()
         }
+        .zIndex(0)
     }
 }
 
