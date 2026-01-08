@@ -23,6 +23,9 @@ struct PersonalInfoEditView: View {
     @State private var isSaving = false
     @State private var showSuccessAlert = false
     @State private var saveError: String? = nil
+    
+    @State private var showBirthDatePicker: Bool = false
+
 
     private var canSave: Bool {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
@@ -75,6 +78,7 @@ struct PersonalInfoEditView: View {
                 Task { await save() }
             }
             .padding()
+            .buttonStyle(PrimaryButtonStyle())
         }
         .onAppear {
             if let user = userSession.user {
@@ -207,7 +211,9 @@ private extension PersonalInfoEditView {
                 submitLabel: .done,
                 error: birthError,
                 maxLength: 10,
-                isNumberOnly: false
+                isNumberOnly: false,
+                isDate: true,
+                isDatePickerPresented: $showBirthDatePicker
             )
             .font(.footnote)
             .onChange(of: birth) { _, newValue in
@@ -222,6 +228,7 @@ private extension PersonalInfoEditView {
                 }
             }
         }
+        .zIndex(showBirthDatePicker ? 10: 0)
     }
 
     var genderSection: some View {
@@ -241,6 +248,7 @@ private extension PersonalInfoEditView {
                 .padding(.leading, 16)
             }
         }
+        .zIndex(0)
     }
 }
 

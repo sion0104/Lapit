@@ -101,6 +101,7 @@ struct MypageSettingView: View {
                 }
             }
             .task {
+                guard userSession.user == nil else { return }
                 await userSession.fetchUserIfNeeded()
             }
         }

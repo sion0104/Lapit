@@ -16,7 +16,7 @@ struct AppButton: View {
                 if isLeading {
                     Text(title)
                         .foregroundStyle(.primary)
-                        .padding(.leading, 20)
+                        .padding(.horizontal, 20)
                     Spacer()
                 } else {
                     Spacer()

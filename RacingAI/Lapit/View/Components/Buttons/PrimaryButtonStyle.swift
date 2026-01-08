@@ -7,9 +7,9 @@ struct PrimaryButtonStyle: ButtonStyle {
             .padding(.horizontal, 19)
             .padding(.vertical, 17)
             .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color("MainColor"))
+                Color(.main)
             )
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             .foregroundStyle(.black)
             .font(.headline)
             .opacity(configuration.isPressed ? 0.8 : 1.0)

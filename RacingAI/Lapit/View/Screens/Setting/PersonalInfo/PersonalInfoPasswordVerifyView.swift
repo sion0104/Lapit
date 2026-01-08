@@ -16,8 +16,8 @@ struct PersonalInfoPasswordVerifyView: View {
             header
             
             passwordRow
+                .padding(16)
             
-            Spacer()
             
             AppButton(
                 title: "다음 단계",
@@ -25,6 +25,9 @@ struct PersonalInfoPasswordVerifyView: View {
             ) {
                 onGoNext()
             }
+            .buttonStyle(PrimaryButtonStyle())
+            
+            Spacer()
         }
         .padding()
         .navigationTitle("")
@@ -82,6 +85,8 @@ struct PersonalInfoPasswordVerifyView: View {
                     error: errorMessage) {
                         verifyPassword()
                     }
+                    .frame(maxWidth: .infinity, maxHeight: 52)
+
                 
                 Button {
                     verifyPassword()

@@ -7,9 +7,9 @@ struct TextFieldStyle: ViewModifier {
     
     func body(content: Content) -> some View {
         content
-            .padding(.horizontal, 20)
-            .padding(.vertical, 13)
-            .frame(maxWidth: 342, alignment: .leading)
+            .padding(.horizontal, 19)
+            .padding(.vertical, 17)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 backgroundColor
             )

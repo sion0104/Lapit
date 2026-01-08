@@ -68,7 +68,7 @@ struct AppTextField: View {
                 } label: {
                     Image(systemName: "calendar")
                         .foregroundStyle(showDatePicker ? .primary : .secondary)
-                        .font(.system(size: 24))
+                        .font(.system(size: 16))
                         .background(
                             Circle()
                                 .fill(showDatePicker
@@ -184,3 +184,4 @@ private extension AppTextField {
         return f.date(from: text)
     }
 }
+

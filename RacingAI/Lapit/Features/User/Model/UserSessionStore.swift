@@ -13,8 +13,6 @@ final class UserSessionStore: ObservableObject {
     var isLoggedIn: Bool { user != nil }
     
     func fetchUserIfNeeded() async {
-        defer { didRestoreSession = true }
-        
         guard TokenStore.shared.loadAccessToken() != nil else {
             self.user = nil
             return
@@ -27,7 +25,6 @@ final class UserSessionStore: ObservableObject {
             let user = try await APIClient.shared.getUserInfo()
             self.user = user
         } catch {
-            self.user = nil
             self.errorMessage = describeAPIError(error)
         }
     }
@@ -70,5 +67,6 @@ final class UserSessionStore: ObservableObject {
 extension UserSessionStore {
     func restoreSessionIfNeeded() async {
         await fetchUserIfNeeded()
+        didRestoreSession = true
     }
 }

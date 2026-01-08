@@ -49,21 +49,23 @@ struct ChangePasswordView: View {
                     .font(.footnote)
                     .foregroundStyle(.red)
             }
-
+            
             Spacer()
-        }
-        .padding()
-        .navigationTitle("")
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .safeAreaInset(edge: .bottom, content: {
+            
             AppButton(
                 title: isSaving ? "비밀번호 변경 중..." : "비밀번호 변경",
                 isEnabled: canSubmit && !isSaving
             ) {
                 save()
             }
-            .padding()
+            .buttonStyle(PrimaryButtonStyle())
+        }
+        .padding()
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .safeAreaInset(edge: .bottom, content: {
+           
         })
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
