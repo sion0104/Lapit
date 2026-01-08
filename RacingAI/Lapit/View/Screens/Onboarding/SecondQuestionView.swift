@@ -28,15 +28,15 @@ struct SecondQuestionView: View {
                             bodyInfoStore.trainingPartner = option
                         } label: {
                             VStack {
-                                Spacer()
+                                Image(option == .solo ? "Solo" : "With")
+                                
                                 Text(option.title)
                                     .font(.callout)
                                     .multilineTextAlignment(.center)
                                     .foregroundStyle(.black)
                                     .fontWeight(.medium)
-                                Spacer()
                             }
-                            .frame(maxWidth: .infinity, minHeight: 70)
+                            .frame(maxWidth: .infinity, minHeight: 200)
                             .background(
                                 RoundedRectangle(cornerRadius: 15)
                                     .fill(Color(.systemGray5))

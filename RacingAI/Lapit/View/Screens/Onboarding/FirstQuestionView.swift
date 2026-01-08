@@ -55,8 +55,8 @@ struct FirstQuestionView: View {
                         .font(.callout)
                         .fontWeight(.medium)
                     
-                    VStack(alignment: .leading, spacing: 10) {
-                        VStack(alignment: .leading) {
+                    VStack(alignment: .center, spacing: 10) {
+                        VStack(alignment: .leading, spacing: 12) {
                             Text("키")
                                 .font(.callout)
                             
@@ -66,14 +66,15 @@ struct FirstQuestionView: View {
                                 keyboard: .decimalPad,
                                 submitLabel: .next,
                                 error: heightError,
-                                maxLength: 5
+                                maxLength: 5,
+                                backgroundColor: .white
                             )
                             .onChange(of: bodyInfoStore.height) { _, _ in
                                 bodyInfoStore.updateBMI()
                             }
                         }
                         
-                        VStack(alignment: .leading) {
+                        VStack(alignment: .leading, spacing: 12) {
                             Text("몸무게")
                                 .font(.callout)
                             
@@ -83,14 +84,15 @@ struct FirstQuestionView: View {
                                 keyboard: .decimalPad,
                                 submitLabel: .next,
                                 error: weightError,
-                                maxLength: 5
+                                maxLength: 5,
+                                backgroundColor: .white
                             )
                             .onChange(of: bodyInfoStore.weight) { _, _ in
                                 bodyInfoStore.updateBMI()
                             }
                         }
                         
-                        VStack(alignment: .leading) {
+                        VStack(alignment: .leading, spacing: 12) {
                             Text("BMI")
                                 .font(.callout)
                             
@@ -99,7 +101,8 @@ struct FirstQuestionView: View {
                                 placeholder: "자동 계산 됩니다.",
                                 keyboard: .decimalPad,
                                 submitLabel: .next,
-                                maxLength: 5
+                                maxLength: 5,
+                                backgroundColor: .white
                             )
                             .disabled(true)
                             .opacity(0.8)

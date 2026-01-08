@@ -15,6 +15,8 @@ struct AppTextField: View {
     
     var isDatePickerPresented: Binding<Bool>? = nil
     
+    var backgroundColor: Color = Color(.systemGray6)
+    
     @FocusState private var isFocused: Bool
     @State private var revealSecure: Bool = false
     
@@ -30,13 +32,14 @@ struct AppTextField: View {
     }
     
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(alignment: .center, spacing: 10) {
             inputField()
                 .keyboardType(keyboard)
                 .submitLabel(submitLabel)
                 .focused($isFocused)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
+                
             
             if isSecure {
                 Button {
@@ -87,7 +90,13 @@ struct AppTextField: View {
                     .accessibilityLabel("입력 내용 지우기")
                 }
             }
-            .modifier(TextFieldStyle(isFoucused: isFocused, isError: error != nil))
+            .modifier(
+                TextFieldStyle(
+                    isFoucused: isFocused,
+                    isError: error != nil,
+                    backgroundColor: backgroundColor
+                )
+            )
             .overlay(alignment: .top) {
                if isDate && showDatePicker {
                    datePickerOverlay
@@ -175,4 +184,3 @@ private extension AppTextField {
         return f.date(from: text)
     }
 }
-

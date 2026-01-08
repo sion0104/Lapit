@@ -5,6 +5,9 @@ struct CompleteView: View {
         Spacer()
         
         VStack(spacing: 10) {
+            Image("OnboardEnd")
+                .padding(.bottom, 60)
+            
             Text("가입이 완료되었습니다!")
                 .font(.system(size: 24).bold())
                 .fontWeight(.bold)

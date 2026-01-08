@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="69" height="99" fill="none" viewBox="0 0 69 99">
+  <circle cx="33.655" cy="21.196" r="18.47" fill="url(#a)"/>
+  <g filter="url(#b)">
+    <circle cx="33.135" cy="20.559" r="16.559" fill="url(#c)"/>
+  </g>
+  <g filter="url(#d)">
+    <path fill="url(#e)" d="M19.74 47.112c.838-3.193 5.314-4.23 8.355-2.945a15.876 15.876 0 0 0 6.196 1.251c2.133 0 4.169-.42 6.028-1.18 2.959-1.211 7.159-.197 8.006 2.886l10.05 36.541c.7 2.546-1.215 5.06-3.856 5.06H14.002c-2.621 0-4.534-2.48-3.869-5.015l9.607-36.598Z"/>
+  </g>
+  <defs>
+    <linearGradient id="a" x1="47.568" x2="39.327" y1="41.025" y2=".651" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F2AFAF"/>
+      <stop offset="1" stop-color="#F26F6F"/>
+    </linearGradient>
+    <linearGradient id="e" x1="52.535" x2="43.134" y1="90.384" y2="40.827" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/>
+      <stop offset="1" stop-color="#F26F6F"/>
+    </linearGradient>
+    <filter id="b" width="41.118" height="41.118" x="12.576" y="0" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feTurbulence baseFrequency="2 2" numOctaves="3" seed="5357" type="fractalNoise"/>
+      <feDisplacementMap width="100%" height="100%" in="shape" result="displacedImage" scale="8" xChannelSelector="R" yChannelSelector="G"/>
+      <feMerge result="effect1_texture_647_1085">
+        <feMergeNode in="displacedImage"/>
+      </feMerge>
+      <feGaussianBlur result="effect2_foregroundBlur_647_1085" stdDeviation="2"/>
+    </filter>
+    <filter id="d" width="68.521" height="65.096" x="0" y="33.63" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur result="effect1_foregroundBlur_647_1085" stdDeviation="5"/>
+    </filter>
+    <radialGradient id="c" cx="0" cy="0" r="1" gradientTransform="matrix(20.3803 14.3299 -17.782 12.3067 25.174 13.235)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F9DEDE"/>
+      <stop offset="1" stop-color="#F26F6F"/>
+    </radialGradient>
+  </defs>
+</svg>

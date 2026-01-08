@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="90" height="88" fill="none" viewBox="0 0 90 88">
+  <circle cx="44.428" cy="13.001" r="10.053" fill="url(#a)"/>
+  <circle cx="44.428" cy="13.001" r="10.053" fill="url(#b)"/>
+  <g filter="url(#c)">
+    <circle cx="44.416" cy="12.679" r="8.679" fill="url(#d)"/>
+  </g>
+  <g filter="url(#e)">
+    <path fill="url(#f)" d="M44.774 26.186c3.177 0 7.687 1.106 8.53 4.169l3.945 14.344c.7 2.546-1.216 5.061-3.857 5.061h-17.3c-2.62 0-4.533-2.48-3.868-5.015l3.75-14.288c.818-3.116 5.579-4.27 8.8-4.27Z"/>
+  </g>
+  <circle cx="24.944" cy="26.512" r="11.992" fill="url(#g)"/>
+  <g filter="url(#h)">
+    <circle cx="24.955" cy="26.354" r="10.257" fill="url(#i)"/>
+  </g>
+  <g filter="url(#j)">
+    <path fill="url(#k)" d="M26.74 42.147c3.17-.424 7.578.646 8.426 3.73l5.341 19.422c.7 2.546-1.215 5.06-3.856 5.06H14c-2.621 0-4.533-2.48-3.868-5.016l5.062-19.28c.838-3.195 5.575-4.321 8.851-3.906a10.437 10.437 0 0 0 2.694-.01Z"/>
+  </g>
+  <circle cx="66.457" cy="30.552" r="14.604" fill="url(#l)"/>
+  <g filter="url(#m)">
+    <circle cx="66.058" cy="30.465" r="12.989" fill="url(#n)"/>
+  </g>
+  <g filter="url(#o)">
+    <path fill="url(#p)" d="M55.028 52.668c.838-3.194 5.434-4.271 8.62-3.404 1.056.287 2.165.44 3.311.44 1.135 0 2.236-.15 3.281-.432 3.088-.832 7.383.208 8.231 3.29l7.24 26.326c.7 2.546-1.215 5.06-3.856 5.06H52.002c-2.621 0-4.534-2.48-3.869-5.015l6.895-26.265Z"/>
+  </g>
+  <defs>
+    <linearGradient id="a" x1="44.428" x2="44.428" y1="2.948" y2="23.055" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8CDBE9"/>
+      <stop offset="1" stop-color="#33CBE6"/>
+    </linearGradient>
+    <linearGradient id="b" x1="44.428" x2="44.428" y1="2.948" y2="23.055" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8CDBE9"/>
+      <stop offset="1" stop-color="#33CBE6"/>
+    </linearGradient>
+    <linearGradient id="f" x1="44.742" x2="44.742" y1="49.76" y2="26.186" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8CDBE9" stop-opacity="0"/>
+      <stop offset="1" stop-color="#33CBE6"/>
+    </linearGradient>
+    <linearGradient id="g" x1="24.944" x2="25.622" y1="14.519" y2="49.79" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B2E762"/>
+      <stop offset="1" stop-color="#0BB131"/>
+    </linearGradient>
+    <linearGradient id="k" x1="27.996" x2="27.257" y1="83.644" y2="42.024" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/>
+      <stop offset="1" stop-color="#0BB131"/>
+    </linearGradient>
+    <linearGradient id="l" x1="66.457" x2="66.457" y1="15.948" y2="45.156" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5DBA5"/>
+      <stop offset="1" stop-color="#FFCB3B"/>
+    </linearGradient>
+    <linearGradient id="p" x1="66.929" x2="66.929" y1="83.949" y2="48.976" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5DBA5" stop-opacity="0"/>
+      <stop offset="1" stop-color="#FFCB3B"/>
+    </linearGradient>
+    <filter id="c" width="25.357" height="25.357" x="31.738" y="0" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feTurbulence baseFrequency="2 2" numOctaves="3" seed="1177" type="fractalNoise"/>
+      <feDisplacementMap width="100%" height="100%" in="shape" result="displacedImage" scale="4" xChannelSelector="R" yChannelSelector="G"/>
+      <feMerge result="effect1_texture_672_937">
+        <feMergeNode in="displacedImage"/>
+      </feMerge>
+      <feGaussianBlur result="effect2_foregroundBlur_672_937" stdDeviation="2"/>
+    </filter>
+    <filter id="e" width="33.303" height="31.574" x="28.091" y="22.186" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur result="effect1_foregroundBlur_672_937" stdDeviation="2"/>
+    </filter>
+    <filter id="h" width="32.513" height="32.513" x="8.699" y="10.097" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feTurbulence baseFrequency="2 2" numOctaves="3" seed="8627" type="fractalNoise"/>
+      <feDisplacementMap width="100%" height="100%" in="shape" result="displacedImage" scale="8" xChannelSelector="R" yChannelSelector="G"/>
+      <feMerge result="effect1_texture_672_937">
+        <feMergeNode in="displacedImage"/>
+      </feMerge>
+      <feGaussianBlur result="effect2_foregroundBlur_672_937" stdDeviation="3"/>
+    </filter>
+    <filter id="j" width="50.653" height="48.301" x="0" y="32.058" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur result="effect1_foregroundBlur_672_937" stdDeviation="5"/>
+    </filter>
+    <filter id="m" width="33.978" height="33.978" x="49.069" y="13.476" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feTurbulence baseFrequency="0.25 0.25" numOctaves="3" seed="9925" type="fractalNoise"/>
+      <feDisplacementMap width="100%" height="100%" in="shape" result="displacedImage" scale="8" xChannelSelector="R" yChannelSelector="G"/>
+      <feMerge result="effect1_texture_672_937">
+        <feMergeNode in="displacedImage"/>
+      </feMerge>
+      <feGaussianBlur result="effect2_foregroundBlur_672_937" stdDeviation="2"/>
+    </filter>
+    <filter id="o" width="45.857" height="42.973" x="44" y="44.976" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur result="effect1_foregroundBlur_672_937" stdDeviation="2"/>
+    </filter>
+    <radialGradient id="d" cx="0" cy="0" r="1" gradientTransform="rotate(48.367 9.686 50.979) scale(9.22092)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D9F3F8"/>
+      <stop offset="1" stop-color="#2AC7E3"/>
+    </radialGradient>
+    <radialGradient id="i" cx="0" cy="0" r="1" gradientTransform="matrix(11.795 16.6668 -17.098 11.102 21.878 21.226)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DFF5BE"/>
+      <stop offset="1" stop-color="#0BB131"/>
+    </radialGradient>
+    <radialGradient id="n" cx="0" cy="0" r="1" gradientTransform="rotate(37.073 -6.72 102.326) scale(21.5463)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FEF3DB"/>
+      <stop offset="1" stop-color="#FFCB3B"/>
+    </radialGradient>
+  </defs>
+</svg>

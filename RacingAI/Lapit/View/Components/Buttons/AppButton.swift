@@ -13,9 +13,17 @@ struct AppButton: View {
             }
         } label: {
             HStack {
-                Text(title)
-                    .foregroundStyle(.primary)
                 if isLeading {
+                    Text(title)
+                        .foregroundStyle(.primary)
+                        .padding(.leading, 20)
+                    Spacer()
+                } else {
+                    Spacer()
+                    
+                    Text(title)
+                        .foregroundStyle(.primary)
+                    
                     Spacer()
                 }
             }
@@ -24,4 +32,11 @@ struct AppButton: View {
         .opacity(isEnabled ? 1 : 0.6)
         .accessibilityLabel(title)
     }
+}
+
+#Preview {
+    AppButton(title: "뒤로가기", isEnabled: true, isLeading: true) {
+        
+    }
+    .border(.black)
 }
