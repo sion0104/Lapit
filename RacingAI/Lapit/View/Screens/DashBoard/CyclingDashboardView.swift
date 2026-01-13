@@ -2,6 +2,8 @@ import SwiftUI
 
 struct CyclingDashboardView: View {
     @EnvironmentObject private var userSession: UserSessionStore
+    
+    @ObservedObject var rideVM: CyclingRideViewModel
         
     @State private var state: CyclingDashboardState = MockCyclingDashboardState.loggedIn // MockData
     
@@ -9,7 +11,6 @@ struct CyclingDashboardView: View {
     @State private var showSettings: Bool = false
     
     @Environment(\.scenePhase) private var scenePhase
-    @StateObject private var rideVM = CyclingRideViewModel()
     
     @StateObject private var receiver = PhoneWorkoutReceiver.shared
     @StateObject private var live = CyclingDashboardLiveState()
@@ -83,8 +84,8 @@ struct CyclingDashboardView: View {
                                 paceHint: "",
                                 currentBPM: currentBPM,
                                 previousBPM: live.previousBPM,
-                                previousLabel: "",
-                                bpmDeltaText: "",
+                                previousLabel: live.previousLabel,
+                                bpmDeltaText: live.bpmDeltaText,
                                 caloriesText: caloriesText
                             )
                             
@@ -147,27 +148,8 @@ struct CyclingDashboardView: View {
                 LoginView()
             }
         }
-        .navigationDestination(isPresented: $showSettings, destination: {
-            MypageSettingView()
-        })
         .sheet(isPresented: $showLogin) {
-            // UI만: 임시 로그인 시트
-            VStack(spacing: 16) {
-                Text("로그인 화면(임시)")
-                    .font(.title2.weight(.bold))
-            
-                Button("로그인 성공(목데이터)") {
-                    showLogin = false
-                }
-                .buttonStyle(.borderedProminent)
-                
-                Button("닫기") {
-                    showLogin = false
-                }
-                .buttonStyle(.bordered)
-            }
-            .padding()
-            .presentationDetents([.medium])
+            LoginView()
         }
         .task {
             await userSession.fetchUserIfNeeded()
@@ -196,7 +178,3 @@ struct CyclingDashboardView: View {
     
 }
 
-#Preview {
-    CyclingDashboardView()
-        .environmentObject(UserSessionStore())
-}

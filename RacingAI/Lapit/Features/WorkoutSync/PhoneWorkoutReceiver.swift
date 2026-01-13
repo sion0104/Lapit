@@ -39,13 +39,16 @@ extension PhoneWorkoutReceiver: WCSessionDelegate {
     #endif
 
     nonisolated func session(_ session: WCSession, didReceiveMessageData messageData: Data) {
+        print("📩 didReceiveMessageData size:", messageData.count)
+
         do {
             let payload = try JSONDecoder().decode(LiveMetricsPayload.self, from: messageData)
             Task { @MainActor in
+                print("✅ payload:", payload)
                 self.latest = payload
             }
         } catch {
-            // 디코딩 실패 처리(필요 시 로그)
+            print("❌ decode fail:", error)
         }
     }
 }

@@ -5,15 +5,32 @@ import WatchConnectivity
 @MainActor
 final class WatchWorkoutManager: NSObject, ObservableObject {
     static let shared = WatchWorkoutManager()
+    
+    @Published private(set) var isRunning: Bool = false
+    @Published private(set) var lastPayload: LiveMetricsPayload?
 
     private let healthStore = HKHealthStore()
-    private var session: HKWorkoutSession?
-    private var builder: HKLiveWorkoutBuilder?
+    private var workoutSession: HKWorkoutSession?
+    private var workoutBuilder: HKLiveWorkoutBuilder?
 
     private var lastDistanceMeters: Double?
     private var lastDistanceAt: Date?
+    
+    private var lastSentAt: Date?
+    
+    private var isStopping: Bool = false
 
-    override private init() { super.init() }
+    override private init() {
+        super.init()
+        activateWCSessionIfNeeded()
+    }
+    
+    private func activateWCSessionIfNeeded(){
+        guard WCSession.isSupported() else { return }
+        let wc = WCSession.default
+        wc.delegate = self
+        wc.activate()
+    }
 
     func requestAuthorization() async throws {
         guard HKHealthStore.isHealthDataAvailable() else { return }
@@ -33,54 +50,93 @@ final class WatchWorkoutManager: NSObject, ObservableObject {
     }
 
     func startCycling() async {
+        print("🚴 startCycling called")
+        
         do { try await requestAuthorization() }
-        catch { return }
+        catch {
+            print("❌ auth fail:", error)
+            return
+        }
 
-        if session != nil { return }
-
+        if workoutSession != nil {
+            print("⚠️ already running")
+            return
+        }
+        
         let config = HKWorkoutConfiguration()
         config.activityType = .cycling
         config.locationType = .outdoor
 
         do {
-            let session = try HKWorkoutSession(healthStore: healthStore, configuration: config)
-            let builder = session.associatedWorkoutBuilder()
-
-            self.session = session
-            self.builder = builder
-
-            session.delegate = self
-            builder.delegate = self
-            builder.dataSource = HKLiveWorkoutDataSource(healthStore: healthStore, workoutConfiguration: config)
-
+            let newSession = try HKWorkoutSession(healthStore: healthStore, configuration: config)
+            let newBuilder = newSession.associatedWorkoutBuilder()
+            
+            self.workoutSession = newSession
+            self.workoutBuilder = newBuilder
+            
+            newSession.delegate = self
+            newBuilder.delegate = self
+            
+            newBuilder.dataSource = HKLiveWorkoutDataSource(
+                healthStore: healthStore,
+                workoutConfiguration: config
+            )
+            
             let startDate = Date()
-            session.startActivity(with: startDate)
+            workoutSession?.startActivity(with: startDate)
+            print("✅ session.startActivity")
+
+            try await workoutBuilder?.beginCollection(at: startDate)
+            print("✅ beginCollection")
             
-            try await builder.beginCollection(at: startDate)
-            
-        } catch { }
+            self.isRunning = true
+            self.isStopping = false
+            self.lastDistanceMeters = nil
+            self.lastDistanceAt = nil
+            self.lastSentAt = nil
+
+        } catch {
+            print("❌ startCycling error:", error)
+            await cleanupAfter()
+        }
     }
 
-    func pause() async { session?.pause() }
-    func resume() async { session?.resume() }
+    func pause() async { workoutSession?.pause() }
+    func resume() async { workoutSession?.resume() }
 
     func stop() async {
-        guard let session, let builder else { return }
+        
+        if isStopping { return }
+        isStopping = true
+        
+        guard let session = workoutSession, let builder = workoutBuilder else {
+            await cleanupAfter()
+            return
+        }
+        
         session.end()
         
         do {
             try await builder.endCollection(at: Date())
-                        _ = try await builder.finishWorkout()
+            _ = try await builder.finishWorkout()
 
         } catch {
             
         }
-
-
-        self.session = nil
-        self.builder = nil
+        
+        await cleanupAfter()
+    }
+    
+    private func cleanupAfter() async {
+        self.workoutSession = nil
+        self.workoutBuilder = nil
+        
         self.lastDistanceMeters = nil
         self.lastDistanceAt = nil
+        self.lastSentAt = nil
+        
+        self.isRunning = false
+        self.isStopping = false
     }
 
     private func sendToPhone(_ payload: LiveMetricsPayload) {
@@ -90,24 +146,38 @@ final class WatchWorkoutManager: NSObject, ObservableObject {
 
         do {
             let data = try JSONEncoder().encode(payload)
-            session.sendMessageData(data, replyHandler: nil, errorHandler: nil)
-        } catch { }
+            session.sendMessageData(data, replyHandler: nil) { error in
+                print("❌ sendMessageData error:", error)
+            }
+        } catch {
+            print("❌ encode error:", error)
+        }
     }
 
     private func makePayload(now: Date) -> LiveMetricsPayload {
+        guard let builder = workoutBuilder else {
+            return LiveMetricsPayload(
+                timestamp: now,
+                heartRateBPM: nil,
+                activeEnergyKcal: nil,
+                distanceMeters: nil,
+                speedMps: nil
+            )
+        }
+        
         let hrType = HKQuantityType.quantityType(forIdentifier: .heartRate)!
         let kcalType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!
         let distType = HKQuantityType.quantityType(forIdentifier: .distanceCycling)!
 
-        let hr = builder?.statistics(for: hrType)?
+        let hr = workoutBuilder?.statistics(for: hrType)?
             .mostRecentQuantity()?
             .doubleValue(for: HKUnit.count().unitDivided(by: HKUnit.minute()))
 
-        let kcal = builder?.statistics(for: kcalType)?
+        let kcal = workoutBuilder?.statistics(for: kcalType)?
             .sumQuantity()?
             .doubleValue(for: .kilocalorie())
 
-        let dist = builder?.statistics(for: distType)?
+        let dist = workoutBuilder?.statistics(for: distType)?
             .sumQuantity()?
             .doubleValue(for: .meter())
 
@@ -129,6 +199,14 @@ final class WatchWorkoutManager: NSObject, ObservableObject {
             speedMps: speedMps
         )
     }
+    
+    private func shouldSent(now: Date) -> Bool {
+        if let last = lastSentAt, now.timeIntervalSince(last) < 1.0 {
+            return false
+        }
+        lastSentAt = now
+        return true
+    }
 }
 
 extension WatchWorkoutManager: HKWorkoutSessionDelegate {
@@ -138,7 +216,12 @@ extension WatchWorkoutManager: HKWorkoutSessionDelegate {
                                     date: Date) { }
 
     nonisolated func workoutSession(_ workoutSession: HKWorkoutSession,
-                                    didFailWithError error: Error) { }
+                                    didFailWithError error: Error) {
+        Task { @MainActor in
+            print("❌ workoutSession failed:", error)
+            await self.cleanupAfter()
+        }
+    }
 }
 
 extension WatchWorkoutManager: HKLiveWorkoutBuilderDelegate {
@@ -150,8 +233,27 @@ extension WatchWorkoutManager: HKLiveWorkoutBuilderDelegate {
 
         Task { @MainActor [weak self] in
             guard let self else { return }
-            let payload = self.makePayload(now: Date())
+            guard self.isRunning else { return }
+            
+            let now = Date()
+            guard self.shouldSent(now: now) else { return }
+            self.lastSentAt = now
+            
+            let payload = self.makePayload(now: now)
+            self.lastPayload = payload
             self.sendToPhone(payload)
+        }
+    }
+}
+
+extension WatchWorkoutManager: WCSessionDelegate {
+    nonisolated func session(_ session: WCSession,
+                             activationDidCompleteWith activationState: WCSessionActivationState,
+                             error: Error?) {
+        if let error {
+            print("❌ WCSession activate error:", error)
+        } else {
+            print("✅ WCSession activated:", activationState.rawValue)
         }
     }
 }

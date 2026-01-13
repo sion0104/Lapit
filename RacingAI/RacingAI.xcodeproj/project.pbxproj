@@ -7,16 +7,45 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AD475B452F005448007A7A82 /* LapitWatchAppExtentsion.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = AD475B3C2F005447007A7A82 /* LapitWatchAppExtentsion.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		AD8E1B2A2F14DEBB00BFF3B9 /* LapitWatchApp Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = AD475B0C2EFDCC42007A7A82 /* LapitWatchApp Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		AD8E1B462F14E73C00BFF3B9 /* LapitWatchApp Watch App Extension.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = AD8E1B3D2F14E73C00BFF3B9 /* LapitWatchApp Watch App Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		AD475B432F005448007A7A82 /* PBXContainerItemProxy */ = {
+		AD8E1B2B2F14DEBB00BFF3B9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ADDB57E62EB8E1B600131F3C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AD475B0B2EFDCC42007A7A82;
+			remoteInfo = "LapitWatchApp Watch App";
+		};
+		AD8E1B322F14DEC400BFF3B9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ADDB57E62EB8E1B600131F3C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AD475B0B2EFDCC42007A7A82;
+			remoteInfo = "LapitWatchApp Watch App";
+		};
+		AD8E1B342F14DEC400BFF3B9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = ADDB57E62EB8E1B600131F3C /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = AD475B3B2F005447007A7A82;
 			remoteInfo = LapitWatchAppExtentsion;
+		};
+		AD8E1B362F14DECE00BFF3B9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ADDB57E62EB8E1B600131F3C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AD475B0B2EFDCC42007A7A82;
+			remoteInfo = "LapitWatchApp Watch App";
+		};
+		AD8E1B442F14E73C00BFF3B9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ADDB57E62EB8E1B600131F3C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AD8E1B3C2F14E73C00BFF3B9;
+			remoteInfo = extension;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -27,7 +56,28 @@
 			dstPath = "$(EXTENSIONS_FOLDER_PATH)";
 			dstSubfolderSpec = 16;
 			files = (
-				AD475B452F005448007A7A82 /* LapitWatchAppExtentsion.appex in Embed ExtensionKit Extensions */,
+				AD8E1B462F14E73C00BFF3B9 /* LapitWatchApp Watch App Extension.appex in Embed ExtensionKit Extensions */,
+			);
+			name = "Embed ExtensionKit Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AD8E1B302F14DEBB00BFF3B9 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				AD8E1B2A2F14DEBB00BFF3B9 /* LapitWatchApp Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AD8E1B312F14DEBB00BFF3B9 /* Embed ExtensionKit Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(EXTENSIONS_FOLDER_PATH)";
+			dstSubfolderSpec = 16;
+			files = (
 			);
 			name = "Embed ExtensionKit Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -36,24 +86,24 @@
 
 /* Begin PBXFileReference section */
 		AD475B0C2EFDCC42007A7A82 /* LapitWatchApp Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LapitWatchApp Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		AD475B3C2F005447007A7A82 /* LapitWatchAppExtentsion.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = LapitWatchAppExtentsion.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		AD8E1B3D2F14E73C00BFF3B9 /* LapitWatchApp Watch App Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = "LapitWatchApp Watch App Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ADFCCF2F2F0EBA6C00265C0E /* Lapit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lapit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		AD8E1B4A2F14E73C00BFF3B9 /* Exceptions for "LapitWatchApp Watch App Extension" folder in "LapitWatchApp Watch App Extension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = AD8E1B3C2F14E73C00BFF3B9 /* LapitWatchApp Watch App Extension */;
+		};
 		ADAF23ED2F0EC03D004DCB6C /* Exceptions for "Lapit" folder in "Lapit" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
 			target = ADFCCF2E2F0EBA6C00265C0E /* Lapit */;
-		};
-		ADFCCEC62F0EB08C00265C0E /* Exceptions for "LapitWatchAppExtentsion" folder in "LapitWatchAppExtentsion" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = AD475B3B2F005447007A7A82 /* LapitWatchAppExtentsion */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -68,12 +118,12 @@
 			path = Shared;
 			sourceTree = "<group>";
 		};
-		AD475B3D2F005447007A7A82 /* LapitWatchAppExtentsion */ = {
+		AD8E1B3E2F14E73C00BFF3B9 /* LapitWatchApp Watch App Extension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				ADFCCEC62F0EB08C00265C0E /* Exceptions for "LapitWatchAppExtentsion" folder in "LapitWatchAppExtentsion" target */,
+				AD8E1B4A2F14E73C00BFF3B9 /* Exceptions for "LapitWatchApp Watch App Extension" folder in "LapitWatchApp Watch App Extension" target */,
 			);
-			path = LapitWatchAppExtentsion;
+			path = "LapitWatchApp Watch App Extension";
 			sourceTree = "<group>";
 		};
 		ADFCCF302F0EBA6C00265C0E /* Lapit */ = {
@@ -94,7 +144,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		AD475B392F005447007A7A82 /* Frameworks */ = {
+		AD8E1B3A2F14E73C00BFF3B9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -111,13 +161,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AD8E1B292F14DEBB00BFF3B9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		ADDB57E52EB8E1B600131F3C = {
 			isa = PBXGroup;
 			children = (
 				AD475B212F00492C007A7A82 /* Shared */,
 				AD475B0D2EFDCC42007A7A82 /* LapitWatchApp Watch App */,
-				AD475B3D2F005447007A7A82 /* LapitWatchAppExtentsion */,
 				ADFCCF302F0EBA6C00265C0E /* Lapit */,
+				AD8E1B3E2F14E73C00BFF3B9 /* LapitWatchApp Watch App Extension */,
+				AD8E1B292F14DEBB00BFF3B9 /* Frameworks */,
 				ADDB57EF2EB8E1B600131F3C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -126,8 +184,8 @@
 			isa = PBXGroup;
 			children = (
 				AD475B0C2EFDCC42007A7A82 /* LapitWatchApp Watch App.app */,
-				AD475B3C2F005447007A7A82 /* LapitWatchAppExtentsion.appex */,
 				ADFCCF2F2F0EBA6C00265C0E /* Lapit.app */,
+				AD8E1B3D2F14E73C00BFF3B9 /* LapitWatchApp Watch App Extension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -147,7 +205,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				AD475B442F005448007A7A82 /* PBXTargetDependency */,
+				AD8E1B452F14E73C00BFF3B9 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				AD475B0D2EFDCC42007A7A82 /* LapitWatchApp Watch App */,
@@ -160,26 +218,26 @@
 			productReference = AD475B0C2EFDCC42007A7A82 /* LapitWatchApp Watch App.app */;
 			productType = "com.apple.product-type.application";
 		};
-		AD475B3B2F005447007A7A82 /* LapitWatchAppExtentsion */ = {
+		AD8E1B3C2F14E73C00BFF3B9 /* LapitWatchApp Watch App Extension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AD475B462F005448007A7A82 /* Build configuration list for PBXNativeTarget "LapitWatchAppExtentsion" */;
+			buildConfigurationList = AD8E1B472F14E73C00BFF3B9 /* Build configuration list for PBXNativeTarget "LapitWatchApp Watch App Extension" */;
 			buildPhases = (
-				AD475B382F005447007A7A82 /* Sources */,
-				AD475B392F005447007A7A82 /* Frameworks */,
-				AD475B3A2F005447007A7A82 /* Resources */,
+				AD8E1B392F14E73C00BFF3B9 /* Sources */,
+				AD8E1B3A2F14E73C00BFF3B9 /* Frameworks */,
+				AD8E1B3B2F14E73C00BFF3B9 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				AD475B3D2F005447007A7A82 /* LapitWatchAppExtentsion */,
+				AD8E1B3E2F14E73C00BFF3B9 /* LapitWatchApp Watch App Extension */,
 			);
-			name = LapitWatchAppExtentsion;
+			name = "LapitWatchApp Watch App Extension";
 			packageProductDependencies = (
 			);
-			productName = LapitWatchAppExtentsion;
-			productReference = AD475B3C2F005447007A7A82 /* LapitWatchAppExtentsion.appex */;
+			productName = extension;
+			productReference = AD8E1B3D2F14E73C00BFF3B9 /* LapitWatchApp Watch App Extension.appex */;
 			productType = "com.apple.product-type.extensionkit-extension";
 		};
 		ADFCCF2E2F0EBA6C00265C0E /* Lapit */ = {
@@ -189,10 +247,16 @@
 				ADFCCF2B2F0EBA6C00265C0E /* Sources */,
 				ADFCCF2C2F0EBA6C00265C0E /* Frameworks */,
 				ADFCCF2D2F0EBA6C00265C0E /* Resources */,
+				AD8E1B302F14DEBB00BFF3B9 /* Embed Watch Content */,
+				AD8E1B312F14DEBB00BFF3B9 /* Embed ExtensionKit Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				AD8E1B2C2F14DEBB00BFF3B9 /* PBXTargetDependency */,
+				AD8E1B332F14DEC400BFF3B9 /* PBXTargetDependency */,
+				AD8E1B352F14DEC400BFF3B9 /* PBXTargetDependency */,
+				AD8E1B372F14DECE00BFF3B9 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				AD475B212F00492C007A7A82 /* Shared */,
@@ -218,7 +282,7 @@
 					AD475B0B2EFDCC42007A7A82 = {
 						CreatedOnToolsVersion = 16.2;
 					};
-					AD475B3B2F005447007A7A82 = {
+					AD8E1B3C2F14E73C00BFF3B9 = {
 						CreatedOnToolsVersion = 16.2;
 					};
 					ADFCCF2E2F0EBA6C00265C0E = {
@@ -241,8 +305,8 @@
 			projectRoot = "";
 			targets = (
 				AD475B0B2EFDCC42007A7A82 /* LapitWatchApp Watch App */,
-				AD475B3B2F005447007A7A82 /* LapitWatchAppExtentsion */,
 				ADFCCF2E2F0EBA6C00265C0E /* Lapit */,
+				AD8E1B3C2F14E73C00BFF3B9 /* LapitWatchApp Watch App Extension */,
 			);
 		};
 /* End PBXProject section */
@@ -255,7 +319,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		AD475B3A2F005447007A7A82 /* Resources */ = {
+		AD8E1B3B2F14E73C00BFF3B9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -279,7 +343,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		AD475B382F005447007A7A82 /* Sources */ = {
+		AD8E1B392F14E73C00BFF3B9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -296,10 +360,29 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		AD475B442F005448007A7A82 /* PBXTargetDependency */ = {
+		AD8E1B2C2F14DEBB00BFF3B9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = AD475B3B2F005447007A7A82 /* LapitWatchAppExtentsion */;
-			targetProxy = AD475B432F005448007A7A82 /* PBXContainerItemProxy */;
+			target = AD475B0B2EFDCC42007A7A82 /* LapitWatchApp Watch App */;
+			targetProxy = AD8E1B2B2F14DEBB00BFF3B9 /* PBXContainerItemProxy */;
+		};
+		AD8E1B332F14DEC400BFF3B9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AD475B0B2EFDCC42007A7A82 /* LapitWatchApp Watch App */;
+			targetProxy = AD8E1B322F14DEC400BFF3B9 /* PBXContainerItemProxy */;
+		};
+		AD8E1B352F14DEC400BFF3B9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			targetProxy = AD8E1B342F14DEC400BFF3B9 /* PBXContainerItemProxy */;
+		};
+		AD8E1B372F14DECE00BFF3B9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AD475B0B2EFDCC42007A7A82 /* LapitWatchApp Watch App */;
+			targetProxy = AD8E1B362F14DECE00BFF3B9 /* PBXContainerItemProxy */;
+		};
+		AD8E1B452F14E73C00BFF3B9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AD8E1B3C2F14E73C00BFF3B9 /* LapitWatchApp Watch App Extension */;
+			targetProxy = AD8E1B442F14E73C00BFF3B9 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -320,13 +403,13 @@
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "운동 기록 및 건강 데이터를 읽기 위해 필요합니다.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "운동 기록 및 건강 데이터를 읽기 위해 필요합니다.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.example.Lapit;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.sion0104.Lapit;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.Lapit.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sion0104.Lapit.watchapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -353,13 +436,13 @@
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "운동 기록 및 건강 데이터를 읽기 위해 필요합니다.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "운동 기록 및 건강 데이터를 읽기 위해 필요합니다.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.example.Lapit;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.sion0104.Lapit;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.Lapit.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sion0104.Lapit.watchapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -370,16 +453,16 @@
 			};
 			name = Release;
 		};
-		AD475B472F005448007A7A82 /* Debug */ = {
+		AD8E1B482F14E73C00BFF3B9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = LapitWatchAppExtentsion/LapitWatchAppExtentsion.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "LapitWatchApp Watch App Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Z64WN83V4Y;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = LapitWatchAppExtentsion/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = LapitWatchAppExtentsion;
+				INFOPLIST_FILE = "LapitWatchApp Watch App Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "LapitWatchApp Watch App Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -388,7 +471,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.Lapit.watchkitapp.LapitWatchAppExtentsion;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sion0104.Lapit.watchapp.extension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -399,16 +482,16 @@
 			};
 			name = Debug;
 		};
-		AD475B482F005448007A7A82 /* Release */ = {
+		AD8E1B492F14E73C00BFF3B9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = LapitWatchAppExtentsion/LapitWatchAppExtentsion.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "LapitWatchApp Watch App Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Z64WN83V4Y;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = LapitWatchAppExtentsion/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = LapitWatchAppExtentsion;
+				INFOPLIST_FILE = "LapitWatchApp Watch App Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "LapitWatchApp Watch App Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -417,7 +500,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.Lapit.watchkitapp.LapitWatchAppExtentsion;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sion0104.Lapit.watchapp.extension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -552,6 +635,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Lapit/RacingAI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Lapit/Preview Content\"";
@@ -561,18 +645,22 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.Lapit;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sion0104.Lapit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -581,6 +669,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Lapit/RacingAI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Lapit/Preview Content\"";
@@ -590,18 +679,22 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.Lapit;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sion0104.Lapit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -617,11 +710,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AD475B462F005448007A7A82 /* Build configuration list for PBXNativeTarget "LapitWatchAppExtentsion" */ = {
+		AD8E1B472F14E73C00BFF3B9 /* Build configuration list for PBXNativeTarget "LapitWatchApp Watch App Extension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				AD475B472F005448007A7A82 /* Debug */,
-				AD475B482F005448007A7A82 /* Release */,
+				AD8E1B482F14E73C00BFF3B9 /* Debug */,
+				AD8E1B492F14E73C00BFF3B9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

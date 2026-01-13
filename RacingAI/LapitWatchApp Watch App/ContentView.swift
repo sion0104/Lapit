@@ -1,21 +1,25 @@
-//
-//  ContentView.swift
-//  LapitWatchApp Watch App
-//
-//  Created by 최시온 on 12/26/25.
-//
-
 import SwiftUI
+import WatchConnectivity
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        Button("Send Mock Metrics") {
+            let payload = LiveMetricsPayload(
+                timestamp: Date(),
+                heartRateBPM: 132,
+                activeEnergyKcal: 88,
+                distanceMeters: 1200,
+                speedMps: 5.2
+            )
+
+            do {
+                let data = try JSONEncoder().encode(payload)
+                WCSession.default.sendMessageData(data, replyHandler: nil, errorHandler: nil)
+            } catch {
+                print(error)
+            }
         }
-        .padding()
+
     }
 }
 

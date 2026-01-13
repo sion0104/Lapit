@@ -2,22 +2,26 @@ import Foundation
 
 @MainActor
 final class CyclingDashboardLiveState: ObservableObject {
-    @Published private(set) var current: LiveMetricsPayload?
     @Published private(set) var previousBPM: Int = 0
     @Published private(set) var previousLabel: String = ""
     @Published private(set) var bpmDeltaText: String = ""
+    
+    private var lastBPM: Int?
 
     func update(with payload: LiveMetricsPayload) {
-        let newBPM = MetricFormatter.bpmInt(payload.heartRateBPM)
-        if let currentBPM = current.map({ MetricFormatter.bpmInt($0.heartRateBPM) }), currentBPM != 0 {
-            previousBPM = currentBPM
+        let bpm = MetricFormatter.bpmInt(payload.heartRateBPM)
+        
+        if let last = lastBPM, last > 0 {
+            previousBPM = last
             previousLabel = "이전"
-            bpmDeltaText = "\(newBPM - currentBPM)"
+            let delta = bpm - last
+            bpmDeltaText = delta == 0 ? "0" : (delta > 0 ? "+\(delta)" : "\(delta)")
         } else {
             previousBPM = 0
             previousLabel = ""
             bpmDeltaText = ""
         }
-        current = payload
+        
+        lastBPM = bpm
     }
 }

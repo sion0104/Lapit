@@ -3,13 +3,15 @@ import SwiftUI
 struct TabContainerView: View {
     @State private var selection: AppTab = .exercise
     @State private var isTabBarHidden: Bool = false
+    
+    @StateObject private var rideVM = CyclingRideViewModel()
 
     var body: some View {
         ZStack(alignment: .bottom) {
             Group {
                 switch selection {
                 case .exercise:
-                    CyclingDashboardView()
+                    CyclingDashboardView(rideVM: rideVM)
                 case .planner:
                     EmptyView()
                 case .aiCoach:
