@@ -5,33 +5,42 @@ struct TabContainerView: View {
     @State private var isTabBarHidden: Bool = false
     
     @StateObject private var rideVM = CyclingRideViewModel()
+    
+    private let tabBarContentHeight: CGFloat = 62
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            Group {
-                switch selection {
-                case .exercise:
-                    CyclingDashboardView(rideVM: rideVM)
-                case .planner:
-                    EmptyView()
-                case .aiCoach:
-                    EmptyView()
-                case .settings:
-                    MypageSettingView()
-                }
-            }
-            .onPreferenceChange(TabBarHiddenPreferenceKey.self) { hidden in
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    isTabBarHidden = hidden
-                }
-            }
-            .safeAreaPadding(.bottom, isTabBarHidden ? 0 : 62)
+        GeometryReader { proxy in
+            let tabBarTotalHeight = isTabBarHidden ? 0 : tabBarContentHeight
 
-            if !isTabBarHidden {
-                CustomTabBarView(tabs: AppTab.allCases, selection: $selection)
-                    .frame(height: 62)
-                    .ignoresSafeArea(.container, edges: .bottom)
+            ZStack(alignment: .bottom) {
+                Group {
+                    switch selection {
+                    case .exercise:
+                        CyclingDashboardView(rideVM: rideVM)
+
+                    case .planner:
+                        EmptyView()
+
+                    case .aiCoach:
+                        AICoachView(onBack: {})
+
+                    case .settings:
+                        MypageSettingView()
+                    }
+                }
+                .safeAreaPadding(.bottom, tabBarTotalHeight)
+                .onPreferenceChange(TabBarHiddenPreferenceKey.self) { hidden in
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isTabBarHidden = hidden
+                    }
+                }
+
+                if !isTabBarHidden {
+                    CustomTabBarView(tabs: AppTab.allCases, selection: $selection)
+                        .frame(height: tabBarContentHeight)
+                }
             }
+            .ignoresSafeArea(.keyboard)
         }
     }
 }

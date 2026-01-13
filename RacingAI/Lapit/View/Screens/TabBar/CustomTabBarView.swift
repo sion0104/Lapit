@@ -29,6 +29,7 @@ struct CustomTabBarView: View {
             }
         }
         .padding(.horizontal, 20)
+        .frame(height: 62)
         .background(
             TopRoundedRectangle(radius: 20)
                 .fill(.white)

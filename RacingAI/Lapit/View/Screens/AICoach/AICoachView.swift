@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct AICoachView: View {
-    
     let onBack: () -> Void
+    @State private var goPlan = false
     
     var body: some View {
         NavigationStack {
@@ -34,7 +34,7 @@ struct AICoachView: View {
                         .font(.callout)
                     
                     Button(action: {
-                        
+                        goPlan = true
                     }, label: {
                         Text("운동 계획하기")
                             .font(.callout)
@@ -69,15 +69,22 @@ struct AICoachView: View {
                         Button { onBack() } label: {
                             Image(systemName: "chevron.left")
                                 .font(.system(size: 15, weight: .semibold))
-                                .foregroundStyle(.black)
+                                .foregroundStyle(Color("Chevron"))
                         }
 
                         Text("AI 운동 코칭")
                             .font(.title3)
-                            .foregroundStyle(Color("Chevron"))
+                            .foregroundStyle(.black)
                             .fontWeight(.medium)
                     }
                 }
+            }
+            .navigationDestination(isPresented: $goPlan) {
+                let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
+
+                AICoachPlanView(
+                    onBack: onBack, date: tomorrow
+                )
             }
         }
     }

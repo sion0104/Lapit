@@ -2,7 +2,7 @@ import Foundation
 
 struct User: Decodable, Identifiable {
     let id: Int
-    let username: String
+    let username: String // userId
     let name: String
     let birthDate: String
 
