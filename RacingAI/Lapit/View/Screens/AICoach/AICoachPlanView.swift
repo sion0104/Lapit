@@ -20,14 +20,14 @@ struct AICoachPlanView: View {
                 
             case .failed(let message):
                 ErrorPlanView(message: message) {
-                    Task { await vm.load(userId: 0, date: Date()) }
+                    Task { await reload() }
                 }
                 .tabBarHidden(true)
             }
         }
         .navigationBarBackButtonHidden(true)
         .task {
-            await vm.load(userId: 0, date: Date())
+            await reload()
         }
     }
     
@@ -42,7 +42,7 @@ struct AICoachPlanView: View {
 }
 
 private struct LoadingPlanView: View {
-    
+    @Environment(\.dismiss) private var dismiss
     let onBack: () -> Void
 
     var body: some View {
@@ -67,7 +67,9 @@ private struct LoadingPlanView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     HStack(spacing: 5) {
-                        Button { onBack() } label: {
+                        Button {
+                            dismiss()
+                            onBack() } label: {
                             Image(systemName: "chevron.left")
                                 .font(.system(size: 15, weight: .semibold))
                                 .foregroundStyle(Color("Chevron"))
@@ -77,15 +79,6 @@ private struct LoadingPlanView: View {
                             .font(.title3)
                             .foregroundStyle(Color("Chevron"))
                             .fontWeight(.medium)
-                    }
-                }
-                
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        
-                    } label: {
-                        Image(systemName: "calendar")
-                            .foregroundStyle(Color("Chevron"))
                     }
                 }
             }

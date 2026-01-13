@@ -5,6 +5,7 @@ struct PlanResultView: View {
     let plan: WorkoutPlan
     
     @Environment(\.dismiss) private var dismiss
+    @State private var goToMyPlan: Bool = false
     
     var body: some View {
         ScrollView {
@@ -101,12 +102,15 @@ struct PlanResultView: View {
             AppButton(
                 title: "내일 플래너에 등록",
                 isEnabled: true) {
-                    
+                    goToMyPlan = true
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .padding()
         }
         .navigationBarBackButtonHidden(true)
+        .navigationDestination(isPresented: $goToMyPlan) {
+            MyWorkoutPlanView(initialPlan: plan)
+        }
     }
     
     @ViewBuilder
