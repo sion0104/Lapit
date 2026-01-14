@@ -32,12 +32,14 @@ struct AICoachPlanView: View {
     }
     
     private func reload() async {
-        guard (userSession.user?.id) != nil else {
+        guard let userId = userSession.user?.id else {
             await MainActor.run {
                 vm.forceFail("로그인 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.")
             }
             return
         }
+
+        await vm.load(userId: userId, date: date)
     }
 }
 

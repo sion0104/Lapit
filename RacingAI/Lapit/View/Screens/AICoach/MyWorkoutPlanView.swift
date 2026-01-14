@@ -43,14 +43,11 @@ struct MyWorkoutPlanView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("요약")
+                    Text(initialPlan.summaryTitle)
                         .fontWeight(.medium)
                     
                     Divider()
-                        .padding(.horizontal, 2)
-
-                    Text(initialPlan.summaryTitle)
-                        .font(.headline)
+                        .padding(.horizontal, 2) 
 
                     Text(initialPlan.summaryDescription)
                         .font(.footnote)
@@ -95,7 +92,8 @@ struct MyWorkoutPlanView: View {
                             value: initialPlan.warmupText)
 
 
-                        Text("메인").font(.caption).foregroundStyle(.secondary)
+                        Text("메인")
+                            .font(.caption)
                         ForEach(initialPlan.mainItems.indices, id: \.self) { i in
                             Text(initialPlan.mainItems[i])
                                 .font(.body)

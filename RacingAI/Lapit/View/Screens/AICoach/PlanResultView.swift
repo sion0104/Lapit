@@ -69,6 +69,7 @@ struct PlanResultView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .navigationBarBackButtonHidden(true)
         .padding()
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {

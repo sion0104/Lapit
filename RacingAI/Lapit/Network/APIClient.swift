@@ -489,4 +489,36 @@ extension APIClient {
     }
 }
 
+extension APIClient {
+    func fetchDailyAIPlan(checkDate: String) async throws -> CommonResponse<DailyAIPlanPayload> {
+        let items = [URLQueryItem(name: "checkDate", value: checkDate)]
+        
+        guard let base = URL(string: "/v1/daily-plan/ai", relativeTo: APIConfig.baseURL) else {
+            throw APIError.invalidURL
+        }
+        var components = URLComponents(url: base, resolvingAgainstBaseURL: true)
+        components?.queryItems = items
+        
+        guard let url = components?.url else {
+            throw APIError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        attachAuthorizationIfNeeded(to: &request)
+        
+        print("➡️ [APIClient] Request: GET \(url.absoluteString)")
+        
+        let (data, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw APIError.unknown }
+        
+        print("⬅️ [APIClient] Response statusCode: \(http.statusCode)")
+        
+        guard (200..<300).contains(http.statusCode) else {
+            throw APIError.serverStatusCode(http.statusCode, data)
+        }
+        
+        return try JSONDecoder().decode(CommonResponse<DailyAIPlanPayload>.self, from: data)
+    }
+}
 

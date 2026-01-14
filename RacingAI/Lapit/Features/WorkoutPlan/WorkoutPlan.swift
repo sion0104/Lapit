@@ -1,6 +1,6 @@
 import Foundation
 
-struct WorkoutPlan: Codable, Equatable {
+struct WorkoutPlan: Codable, Equatable, Hashable {
     let dateTitle: String
     let summaryTitle: String
     let summaryDescription: String
