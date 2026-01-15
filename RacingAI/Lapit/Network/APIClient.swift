@@ -209,6 +209,9 @@ extension APIClient {
         
         attachAuthorizationIfNeeded(to: &request)
         
+        print("➡️ [APIClient] Request: POST \(url.absoluteString)")
+        logRequestBody(request)
+        
         let (data, response) = try await session.data(for: request)
         
         guard let http = response as? HTTPURLResponse else {
@@ -288,6 +291,7 @@ extension APIClient {
         request.httpBody = bodyString.data(using: .utf8)
 
         print("➡️ [APIClient] Request: POST \(url.absoluteString)")
+        logRequestBody(request)
         print("📨 [APIClient] FormBody: \(bodyString)")
         
         attachAuthorizationIfNeeded(to: &request)
@@ -469,18 +473,19 @@ private extension Data {
 
 private extension APIClient {
     func attachAuthorizationIfNeeded(to request: inout URLRequest) {
-        if let auth = TokenStore.shared.loadAuthorizationValue() {
-            request.setValue(auth, forHTTPHeaderField: "Authorization")
-
-            let tokenLength = auth.count
-            print("🔐 [APIClient] Authorization attached (length: \(tokenLength))")
-        } else {
+        guard let raw = TokenStore.shared.loadAuthorizationValue() else {
             request.setValue(nil, forHTTPHeaderField: "Authorization")
             print("🔐 [APIClient] Authorization removed (no token)")
+            return
         }
+
+        let sanitized = AuthorizationSanitizer.sanitize(raw)
+        request.setValue(sanitized, forHTTPHeaderField: "Authorization")
+
+        print("🔐 [APIClient] Authorization attached (rawLen: \(raw.count), sanitizedLen: \(sanitized.count))")
+//        print("🔐 [APIClient] Authorization prefix:", sanitized.prefix(20))
     }
 }
-
 
 
 extension APIClient {
@@ -521,4 +526,36 @@ extension APIClient {
         return try JSONDecoder().decode(CommonResponse<DailyAIPlanPayload>.self, from: data)
     }
 }
+
+private extension APIClient {
+    func logRequestBody(_ request: URLRequest) {
+        guard let body = request.httpBody else {
+            print("📨 [APIClient] Body: <empty>")
+            return
+        }
+
+        if let contentType = request.value(forHTTPHeaderField: "Content-Type") {
+            print("📨 [APIClient] Content-Type: \(contentType)")
+        }
+
+        // JSON
+        if let json = try? JSONSerialization.jsonObject(with: body),
+           let pretty = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted),
+           let jsonString = String(data: pretty, encoding: .utf8) {
+
+            print("📨 [APIClient] Body(JSON):\n\(jsonString)")
+            return
+        }
+
+        // UTF-8 Text (form-urlencoded 등)
+        if let text = String(data: body, encoding: .utf8) {
+            print("📨 [APIClient] Body(Text):\n\(text)")
+            return
+        }
+
+        // Binary
+        print("📨 [APIClient] Body(Binary): \(body.count) bytes")
+    }
+}
+
 

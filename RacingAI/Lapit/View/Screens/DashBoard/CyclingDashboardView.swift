@@ -10,25 +10,29 @@ struct CyclingDashboardView: View {
     @State private var showLogin: Bool = false
     @State private var showSettings: Bool = false
     
+    @State private var isSessionActive: Bool = false
+    @State private var isStopping: Bool = false
+    
     @Environment(\.scenePhase) private var scenePhase
     
     @StateObject private var receiver = PhoneWorkoutReceiver.shared
     @StateObject private var live = CyclingDashboardLiveState()
+    @StateObject private var recorder = WorkoutUploadRecorder()
     
     private var distanceText: String {
-        MetricFormatter.metersToKmText(receiver.latest?.distanceMeters)
+        MetricFormatter.metersToKmText(live.currentDistanceMeters)
     }
 
     private var speedText: String {
-        MetricFormatter.speedMpsToKmhText(receiver.latest?.speedMps)
+        MetricFormatter.speedMpsToKmhText(live.currentSpeedMps)
     }
 
     private var caloriesText: String {
-        MetricFormatter.kcalText(receiver.latest?.activeEnergyKcal)
+        MetricFormatter.kcalText(live.currentCaloriesKcal)
     }
 
     private var currentBPM: Int {
-        MetricFormatter.bpmInt(receiver.latest?.heartRateBPM)
+        live.currentBPM
     }
     
     private var needsLogin: Bool { !userSession.isLoggedIn }
@@ -71,8 +75,27 @@ struct CyclingDashboardView: View {
                                     }
                                 },
                                 onStop: {
+                                    let finalDuration = rideVM.elapsedSeconds
+
+                                    isStopping = true
+                                    isSessionActive = false
+
                                     rideVM.stopWorkout()
                                     receiver.sendCommand(.stop)
+
+                                    Task { @MainActor in
+                                        do {
+                                            try await recorder.stopAndUpload(
+                                                workoutType: "cycling",
+                                                durationSec: max(1, finalDuration),
+                                                latestProvider: { receiver.latest }
+                                            )
+                                            rideVM.stopWorkout()
+                                        } catch {
+                                            print("❌ upload failed:", describeAPIError(error))
+                                        }
+                                        isStopping = false
+                                    }
                                 },
                                 onCancelCountdown: { rideVM.cancelCountdown() }
                             )
@@ -167,14 +190,22 @@ struct CyclingDashboardView: View {
                 break
             }
         }
-        .onReceive(receiver.$latest.compactMap { $0 }) { live.update(with: $0) }
+        .onReceive(receiver.$latest.compactMap { $0 }) { payload in
+            guard isSessionActive, !isStopping else { return }
+
+            live.update(with: payload)
+            recorder.append(payload)
+        }
         .onAppear {
-            rideVM.onRunningStarted = { [weak receiver = receiver] in
+            rideVM.onRunningStarted = { [weak receiver] in
+                isSessionActive = true
+                isStopping = false
+
+                recorder.start()
                 receiver?.sendCommand(.startCycling)
             }
         }
+
     }
-    
-    
 }
 
