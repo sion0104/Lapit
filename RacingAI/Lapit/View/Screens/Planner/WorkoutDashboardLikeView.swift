@@ -1,38 +1,70 @@
 import SwiftUI
 
-// MARK: - Main Screen (Screenshot-like)
-
 struct WorkoutDashboardLikeView: View {
-    private let dayNumbers = [20, 21, 22, 23, 24, 25]
+    @EnvironmentObject private var store: WorkoutDailyStore
+    
+    @State private var isLoading: Bool = false
+    @State private var errorMessage: String? = nil
+
+    
     @State private var selectedDayIndex: Int = 0
-    
-    @State private var elapsedText: String = "01H 20M 45S"
-    @State private var isPlaying: Bool = true
-    
+    @State private var dayNumbers: [Int] = []
+        
     @State private var score: Int = 85
     
     @State private var feedbackMemo: String = "오늘 작성된 내용이 없습니다"
     
-    private let exerciseResultTitle = "Excellent"
-    private let exerciseResultDetail = "평균 BPM 150, 파워 데이터 480W\n오늘 운동시간 2H 34M 22S"
+    @State private var exerciseResultTitle: String = "-"
+    @State private var exerciseResultDetail: String = "-"
+
+    @State private var caloriesValue: String = "-"
+    @State private var caloriesDetail: String = "-"
+
+    @State private var hrAverage: Int = 0
+    @State private var hrMin: Int = 0
+    @State private var hrMax: Int = 0
+    @State private var hrBars: [Double] = []
+    @State private var hrXAxisLabels: [String] = ["", "", "", ""]
+    @State private var hrMaxLabel: String = ""
+
+    @State private var avgSpeed: String = "-"
+    @State private var avgSpeedDetail: String = "-"
+
+    @State private var distance: String = "-"
+    @State private var distanceDetail: String = "-"
+
+    @State private var conditionTitle: String = "-"
+    @State private var conditionDetail: String = "-"
     
-    private let caloriesValue = "350kcal"
-    private let caloriesDetail = "어려운만큼 칼로리를 더 소모했습니다"
+    @State private var scrollToDay: Int? = nil
+        
+    private var selectedDay: Int? {
+        dayNumbers.indices.contains(selectedDayIndex) ? dayNumbers[selectedDayIndex] : nil
+    }
+
+    private var selectedDate: Date? {
+        guard let day = selectedDay else { return nil }
+
+        let cal = Calendar(identifier: .gregorian)
+        let now = Date()
+
+        var comps = DateComponents()
+        comps.calendar = cal
+        comps.timeZone = TimeZone(identifier: "Asia/Seoul")
+        comps.year = cal.component(.year, from: now)
+        comps.month = cal.component(.month, from: now)
+        comps.day = day
+        comps.hour = 0
+        comps.minute = 0
+        comps.second = 0
+
+        return cal.date(from: comps)
+    }
     
-    private let hrAverage = 148
-    private let hrMin = 90
-    private let hrMax = 150
-    
-    private let hrBars: [Double] = [0.25,0.55,0.40,0.70,0.35,0.60,0.42,0.58,0.75,0.50,0.30,0.62,0.48,0.72,0.40,0.55,0.68,0.45]
-    
-    private let avgSpeed = "65 km/h"
-    private let avgSpeedDetail = "(최저 23km/h ~ 최고 29km/h) 사이를 유지 중 입니다"
-    
-    private let distance = "30 km"
-    private let distanceDetail = "이번주 목표까지 10km 남았습니다"
-    
-    private let conditionTitle = "기분 좋음"
-    private let conditionDetail = "컨디션 보통\n좋은 컨디션을 유지하고 있습니다"
+    private var selectedCheckDateString: String? {
+        guard let selectedDate else { return nil }
+        return WorkoutDateFormatter.checkDateString(selectedDate)
+    }
     
     var body: some View {
         ScrollView {
@@ -81,7 +113,7 @@ struct WorkoutDashboardLikeView: View {
                 
                 VStack(spacing: 12) {
                     infoCard(
-                        title: "오늘 운동 결과",
+                        title: "운동 결과",
                         value: exerciseResultTitle,
                         valueStyle: .accent,
                         detail: exerciseResultDetail
@@ -96,7 +128,7 @@ struct WorkoutDashboardLikeView: View {
                 }
                 
                 // MARK: Today Workout Data
-                sectionHeader("오늘 운동 데이터")
+                sectionHeader("운동 데이터")
                 
                 // Heart Rate Card
                 card {
@@ -117,20 +149,17 @@ struct WorkoutDashboardLikeView: View {
                                 .foregroundStyle(.secondary)
                         }
                         
-                        MiniBarChart(values: hrBars)
-                            .frame(height: 80)
-                        
-                        HStack {
-                            Text("13:00")
-                            Spacer()
-                            Text("14:00")
-                            Spacer()
-                            Text("15:00")
-                            Spacer()
-                            Text("16:00")
+                        if hrBars.isEmpty {
+                            Text("심박 데이터가 없습니다")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        } else {
+                            HeartRatePillChart(
+                                values: hrBars,
+                                maxLabel: hrMaxLabel.isEmpty ? " " : hrMaxLabel,
+                                xLabels: hrXAxisLabels
+                            )
                         }
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
                     }
                 }
                 
@@ -155,7 +184,7 @@ struct WorkoutDashboardLikeView: View {
                 // Distance
                 card {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("오늘 주행거리")
+                        Text("주행거리")
                             .font(.headline)
                             .fontWeight(.semibold)
                         
@@ -205,48 +234,258 @@ struct WorkoutDashboardLikeView: View {
                 }
             }
         }
-        .background(Color(.systemGroupedBackground))
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
+        .onAppear {
+            refreshMonthDays()
+            scrollToDay = Calendar.current.component(.day, from: Date())
 
-// MARK: - Top UI Components
-
-private extension WorkoutDashboardLikeView {
-    var topDateRow: some View {
-        HStack(spacing: 10) {
-            ForEach(dayNumbers.indices, id: \.self) { idx in
-                let isSelected = selectedDayIndex == idx
-                
-                Button {
-                    selectedDayIndex = idx
-                } label: {
-                    Text("\(dayNumbers[idx])")
-                        .font(.subheadline.weight(.semibold))
-                        .frame(width: 34, height: 34)
-                        .background(
-                            Circle()
-                                .fill(isSelected ? Color.mint.opacity(0.18) : Color.clear)
-                        )
-                        .overlay(
-                            Circle()
-                                .stroke(isSelected ? Color.mint.opacity(0.55) : Color.black.opacity(0.08), lineWidth: 1)
-                        )
+            if let checkDate = selectedCheckDateString {
+                if let cached = store.cache[checkDate] {
+                    apply(payload: cached)
+                } else {
+                    store.load(checkDate: checkDate)
                 }
-                .foregroundStyle(.primary)
+            }
+        }
+        .onChange(of: selectedDayIndex, {
+            guard let checkDate = selectedCheckDateString else { return }
+
+               if let cached = store.cache[checkDate] {
+                   apply(payload: cached)
+               } else {
+                   store.load(checkDate: checkDate)
+               }
+        })
+        .onChange(of: store.lastUpdatedKey) { _, key in
+            guard let key,
+                  key == selectedCheckDateString,
+                  let payload = store.cache[key] else { return }
+            apply(payload: payload)
+        }
+        .background(Color(.systemGroupedBackground))
+    }
+    
+    
+    private func refreshMonthDays(baseDate: Date = Date()) {
+        let cal = Calendar.current
+        let range = cal.range(of: .day, in: .month, for: baseDate) ?? 1..<2
+        dayNumbers = Array(range)
+
+        let today = cal.component(.day, from: baseDate)
+        selectedDayIndex = dayNumbers.firstIndex(of: today) ?? 0
+
+        scrollToDay = today
+    }
+    
+    @MainActor
+    private func apply(payload: WorkoutDailyPayload) {
+        
+        print("📊 [WorkoutDailyPayload]")
+        print("  • checkDate:", payload.checkDate)
+        print("  • avgHeartRate:", payload.avgHeartRate)
+        print("  • minHeartRate:", payload.minHeartRate)
+        print("  • maxHeartRate:", payload.maxHeartRate)
+        print("  • avgPower:", payload.avgPower)
+        print("  • totalCalories:", payload.totalCaloriesKcal)
+        print("  • avgSpeed:", payload.avgSpeed)
+        print("  • totalDistance:", payload.totalDistance)
+        print("  • avgRideSec:", payload.avgRideSec)
+        print("  • workoutMeasureList count:", payload.workoutMeasureList.count)
+
+        if let condition = payload.dailyCondition {
+            print("  • condition:",
+                  "mood:", condition.moodScore,
+                  "fatigue:", condition.fatigueScore,
+                  "recovery:", condition.recoveryState)
+        } else {
+            print("  • condition: nil")
+        }
+
+        if let plan = payload.dailyPlan {
+            print("  • plan memo:", plan.memo)
+        } else {
+            print("  • plan: nil")
+        }
+        
+        hrAverage = Int(payload.avgHeartRate.rounded())
+        hrMin = Int(payload.minHeartRate.rounded())
+        hrMax = Int(payload.maxHeartRate.rounded())
+        
+        let points: [(date: Date, hr: Int)] = payload.workoutMeasureList.compactMap { m -> (date: Date, hr: Int)? in
+            guard let d = WorkoutDateFormatter.backendStringDate(m.measureAt) else { return nil }
+            return (d, m.heartRate) as? (date: Date, hr: Int)
+        }
+        .sorted { $0.date < $1.date }
+
+        hrXAxisLabels = makeTimeLabels(from: points.map(\.date), count: 4)
+
+        let hrs = points.map(\.hr).filter { $0 > 0 }
+        let norm = normalizeWithPercentileClamp(values: hrs, lowerP: 0.05, upperP: 0.95)
+
+        hrBars = norm.values
+        hrMaxLabel = norm.displayMaxLabel
+
+        caloriesValue = "\(Int(payload.totalCaloriesKcal.rounded() ))kcal"
+        caloriesDetail = "어려운만큼 칼로리를 더 소모했습니다"
+
+        avgSpeed = String(format: "%.2f km/h", payload.avgSpeed)
+        avgSpeedDetail = String(format: "(최저 %.0fkm/h ~ 최고 %.0fkm/h)", payload.minSpeed, payload.maxSpeed)
+
+        distance = String(format: "%.0f km", payload.totalDistance)
+        distanceDetail = "이번주 목표까지 10km 남았습니다"
+
+        if payload.avgPower >= 250 {
+            exerciseResultTitle = "Excellent"
+        } else if payload.avgPower >= 180 {
+            exerciseResultTitle = "Perfect"
+        } else {
+            exerciseResultTitle = "Good"
+        }
+
+        let rideSec = payload.avgRideSec ?? 0
+
+        exerciseResultDetail =
+        "평균 BPM \(Int(payload.avgHeartRate.rounded())), 파워 데이터 \(Int(payload.avgPower.rounded()))W\n오늘 운동시간 \(formatRideTime(rideSec))"
+
+        if let plan = payload.dailyPlan, !plan.memo.isEmpty {
+            feedbackMemo = plan.memo
+        } else {
+            feedbackMemo = "오늘 작성된 내용이 없습니다"
+        }
+
+        if let c = payload.dailyCondition {
+            conditionTitle = c.recoveryState
+            conditionDetail = "기분 \(c.moodScore), 피로 \(c.fatigueScore)\n통증 부위: \(c.painArea)"
+        } else {
+            conditionTitle = "기록 없음"
+            conditionDetail = ""
+        }
+    }
+
+    private func formatRideTime(_ sec: Int) -> String {
+        let h = sec / 3600
+        let m = (sec % 3600) / 60
+        let s = sec % 60
+        if h > 0 { return "\(h)H \(m)M \(s)S" }
+        return "\(m)M \(s)S"
+    }
+
+    private func makeHeartRateBars(from list: [WorkoutMeasure], minHR: Double, maxHR: Double) -> [Double] {
+        let hr = list.map(\.heartRate).filter { $0 > 0 }
+        guard !hr.isEmpty else { return [] }
+
+        let lo = minHR > 0 ? minHR : (hr.min() ?? 0)
+        let hi = maxHR > 0 ? maxHR : (hr.max() ?? (lo + 1))
+
+        let denom = max(hi - lo, 1e-6)
+        return hr.map { ($0 - lo) / denom } // 0...1
+    }
+
+    private func makeTimeLabels(from dates: [Date], count: Int) -> [String] {
+        guard let minD = dates.min(), let maxD = dates.max(), count >= 2 else {
+            return Array(repeating: "", count: max(count, 1))
+        }
+
+        let total = maxD.timeIntervalSince(minD)
+        let step = total / Double(count - 1)
+
+        let df = DateFormatter()
+        df.calendar = Calendar(identifier: .gregorian)
+        df.locale = Locale(identifier: "ko_KR")
+        df.timeZone = TimeZone(identifier: "Asia/Seoul")
+        df.dateFormat = "HH:mm"
+
+        return (0..<count).map { i in
+            let t = minD.addingTimeInterval(step * Double(i))
+            return df.string(from: t)
+        }
+    }
+
+    private struct NormalizedResult {
+        let values: [Double]
+        let displayMaxLabel: String
+    }
+
+    private func normalizeWithPercentileClamp(values: [Int], lowerP: Double, upperP: Double) -> NormalizedResult {
+        guard !values.isEmpty else { return .init(values: [], displayMaxLabel: "") }
+
+        let sorted = values.sorted()
+        let lo = percentile(sorted, p: lowerP)
+        let hi = percentile(sorted, p: upperP)
+        let denom = max(hi - lo, 1)
+
+        let clamped = values.map { min(max($0, lo), hi) }
+        let normalized = clamped.map { Double($0 - lo) / Double(denom) }
+
+        return .init(values: normalized, displayMaxLabel: "\(hi)")
+    }
+
+    private func percentile(_ sorted: [Int], p: Double) -> Int {
+        let n = sorted.count
+        if n == 1 { return sorted[0] }
+
+        let clampedP = min(max(p, 0), 1)
+        let idx = clampedP * Double(n - 1)
+        let lo = Int(floor(idx))
+        let hi = Int(ceil(idx))
+
+        if lo == hi { return sorted[lo] }
+        let w = idx - Double(lo)
+        let v = Double(sorted[lo]) * (1 - w) + Double(sorted[hi]) * w
+        return Int(round(v))
+    }
+
+    
+    // MARK: - Top UI Components
+    private var topDateRow: some View {
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(dayNumbers, id: \.self) { day in
+                        let idx = dayNumbers.firstIndex(of: day) ?? 0
+                        let isSelected = selectedDayIndex == idx
+
+                        Button {
+                            selectedDayIndex = idx
+                            scrollToDay = day
+                        } label: {
+                            Text("\(day)")
+                                .font(.footnote)
+                                .frame(width: 48, height: 32)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 100)
+                                        .fill(isSelected ? Color.mint : Color.clear)
+                                )
+                        }
+                        .foregroundStyle(.primary)
+                        .id(day)
+                    }
+                }
+                .padding(.horizontal, 2)
+            }
+            .onChange(of: scrollToDay) { _, day in
+                guard let day else { return }
+                DispatchQueue.main.async {
+                    withAnimation(.easeInOut) {
+                        proxy.scrollTo(day, anchor: .center)
+                    }
+                }
             }
         }
     }
+
     func sectionHeader(_ title: String) -> some View {
         HStack {
             Text(title)
                 .font(.title3)
                 .fontWeight(.medium)
+            
             Spacer()
         }
         .padding(.top, 24)
     }
 }
+
+
 
 // MARK: - Reusable Cards
 
@@ -326,6 +565,8 @@ struct MiniBarChart: View {
         }
     }
 }
+
+
 
 // MARK: - Preview
 

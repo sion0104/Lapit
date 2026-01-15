@@ -25,4 +25,5 @@ enum NumberSanitizer {
         let v = clamp(safe(value), min: min, max: max)
         return round(v, scale: scale)
     }
+    
 }

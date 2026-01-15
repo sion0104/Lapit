@@ -27,7 +27,6 @@ struct WorkoutDetailRequest: Encodable {
 
 
 enum WorkoutDateFormatter {
-
     static func checkDateString(_ date: Date) -> String {
         let df = DateFormatter()
         df.calendar = Calendar(identifier: .gregorian)
@@ -41,13 +40,24 @@ enum WorkoutDateFormatter {
         let df = DateFormatter()
         df.calendar = Calendar(identifier: .gregorian)
         df.locale = Locale(identifier: "ko_KR")
-        df.timeZone = TimeZone(identifier: "Asia/Seoul")   // ✅ KST 고정
+        df.timeZone = TimeZone(identifier: "Asia/Seoul")
         df.dateFormat = "yyyy-MM-dd HH:mm:ss"
         return df
     }()
 
     static func backendDateTimeString(_ date: Date) -> String {
         backendDateTime.string(from: date)
+    }
+    
+    static func backendStringDate(_ string: String) -> Date? {
+        if let d = backendDateTime.date(from: string) { return d }
+
+        let df = DateFormatter()
+        df.calendar = Calendar(identifier: .gregorian)
+        df.locale = Locale(identifier: "ko_KR")
+        df.timeZone = TimeZone(identifier: "Asia/Seoul")
+        df.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+        return df.date(from: string)
     }
 }
 

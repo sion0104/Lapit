@@ -566,6 +566,41 @@ extension APIClient {
     }
 }
 
+extension APIClient {
+    func fetchWorkoutDaily(checkDate: String) async throws -> CommonResponse<WorkoutDailyPayload> {
+        let items = [URLQueryItem(name: "checkDate", value: checkDate)]
+
+        guard let base = URL(string: "/v1/workout/daily", relativeTo: APIConfig.baseURL) else {
+            throw APIError.invalidURL
+        }
+        var components = URLComponents(url: base, resolvingAgainstBaseURL: true)
+        components?.queryItems = items
+
+        guard let url = components?.url else { throw APIError.invalidURL }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        attachAuthorizationIfNeeded(to: &request)
+
+        print("➡️ [APIClient] Request: GET \(url.absoluteString)")
+
+        let (data, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw APIError.unknown }
+
+        print("⬅️ [APIClient] Response statusCode: \(http.statusCode)")
+        
+        
+        if let jsonString = String(data: data, encoding: .utf8) {
+            print("📦 [APIClient] Raw JSON:\n\(jsonString)")
+        }
+
+        guard (200..<300).contains(http.statusCode) else {
+            throw APIError.serverStatusCode(http.statusCode, data)
+        }
+
+        return try JSONDecoder().decode(CommonResponse<WorkoutDailyPayload>.self, from: data)
+    }
+}
 
 private extension APIClient {
     func logRequestBody(_ request: URLRequest) {

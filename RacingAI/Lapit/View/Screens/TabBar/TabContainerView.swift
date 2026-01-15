@@ -5,6 +5,7 @@ struct TabContainerView: View {
     @State private var isTabBarHidden: Bool = false
     
     @StateObject private var rideVM = CyclingRideViewModel()
+    @StateObject private var workoutDailyStore = WorkoutDailyStore()
     
     private let tabBarContentHeight: CGFloat = 62
 
@@ -20,6 +21,7 @@ struct TabContainerView: View {
 
                     case .planner:
                         WorkoutDashboardLikeView()
+                            .environmentObject(workoutDailyStore)
 
                     case .aiCoach:
                         AICoachView(onBack: {})
@@ -39,6 +41,9 @@ struct TabContainerView: View {
                     CustomTabBarView(tabs: AppTab.allCases, selection: $selection)
                         .frame(height: tabBarContentHeight)
                 }
+            }
+            .onAppear {
+                workoutDailyStore.preloadTodayIfNeeded()
             }
             .ignoresSafeArea(.keyboard)
         }

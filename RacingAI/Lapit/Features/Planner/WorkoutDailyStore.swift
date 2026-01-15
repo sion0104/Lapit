@@ -1,0 +1,57 @@
+import Foundation
+
+@MainActor
+final class WorkoutDailyStore: ObservableObject {
+    @Published private(set) var isLoading: Bool = false
+    @Published private(set) var errorMessage: String? = nil
+
+    @Published private(set) var cache: [String: WorkoutDailyPayload] = [:]
+    
+    @Published private(set) var lastUpdatedKey: String? = nil
+
+    private var task: Task<Void, Never>?
+
+    func preloadTodayIfNeeded() {
+        let today = WorkoutDateFormatter.checkDateString(Date())
+        if cache[today] != nil { return }
+        load(checkDate: today)
+    }
+
+    func load(checkDate: String) {
+        if cache[checkDate] != nil, isLoading == false { return }
+
+        task?.cancel()
+        task = Task { [weak self] in
+            guard let self else { return }
+            await self._load(checkDate: checkDate)
+        }
+    }
+
+    func cancel() {
+        task?.cancel()
+        task = nil
+    }
+
+    private func _load(checkDate: String) async {
+        if Task.isCancelled { return }
+
+        isLoading = true
+        errorMessage = nil
+
+        do {
+            let res: CommonResponse<WorkoutDailyPayload> =
+                try await APIClient.shared.fetchWorkoutDaily(checkDate: checkDate)
+
+            if Task.isCancelled { return }
+
+            cache[checkDate] = res.data
+            lastUpdatedKey = checkDate
+            
+        } catch {
+            if Task.isCancelled { return }
+            errorMessage = error.localizedDescription
+        }
+
+        isLoading = false
+    }
+}
