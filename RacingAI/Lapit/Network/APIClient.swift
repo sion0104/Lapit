@@ -527,6 +527,46 @@ extension APIClient {
     }
 }
 
+extension APIClient {
+    func postVoid<Body: Encodable>(
+        _ path: String,
+        body: Body
+    ) async throws {
+        guard let url = URL(string: path, relativeTo: baseURL) else {
+            throw APIError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(body)
+
+        attachAuthorizationIfNeeded(to: &request)
+
+        print("➡️ [APIClient] Request: POST \(url.absoluteString)")
+        logRequestBody(request)
+
+        let (data, response) = try await session.data(for: request)
+
+        guard let http = response as? HTTPURLResponse else {
+            throw APIError.unknown
+        }
+
+        print("⬅️ [APIClient] Response statusCode: \(http.statusCode)")
+        if let bodyString = String(data: data, encoding: .utf8), !bodyString.isEmpty {
+            print("📦 [APIClient] Response body: \(bodyString)")
+        } else {
+            print("📦 [APIClient] Response body: <empty> (\(data.count) bytes)")
+        }
+
+        guard (200..<300).contains(http.statusCode) else {
+            throw APIError.serverStatusCode(http.statusCode, data)
+        }
+
+    }
+}
+
+
 private extension APIClient {
     func logRequestBody(_ request: URLRequest) {
         guard let body = request.httpBody else {

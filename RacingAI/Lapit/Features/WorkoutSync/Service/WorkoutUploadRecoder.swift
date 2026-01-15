@@ -50,10 +50,8 @@ final class WorkoutUploadRecorder: ObservableObject {
             samples.append(latest)
         }
 
-        let rawEndTime = samples.last?.timestamp ?? Date()
-
-        let endTime = max(rawEndTime, startTime)
-
+        let rawEndTime = (samples.last?.timestamp ?? Date()).truncatedToSecond
+        let endTime = max(rawEndTime, startTime.truncatedToSecond)
         let computedDurationSec = max(0, Int(endTime.timeIntervalSince(startTime).rounded()))
 
         let request = buildRequest(
@@ -64,7 +62,7 @@ final class WorkoutUploadRecorder: ObservableObject {
         )
 
 
-        let _: CommonResponse<EmptyData> = try await APIClient.shared.post("/v1/workout", body: request)
+        try await APIClient.shared.postVoid("/v1/workout", body: request)
 
         reset()
     }
@@ -117,8 +115,8 @@ final class WorkoutUploadRecorder: ObservableObject {
         return WorkoutSaveRequest(
             workoutType: WorkoutTypeMapper.toServer(workoutType),
             checkDate: checkDate,
-            startTime: WorkoutDateFormatter.isoString(startTime),
-            endTime: WorkoutDateFormatter.isoString(endTime),
+            startTime: WorkoutDateFormatter.backendDateTimeString(startTime),
+            endTime: WorkoutDateFormatter.backendDateTimeString(endTime),
             durationSec: durationSec,
             totalDistance: totalDistance,
             totalCaloriesKcal: totalCalories,
@@ -164,12 +162,12 @@ final class WorkoutUploadRecorder: ObservableObject {
                 continue
             }
             
-            if now > endTime { continue }
+            if now.truncatedToSecond > endTime { continue }
             
 
             result.append(
                 WorkoutDetailRequest(
-                    measureAt: WorkoutDateFormatter.isoString(now),
+                    measureAt: WorkoutDateFormatter.backendDateTimeString(now),
                     heartRate: NumberSanitizer.round(hr, scale: 2),
                     speed: NumberSanitizer.round(speed, scale: 2),
                     power: nil
@@ -191,5 +189,12 @@ final class WorkoutUploadRecorder: ObservableObject {
         let distOk = NumberSanitizer.safe(p.distanceMeters) > 0
         let kcalOk = NumberSanitizer.safe(p.activeEnergyKcal) > 0
         return hrOk || distOk || kcalOk
+    }
+}
+
+private extension Date {
+    var truncatedToSecond: Date {
+        let t = timeIntervalSince1970
+        return Date(timeIntervalSince1970: floor(t))
     }
 }

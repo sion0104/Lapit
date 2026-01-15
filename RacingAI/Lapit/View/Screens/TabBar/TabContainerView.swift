@@ -19,7 +19,7 @@ struct TabContainerView: View {
                         CyclingDashboardView(rideVM: rideVM)
 
                     case .planner:
-                        EmptyView()
+                        WorkoutDashboardLikeView()
 
                     case .aiCoach:
                         AICoachView(onBack: {})
