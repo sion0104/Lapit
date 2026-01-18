@@ -154,7 +154,7 @@ struct MyWorkoutPlanView: View {
                             )
                             .clipShape(RoundedRectangle(cornerRadius: 100))
                     }
-                    .shadow(color: Color("Grdient" ).opacity(0.2), radius: 2, x: 0, y: 2)
+                    .shadow(color: Color("Grdaient" ).opacity(0.2), radius: 2, x: 0, y: 2)
                     .overlay(
                     RoundedRectangle(cornerRadius: 100)
                     .inset(by: 0.25)

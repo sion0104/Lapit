@@ -5,10 +5,6 @@ struct WorkoutDashboardLikeView: View {
     
     @State private var isLoading: Bool = false
     @State private var errorMessage: String? = nil
-
-    
-    @State private var selectedDayIndex: Int = 0
-    @State private var dayNumbers: [Int] = []
         
     @State private var score: Int = 85
     
@@ -26,6 +22,8 @@ struct WorkoutDashboardLikeView: View {
     @State private var hrBars: [Double] = []
     @State private var hrXAxisLabels: [String] = ["", "", "", ""]
     @State private var hrMaxLabel: String = ""
+    @State private var hrMinLabel: String = ""
+
 
     @State private var avgSpeed: String = "-"
     @State private var avgSpeedDetail: String = "-"
@@ -36,41 +34,37 @@ struct WorkoutDashboardLikeView: View {
     @State private var conditionTitle: String = "-"
     @State private var conditionDetail: String = "-"
     
-    @State private var scrollToDay: Int? = nil
-        
-    private var selectedDay: Int? {
-        dayNumbers.indices.contains(selectedDayIndex) ? dayNumbers[selectedDayIndex] : nil
-    }
-
-    private var selectedDate: Date? {
-        guard let day = selectedDay else { return nil }
-
+    @State private var caloriesTrend: CaloriesTrend = .none
+    @State private var exerciseResultColor: Color = .primary
+    
+    private var todayDate: Date {
         let cal = Calendar(identifier: .gregorian)
         let now = Date()
+        return cal.startOfDay(for: now)
+    }
 
-        var comps = DateComponents()
-        comps.calendar = cal
-        comps.timeZone = TimeZone(identifier: "Asia/Seoul")
-        comps.year = cal.component(.year, from: now)
-        comps.month = cal.component(.month, from: now)
-        comps.day = day
-        comps.hour = 0
-        comps.minute = 0
-        comps.second = 0
-
-        return cal.date(from: comps)
+    private var todayCheckDateString: String {
+        WorkoutDateFormatter.checkDateString(Date())
     }
     
-    private var selectedCheckDateString: String? {
-        guard let selectedDate else { return nil }
-        return WorkoutDateFormatter.checkDateString(selectedDate)
+    private var todayTitleString: String {
+        let df = DateFormatter()
+        df.calendar = Calendar(identifier: .gregorian)
+        df.locale = Locale(identifier: "ko_KR")
+        df.timeZone = TimeZone(identifier: "Asia/Seoul")
+        df.dateFormat = "yyyy년 M월 d일 EEEE"
+        return df.string(from: Date())
+    }
+
+    private enum CaloriesTrend {
+        case up
+        case down
+        case none
     }
     
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                topDateRow
-                
                 WorkoutScoreGaugeView(
                     score: score,
                     title: "운동 점수",
@@ -80,7 +74,6 @@ struct WorkoutDashboardLikeView: View {
                 .frame(height: 175)
                 .padding(.top, 30)
 
-                // MARK: Feedback Memo
                 card {
                     VStack(alignment: .leading, spacing: 10) {
                         HStack {
@@ -114,16 +107,15 @@ struct WorkoutDashboardLikeView: View {
                 VStack(spacing: 12) {
                     infoCard(
                         title: "운동 결과",
-                        value: exerciseResultTitle,
-                        valueStyle: .accent,
+                        value: exerciseResultTitle, valueColor: exerciseResultColor,
                         detail: exerciseResultDetail
                     )
                     
-                    infoCard(
+                    caloriesInfoCard(
                         title: "소모 칼로리",
                         value: caloriesValue,
-                        valueStyle: .accent,
-                        detail: caloriesDetail
+                        detail: caloriesDetail,
+                        trend: caloriesTrend
                     )
                 }
                 
@@ -157,6 +149,7 @@ struct WorkoutDashboardLikeView: View {
                             HeartRatePillChart(
                                 values: hrBars,
                                 maxLabel: hrMaxLabel.isEmpty ? " " : hrMaxLabel,
+                                minLabel: hrMinLabel.isEmpty ? " " : hrMinLabel,
                                 xLabels: hrXAxisLabels
                             )
                         }
@@ -235,117 +228,130 @@ struct WorkoutDashboardLikeView: View {
             }
         }
         .onAppear {
-            refreshMonthDays()
-            scrollToDay = Calendar.current.component(.day, from: Date())
-
-            if let checkDate = selectedCheckDateString {
-                if let cached = store.cache[checkDate] {
-                    apply(payload: cached)
-                } else {
-                    store.load(checkDate: checkDate)
-                }
-            }
+            loadToday()
         }
-        .onChange(of: selectedDayIndex, {
-            guard let checkDate = selectedCheckDateString else { return }
-
-               if let cached = store.cache[checkDate] {
-                   apply(payload: cached)
-               } else {
-                   store.load(checkDate: checkDate)
-               }
-        })
-        .onChange(of: store.lastUpdatedKey) { _, key in
-            guard let key,
-                  key == selectedCheckDateString,
-                  let payload = store.cache[key] else { return }
+        .onChange(of: store.lastUpdatedVersion) { _, _ in
+            let key = todayCheckDateString
+            guard let payload = store.cache[key] else { return }
             apply(payload: payload)
         }
+
         .background(Color(.systemGroupedBackground))
     }
     
-    
-    private func refreshMonthDays(baseDate: Date = Date()) {
-        let cal = Calendar.current
-        let range = cal.range(of: .day, in: .month, for: baseDate) ?? 1..<2
-        dayNumbers = Array(range)
+    @MainActor
+    private func loadToday() {
+        let checkDate = todayCheckDateString
 
-        let today = cal.component(.day, from: baseDate)
-        selectedDayIndex = dayNumbers.firstIndex(of: today) ?? 0
-
-        scrollToDay = today
+        if let cached = store.cache[checkDate] {
+            apply(payload: cached)
+        } else {
+            store.load(checkDate: checkDate)
+        }
     }
     
     @MainActor
     private func apply(payload: WorkoutDailyPayload) {
-        
-        print("📊 [WorkoutDailyPayload]")
-        print("  • checkDate:", payload.checkDate)
-        print("  • avgHeartRate:", payload.avgHeartRate)
-        print("  • minHeartRate:", payload.minHeartRate)
-        print("  • maxHeartRate:", payload.maxHeartRate)
-        print("  • avgPower:", payload.avgPower)
-        print("  • totalCalories:", payload.totalCaloriesKcal)
-        print("  • avgSpeed:", payload.avgSpeed)
-        print("  • totalDistance:", payload.totalDistance)
-        print("  • avgRideSec:", payload.avgRideSec)
-        print("  • workoutMeasureList count:", payload.workoutMeasureList.count)
 
-        if let condition = payload.dailyCondition {
-            print("  • condition:",
-                  "mood:", condition.moodScore,
-                  "fatigue:", condition.fatigueScore,
-                  "recovery:", condition.recoveryState)
-        } else {
-            print("  • condition: nil")
-        }
+        // ✅ 운동 여부(파워 0으로 판단하지 말 것)
+        let hasDetails = !payload.details.isEmpty
+        let todayKcal = Int(payload.totalCaloriesKcal.rounded())
+        let didWorkout = hasDetails || payload.durationSec > 0 || todayKcal > 0
 
-        if let plan = payload.dailyPlan {
-            print("  • plan memo:", plan.memo)
-        } else {
-            print("  • plan: nil")
-        }
-        
-        hrAverage = Int(payload.avgHeartRate.rounded())
-        hrMin = Int(payload.minHeartRate.rounded())
-        hrMax = Int(payload.maxHeartRate.rounded())
-        
-        let points: [(date: Date, hr: Int)] = payload.workoutMeasureList.compactMap { m -> (date: Date, hr: Int)? in
+        // -----------------------------
+        // 1) 심박 (details 기반)
+        // -----------------------------
+        let points: [(date: Date, hr: Int)] = payload.details.compactMap { m -> (date: Date, hr: Int)? in
             guard let d = WorkoutDateFormatter.backendStringDate(m.measureAt) else { return nil }
-            return (d, m.heartRate) as? (date: Date, hr: Int)
+            let hr = Int(m.heartRate.rounded())
+            return (d, hr)
         }
         .sorted { $0.date < $1.date }
 
-        hrXAxisLabels = makeTimeLabels(from: points.map(\.date), count: 4)
-
         let hrs = points.map(\.hr).filter { $0 > 0 }
-        let norm = normalizeWithPercentileClamp(values: hrs, lowerP: 0.05, upperP: 0.95)
-
-        hrBars = norm.values
-        hrMaxLabel = norm.displayMaxLabel
-
-        caloriesValue = "\(Int(payload.totalCaloriesKcal.rounded() ))kcal"
-        caloriesDetail = "어려운만큼 칼로리를 더 소모했습니다"
-
-        avgSpeed = String(format: "%.2f km/h", payload.avgSpeed)
-        avgSpeedDetail = String(format: "(최저 %.0fkm/h ~ 최고 %.0fkm/h)", payload.minSpeed, payload.maxSpeed)
-
-        distance = String(format: "%.0f km", payload.totalDistance)
-        distanceDetail = "이번주 목표까지 10km 남았습니다"
-
-        if payload.avgPower >= 250 {
-            exerciseResultTitle = "Excellent"
-        } else if payload.avgPower >= 180 {
-            exerciseResultTitle = "Perfect"
+        if hrs.isEmpty {
+            hrAverage = 0
+            hrMin = 0
+            hrMax = 0
+            hrBars = []
+            hrXAxisLabels = ["", "", "", ""]
+            hrMaxLabel = ""
+            hrMinLabel = ""
         } else {
-            exerciseResultTitle = "Good"
+            // avg/min/max는 details에서 계산
+            hrAverage = Int(Double(hrs.reduce(0, +)) / Double(hrs.count))
+            hrMin = hrs.min() ?? 0
+            hrMax = hrs.max() ?? 0
+
+            hrXAxisLabels = makeTimeLabels(from: points.map(\.date), count: 4)
+
+            let norm = normalizeWithPercentileClamp(values: hrs, lowerP: 0.05, upperP: 0.95)
+            hrBars = norm.values
+            hrMaxLabel = norm.displayMaxLabel
+            hrMinLabel = norm.displayMinLabel
         }
 
-        let rideSec = payload.avgRideSec ?? 0
+        // -----------------------------
+        // 2) 칼로리 (prev 비교)
+        // -----------------------------
+        caloriesValue = "\(todayKcal)kcal"
 
+        let prevKcal = Int(payload.prevTotalCaloriesKcal.rounded())
+        if prevKcal <= 0 {
+            caloriesDetail = ""
+            caloriesTrend = .none
+        } else if todayKcal > prevKcal {
+            caloriesDetail = "어제보다 칼로리를 더 소모했습니다"
+            caloriesTrend = .up
+        } else if todayKcal < prevKcal {
+            caloriesDetail = "어제보다 칼로리 소모량이 낮습니다"
+            caloriesTrend = .down
+        } else {
+            caloriesDetail = ""
+            caloriesTrend = .none
+        }
+
+        // -----------------------------
+        // 3) 속도/거리 (단위 변환!)
+        // -----------------------------
+        let avgSpeedKmh = payload.avgSpeed * 3.6
+        let maxSpeedKmh = payload.maxSpeed * 3.6
+
+        avgSpeed = String(format: "%.2f km/h", avgSpeedKmh)
+        // minSpeed는 payload에 없으니 details에서 계산(없으면 0)
+        let minSpeedKmh = (payload.details.map(\.speed).filter { $0 > 0 }.min() ?? 0) * 3.6
+        avgSpeedDetail = String(format: "(최저 %.0fkm/h ~ 최고 %.0fkm/h)", minSpeedKmh, maxSpeedKmh)
+
+        let distanceKm = payload.totalDistance / 1000.0
+        distance = String(format: "%.1f km", distanceKm)
+        distanceDetail = "이번주 목표까지 10km 남았습니다"
+
+        // -----------------------------
+        // 4) 운동 결과 색/타이틀
+        // -----------------------------
+        if didWorkout == false {
+            exerciseResultTitle = "운동을 하지 않았습니다."
+            exerciseResultColor = Color(.good)
+        } else if payload.avgPower >= 250 {
+            exerciseResultTitle = "Excellent"
+            exerciseResultColor = Color(.excellent)
+        } else if payload.avgPower >= 180 {
+            exerciseResultTitle = "Perfect"
+            exerciseResultColor = Color(.perfect)
+        } else {
+            exerciseResultTitle = "Good"
+            exerciseResultColor = Color(.good)
+        }
+
+        // -----------------------------
+        // 5) 운동 결과 상세(시간은 durationSec 사용)
+        // -----------------------------
         exerciseResultDetail =
-        "평균 BPM \(Int(payload.avgHeartRate.rounded())), 파워 데이터 \(Int(payload.avgPower.rounded()))W\n오늘 운동시간 \(formatRideTime(rideSec))"
+        "평균 BPM \(hrAverage), 파워 데이터 \(Int(payload.avgPower.rounded()))W\n오늘 운동시간 \(formatRideTime(payload.durationSec))"
 
+        // -----------------------------
+        // 6) 메모/컨디션 (기존 유지)
+        // -----------------------------
         if let plan = payload.dailyPlan, !plan.memo.isEmpty {
             feedbackMemo = plan.memo
         } else {
@@ -403,10 +409,13 @@ struct WorkoutDashboardLikeView: View {
     private struct NormalizedResult {
         let values: [Double]
         let displayMaxLabel: String
+        let displayMinLabel: String
     }
 
     private func normalizeWithPercentileClamp(values: [Int], lowerP: Double, upperP: Double) -> NormalizedResult {
-        guard !values.isEmpty else { return .init(values: [], displayMaxLabel: "") }
+        guard !values.isEmpty else {
+            return .init(values: [], displayMaxLabel: "", displayMinLabel: "")
+        }
 
         let sorted = values.sorted()
         let lo = percentile(sorted, p: lowerP)
@@ -416,7 +425,11 @@ struct WorkoutDashboardLikeView: View {
         let clamped = values.map { min(max($0, lo), hi) }
         let normalized = clamped.map { Double($0 - lo) / Double(denom) }
 
-        return .init(values: normalized, displayMaxLabel: "\(hi)")
+        return .init(
+            values: normalized,
+            displayMaxLabel: "\(hi)",
+            displayMinLabel: "\(lo)"
+        )
     }
 
     private func percentile(_ sorted: [Int], p: Double) -> Int {
@@ -432,45 +445,6 @@ struct WorkoutDashboardLikeView: View {
         let w = idx - Double(lo)
         let v = Double(sorted[lo]) * (1 - w) + Double(sorted[hi]) * w
         return Int(round(v))
-    }
-
-    
-    // MARK: - Top UI Components
-    private var topDateRow: some View {
-        ScrollViewReader { proxy in
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(dayNumbers, id: \.self) { day in
-                        let idx = dayNumbers.firstIndex(of: day) ?? 0
-                        let isSelected = selectedDayIndex == idx
-
-                        Button {
-                            selectedDayIndex = idx
-                            scrollToDay = day
-                        } label: {
-                            Text("\(day)")
-                                .font(.footnote)
-                                .frame(width: 48, height: 32)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 100)
-                                        .fill(isSelected ? Color.mint : Color.clear)
-                                )
-                        }
-                        .foregroundStyle(.primary)
-                        .id(day)
-                    }
-                }
-                .padding(.horizontal, 2)
-            }
-            .onChange(of: scrollToDay) { _, day in
-                guard let day else { return }
-                DispatchQueue.main.async {
-                    withAnimation(.easeInOut) {
-                        proxy.scrollTo(day, anchor: .center)
-                    }
-                }
-            }
-        }
     }
 
     func sectionHeader(_ title: String) -> some View {
@@ -501,20 +475,20 @@ private extension WorkoutDashboardLikeView {
 
     }
     
-    enum ValueStyle {
-        case accent
-        case normal
-    }
-    
-    func infoCard(title: String, value: String, valueStyle: ValueStyle, detail: String) -> some View {
+    func infoCard(
+        title: String,
+        value: String,
+        valueColor: Color,
+        detail: String
+    ) -> some View {
         card {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 6) {
                     Text(title)
                         .fontWeight(.medium)
-                    
+
                     Spacer()
-                    
+
                     Button {
                         // TODO: info
                     } label: {
@@ -522,20 +496,99 @@ private extension WorkoutDashboardLikeView {
                             .foregroundStyle(.question)
                     }
                 }
-                
+
                 Divider()
                     .padding(.horizontal, 2)
-                
+
                 Text(value)
                     .font(.title3)
                     .fontWeight(.bold)
-                    .foregroundStyle(valueStyle == .accent ? Color.mint : .primary)
-                
+                    .foregroundStyle(valueColor)
+
                 Text(detail)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
+        }
+    }
+    
+    private func caloriesInfoCard(title: String, value: String, detail: String, trend: CaloriesTrend) -> some View {
+        card {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 6) {
+                    Text(title)
+                        .fontWeight(.medium)
+
+                    Spacer()
+
+                    Button {
+                        // TODO: info
+                    } label: {
+                        Image(systemName: "questionmark.circle")
+                            .foregroundStyle(.question)
+                    }
+                }
+
+                Divider()
+                    .padding(.horizontal, 2)
+
+                HStack(spacing: 6) {
+                    Text(value)
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundStyle(Color.mint)
+
+                    if trend != .none {
+                        TrendTriangle(trend: trend)
+                            .padding(.top, 1)
+                    }
+
+                    Spacer()
+                }
+
+                if !detail.isEmpty {
+                    Text(detail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+    }
+    
+    private struct TrendTriangle: View {
+        let trend: WorkoutDashboardLikeView.CaloriesTrend
+
+        var body: some View {
+            RoundedTriangle()
+                .fill(trend == .up ? Color.blue : Color.red)
+                .frame(width: 14, height: 12)
+                .rotationEffect(trend == .up ? .degrees(0) : .degrees(180))
+        }
+    }
+
+    private struct RoundedTriangle: Shape {
+        var cornerRadius: CGFloat = 2.2
+
+        func path(in rect: CGRect) -> Path {
+            // 삼각형 꼭짓점 3개
+            let p1 = CGPoint(x: rect.midX, y: rect.minY) // top
+            let p2 = CGPoint(x: rect.maxX, y: rect.maxY) // bottom-right
+            let p3 = CGPoint(x: rect.minX, y: rect.maxY) // bottom-left
+
+            // 간단한 "둥근" 처리: 각 변 중간으로 들어가면서 곡선 연결
+            let m12 = CGPoint(x: (p1.x + p2.x)/2, y: (p1.y + p2.y)/2)
+            let m23 = CGPoint(x: (p2.x + p3.x)/2, y: (p2.y + p3.y)/2)
+            let m31 = CGPoint(x: (p3.x + p1.x)/2, y: (p3.y + p1.y)/2)
+
+            var path = Path()
+            path.move(to: m31)
+            path.addQuadCurve(to: m12, control: p1)
+            path.addQuadCurve(to: m23, control: p2)
+            path.addQuadCurve(to: m31, control: p3)
+            path.closeSubpath()
+            return path
         }
     }
 }
@@ -567,11 +620,11 @@ struct MiniBarChart: View {
 }
 
 
-
 // MARK: - Preview
 
 #Preview {
     NavigationStack {
         WorkoutDashboardLikeView()
+            .environmentObject(WorkoutDailyStore())
     }
 }

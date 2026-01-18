@@ -7,7 +7,8 @@ final class WorkoutDailyStore: ObservableObject {
 
     @Published private(set) var cache: [String: WorkoutDailyPayload] = [:]
     
-    @Published private(set) var lastUpdatedKey: String? = nil
+    @Published private(set) var lastUpdatedVersion: Int = 0
+    @Published private(set) var lastUpdatedKey: String = ""
 
     private var task: Task<Void, Never>?
 
@@ -46,6 +47,7 @@ final class WorkoutDailyStore: ObservableObject {
 
             cache[checkDate] = res.data
             lastUpdatedKey = checkDate
+            lastUpdatedVersion += 1
             
         } catch {
             if Task.isCancelled { return }
