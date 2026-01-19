@@ -70,7 +70,6 @@ struct WorkoutScoreGaugeView: View {
                         )
                 }
                 .scaleEffect(ringScale)
-                .padding(lineWidth / 2)
                 .animation(.easeOut(duration: 0.8), value: score)
                 
                 VStack(spacing: 10) {
@@ -95,10 +94,9 @@ struct WorkoutScoreGaugeView: View {
                         .fontWeight(.medium)
                         .foregroundStyle(gaugeGradient)
                 }
-                .padding(.top, size * 0.001)
             }
         }
-        .aspectRatio(1.15, contentMode: .fit)
+        .aspectRatio(1.0, contentMode: .fit)
     }
 }
 

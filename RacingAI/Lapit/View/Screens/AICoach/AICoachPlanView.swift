@@ -14,8 +14,8 @@ struct AICoachPlanView: View {
                 LoadingPlanView(onBack: onBack)
                     .tabBarHidden(true)
                 
-            case .loaded(let plan):
-                PlanResultView(onBack: onBack, plan: plan)
+            case .loaded(let result):
+                PlanResultView(onBack: onBack, plan: result.parsed, rawMarkdown: result.rawMarkdown)
                     .tabBarHidden(true)
                 
             case .failed(let message):

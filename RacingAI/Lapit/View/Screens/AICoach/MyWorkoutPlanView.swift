@@ -1,23 +1,40 @@
 import SwiftUI
+import SwiftData
 
 struct MyWorkoutPlanView: View {
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
 
-    let initialPlan: WorkoutPlan
+    let checkDate: String
 
+    @State private var entity: DailyPlanEntity?
+    @State private var checklist: [PlanCheckItem] = []
+    @State private var memo: String = ""
+    @State private var errorMessage: String?
+
+    // (기존 탭 UI 유지용) - 실제 날짜 리스트는 나중에 확장 가능
     private let dates = ["11월 2일", "11월 3일", "11월 4일"]
     @State private var selectedIndex: Int = 1
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                
+
+                Text(checkDate.toKoreanMonthDay())
+                    .font(.title3)
+                    .fontWeight(.medium)
+
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+
+                // (기존 날짜 세그먼트 UI 유지)
                 HStack {
                     ForEach(dates.indices, id: \.self) { idx in
-                        Button {
-                            selectedIndex = idx
-                        } label: {
+                        Button { selectedIndex = idx } label: {
                             Text(dates[idx])
                                 .font(selectedIndex == idx ? .callout : .subheadline)
                                 .fontWeight(selectedIndex == idx ? .medium : .regular)
@@ -27,7 +44,6 @@ struct MyWorkoutPlanView: View {
                                     RoundedRectangle(cornerRadius: 100)
                                         .foregroundStyle(selectedIndex == idx ? Color("MainColor") : Color.clear)
                                 )
-                                    
                         }
                         .foregroundStyle(.primary)
                     }
@@ -36,88 +52,130 @@ struct MyWorkoutPlanView: View {
                 .frame(maxWidth: .infinity)
                 .background {
                     Rectangle()
-                      .foregroundColor(.clear)
-                      .background(.white)
-                      .cornerRadius(100)
-                      .shadow(color: Color(red: 0.82, green: 0.82, blue: 0.84).opacity(0.2), radius: 2, x: 0, y: 2)
+                        .foregroundColor(.clear)
+                        .background(.white)
+                        .cornerRadius(100)
+                        .shadow(color: Color(red: 0.82, green: 0.82, blue: 0.84).opacity(0.2), radius: 2, x: 0, y: 2)
                 }
 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(initialPlan.summaryTitle)
-                        .fontWeight(.medium)
-                    
-                    Divider()
-                        .padding(.horizontal, 2) 
-
-                    Text(initialPlan.summaryDescription)
-                        .font(.footnote)
-                }
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 15))
-
-
-                    
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("운동 내용")
-                        .font(.title3)
-                        .fontWeight(.medium)
-                    
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("목표 지표")
+                if let entity {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(entity.summaryTitle)
                             .fontWeight(.medium)
-                        
-                        Divider()
-                            .padding(.horizontal, 2)
 
-                        metricRow(title: "평균 HR", value: initialPlan.avgHRText)
-                        metricRow(title: "최고속 구간", value: initialPlan.maxSpeedText)
-                        metricRow(title: "Training Efficiency Score 목표", value: initialPlan.tesGoalText)
+                        Divider().padding(.horizontal, 2)
+
+                        Text(entity.summaryDescription)
+                            .font(.footnote)
                     }
                     .padding()
                     .frame(maxWidth: .infinity)
                     .background(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 15))
 
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("운동 내용")
+                            .font(.title3)
+                            .fontWeight(.medium)
 
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("세부 계획").font(.subheadline).fontWeight(.semibold)
-                        
-                        Divider()
-                            .padding(.horizontal, 2)
-
-                        metricRow(
-                            title: "워밍업",
-                            value: initialPlan.warmupText)
-
-
-                        Text("메인")
-                            .font(.caption)
-                        ForEach(initialPlan.mainItems.indices, id: \.self) { i in
-                            Text(initialPlan.mainItems[i])
-                                .font(.body)
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("목표 지표")
                                 .fontWeight(.medium)
+
+                            Divider().padding(.horizontal, 2)
+
+                            metricRow(title: "평균 HR", value: entity.avgHRText)
+                            metricRow(title: "최고속 구간", value: entity.maxSpeedText)
+                            metricRow(title: "Training Efficiency Score 목표", value: entity.tesGoalText)
                         }
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 15))
+
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("세부 계획")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+
+                            Divider().padding(.horizontal, 2)
+
+                            metricRow(title: "워밍업", value: entity.warmupText)
+
+                            Text("메인")
+                                .font(.caption)
+
+                            ForEach(entity.mainItems.indices, id: \.self) { i in
+                                Text(entity.mainItems[i])
+                                    .font(.body)
+                                    .fontWeight(.medium)
+                            }
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 15))
+
+                        // ✅ 체크리스트(원하신 “String + Bool 리스트”)
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("세부 계획 체크")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+
+                            Divider().padding(.horizontal, 2)
+
+                            ForEach(checklist.indices, id: \.self) { idx in
+                                Button {
+                                    checklist[idx].isDone.toggle()
+                                    saveLocalOnly()
+                                } label: {
+                                    HStack(alignment: .top, spacing: 10) {
+                                        Image(systemName: checklist[idx].isDone ? "checkmark.circle.fill" : "circle")
+                                        Text(checklist[idx].text)
+                                            .font(.body)
+                                            .multilineTextAlignment(.leading)
+                                    }
+                                }
+                                .foregroundStyle(.primary)
+                            }
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 15))
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("메모")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+
+                            TextField("메모를 입력하세요", text: $memo, axis: .vertical)
+                                .textFieldStyle(.roundedBorder)
+
+                            Button("메모 저장") {
+                                saveLocalOnly()
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 15))
                     }
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 15))
+
+                } else {
+                    Text("저장된 계획을 불러오는 중이에요...")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 }
-                
             }
             .padding()
         }
-        .background(
-            Color("Background")
-        )
+        .background(Color("Background"))
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 HStack(spacing: 5) {
-                    Button {
-                        dismiss()
-                    } label: {
+                    Button { dismiss() } label: {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundStyle(Color("Chevron"))
@@ -129,46 +187,32 @@ struct MyWorkoutPlanView: View {
                         .fontWeight(.medium)
                 }
             }
-            
-            ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: 4) {
-                    Button {
-                        // TODO: 계획 짜기 버튼
-                    } label: {
-                        Text("계획 짜기")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 4)
-                            .foregroundStyle(.black)
-                            .background(
-                                LinearGradient(
-                                stops: [
-                                Gradient.Stop(color: .white, location: 0.00),
-                                Gradient.Stop(color: Color("Gradient").opacity(0.7), location: 1.00),
-                                ],
-                                startPoint: UnitPoint(x: 0.5, y: 1),
-                                endPoint: UnitPoint(x: 0.5, y: 0)
-                                )
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 100))
-                    }
-                    .shadow(color: Color("Grdaient" ).opacity(0.2), radius: 2, x: 0, y: 2)
-                    .overlay(
-                    RoundedRectangle(cornerRadius: 100)
-                    .inset(by: 0.25)
-                    .stroke(Color("Gradient"), lineWidth: 0.5)
-                    )
-                    
-                    Button {
-                        // TODO: 캘린더 버튼
-                    } label: {
-                        Image(systemName: "calendar")
-                            .foregroundStyle(.black)
-                    }
-                }
-            }
+        }
+        .navigationBarBackButtonHidden(true)
+        .task { load() }
+    }
+
+    private func load() {
+        do {
+            let e = try DailyPlanLocalStore.fetch(by: checkDate, context: modelContext)
+            self.entity = e
+            self.checklist = e?.checklist ?? []
+            self.memo = e?.memo ?? ""
+            self.errorMessage = (e == nil) ? "저장된 계획을 찾지 못했어요." : nil
+        } catch {
+            self.errorMessage = error.localizedDescription
+        }
+    }
+
+    private func saveLocalOnly() {
+        guard let entity else { return }
+        do {
+            entity.checklist = checklist
+            entity.memo = memo
+            entity.updatedAt = Date()
+            try modelContext.save()
+        } catch {
+            self.errorMessage = error.localizedDescription
         }
     }
 
@@ -184,26 +228,14 @@ struct MyWorkoutPlanView: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        MyWorkoutPlanView(
-            initialPlan: WorkoutPlan(
-                dateTitle: "11월 3일",
-                summaryTitle: "회복 중심 지구력 훈련",
-                summaryDescription: "오늘 훈련은 회복을 최우선으로 하며, 저강도 지구력 주행과 짧은 인터벌을 조합합니다.",
-                trainingContent: "사이클링",
-                avgHRText: "130 ~ 140 BPM",
-                maxSpeedText: "45 km/h 이상 2회",
-                tesGoalText: "80점 이상",
-                warmupText: "Z2 15분 → Z3 5분 (케이던스 90~95)",
-                mainItems: [
-                    "지구력 주행 20분 @ 25~30 km/h (RPE 5~6)",
-                    "회복 5분 @ Z1",
-                    "1분 스프린트 @ 40 km/h 이상 → 회복 3분 @ Z2 (3세트)",
-                    "쿨다운 Z1 10분"
-                ]
-            )
-        )
+private extension String {
+    func toKoreanMonthDay() -> String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "ko_KR")
+        f.timeZone = .current
+        f.dateFormat = "yyyy-MM-dd"
+        guard let date = f.date(from: self) else { return self }
+        let c = Calendar.current
+        return "\(c.component(.month, from: date))월 \(c.component(.day, from: date))일"
     }
 }
-

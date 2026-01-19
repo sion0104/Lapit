@@ -9,11 +9,6 @@
 			<key>orderHint</key>
 			<integer>1</integer>
 		</dict>
-		<key>LapitWatchApp Watch App Extension.xcscheme_^#shared#^_</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>2</integer>
-		</dict>
 		<key>LapitWatchApp Watch App.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
@@ -27,7 +22,7 @@
 		<key>extension.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>2</integer>
+			<integer>3</integer>
 		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
@@ -42,12 +37,27 @@
 			<key>primary</key>
 			<true/>
 		</dict>
+		<key>AD6CAE242F1E6512003C403B</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>AD8E1B3C2F14E73C00BFF3B9</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>ADDB57ED2EB8E1B600131F3C</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
 		<key>ADFCCECA2F0EB22F00265C0E</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>ADFCCF2E2F0EBA6C00265C0E</key>
 		<dict>
 			<key>primary</key>
 			<true/>

@@ -5,7 +5,7 @@ final class AICoachPlanViewModel: ObservableObject {
     enum State: Equatable {
         case idle
         case loading
-        case loaded(WorkoutPlan)
+        case loaded(WorkoutPlanResult)
         case failed(String)
     }
     
@@ -17,8 +17,8 @@ final class AICoachPlanViewModel: ObservableObject {
         
         state = .loading
         do {
-            let plan = try await fetchPlan(userId: userId, date: date)
-            state = .loaded(plan)
+            let result = try await fetchPlan(userId: userId, date: date)
+            state = .loaded(result)
         } catch {
             state = .failed(error.localizedDescription)
         }
@@ -41,19 +41,19 @@ private extension AICoachPlanViewModel {
         let plan: String
     }
     
-    func fetchPlan(userId: Int, date: Date) async throws -> WorkoutPlan {
+    func fetchPlan(userId: Int, date: Date) async throws -> WorkoutPlanResult {
         let url = URL(string: "https://fastapi-fit-675973952276.europe-west1.run.app/training/plan")!
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
+
         let dateString = date.toYMD()
         let body = TrainingPlanRequest(user_id: userId, date: dateString)
         request.httpBody = try JSONEncoder().encode(body)
-        
+
         let (data, response) = try await URLSession.shared.data(for: request)
-        
+
         guard let http = response as? HTTPURLResponse else {
             throw URLError(.badServerResponse)
         }
@@ -63,9 +63,23 @@ private extension AICoachPlanViewModel {
                 NSLocalizedDescriptionKey: "HTTP \(http.statusCode)\n\(raw)"
             ])
         }
-        
+
         let decoded = try JSONDecoder().decode(TrainingPlanResponse.self, from: data)
-        return try parsePlanString(decoded.plan, dateTitle: "\(date.monthKorean()) \(date.day())일 운동 계획")
+
+        let rawMarkdown = normalizeMarkdown(decoded.plan)
+
+        let title = "\(date.monthKorean()) \(date.day())일 운동 계획"
+        let parsed = try parsePlanString(rawMarkdown, dateTitle: title)
+
+        return WorkoutPlanResult(rawMarkdown: rawMarkdown, parsed: parsed)
+    }
+
+    func normalizeMarkdown(_ raw: String) -> String {
+        var text = raw
+        text = text.replacingOccurrences(of: "\\n", with: "\n")
+        text = text.replacingOccurrences(of: "\r\n", with: "\n")
+        text = text.replacingOccurrences(of: "\r", with: "\n")
+        return text
     }
     
     func parsePlanString(_ raw: String, dateTitle: String) throws -> WorkoutPlan {
@@ -103,11 +117,7 @@ private extension AICoachPlanViewModel {
             // 메인 파트: "- 메인:" 아래의 블록을 배열로
             let mainItems = extractMainItemsFromDetail(detailSection)
 
-            // 원하시면 쿨다운을 별도 필드로 만들 수도 있는데,
-            // 지금 모델은 mainItems에 포함시키는 방식이 깔끔합니다.
             if let cooldown = extractMarkdownValue(in: detailSection, key: "쿨다운"), !cooldown.isEmpty {
-                // mainItems에 쿨다운 한 줄 추가 (옵션)
-                // 이미 extractMainItemsFromDetail 안에서 포함시키게 해두는 방법도 있음.
             }
 
             return WorkoutPlan(

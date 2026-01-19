@@ -63,180 +63,180 @@ struct WorkoutDashboardLikeView: View {
     }
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                WorkoutScoreGaugeView(
-                    score: score,
-                    title: "운동 점수",
-                    message: "훈련을 잘 하고 있어요!",
-                    ringScale: 1.18
-                )
-                .frame(height: 175)
-                .padding(.top, 30)
-
-                card {
-                    VStack(alignment: .leading, spacing: 10) {
-                        HStack {
-                            Text("피드백 메모")
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 20) {
+                    WorkoutScoreGaugeView(
+                        score: score,
+                        title: "운동 점수",
+                        message: "훈련을 잘 하고 있어요!",
+                        ringScale: 1.18
+                    )
+                    .frame(height: 175)
+                    card {
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack {
+                                Text("피드백 메모")
+                                    .font(.headline)
+                                    .fontWeight(.semibold)
+                                
+                                Spacer()
+                                
+                                Button {
+                                    // TODO: memo edit
+                                } label: {
+                                    Image(systemName: "pencil")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            
+                            Divider()
+                                .padding(.horizontal, 2)
+                            
+                            Text(feedbackMemo)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    
+                    // MARK: Diagnosis Section
+                    sectionHeader("운동 진단")
+                    
+                    VStack(spacing: 12) {
+                        infoCard(
+                            title: "운동 결과",
+                            value: exerciseResultTitle, valueColor: exerciseResultColor,
+                            detail: exerciseResultDetail
+                        )
+                        
+                        caloriesInfoCard(
+                            title: "소모 칼로리",
+                            value: caloriesValue,
+                            detail: caloriesDetail,
+                            trend: caloriesTrend
+                        )
+                    }
+                    
+                    // MARK: Today Workout Data
+                    sectionHeader("운동 데이터")
+                    
+                    // Heart Rate Card
+                    card {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("심박수")
+                                .fontWeight(.medium)
+                            
+                            Divider()
+                                .padding(.horizontal, 2)
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("평균 심박수 \(hrAverage) BPM")
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                                
+                                Text("최고 \(hrMax), 최저 \(hrMin)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            
+                            if hrBars.isEmpty {
+                                Text("심박 데이터가 없습니다")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                HeartRatePillChart(
+                                    values: hrBars,
+                                    maxLabel: hrMaxLabel.isEmpty ? " " : hrMaxLabel,
+                                    minLabel: hrMinLabel.isEmpty ? " " : hrMinLabel,
+                                    xLabels: hrXAxisLabels
+                                )
+                            }
+                        }
+                    }
+                    
+                    // Avg Speed
+                    card {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("평균 주행속도")
                                 .font(.headline)
                                 .fontWeight(.semibold)
                             
-                            Spacer()
+                            Text(avgSpeed)
+                                .font(.title3)
+                                .fontWeight(.bold)
+                                .foregroundStyle(.blue)
                             
-                            Button {
-                                // TODO: memo edit
-                            } label: {
-                                Image(systemName: "pencil")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(.secondary)
-                            }
+                            Text(avgSpeedDetail)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
-                        
-                        Divider()
-                            .padding(.horizontal, 2)
-                        
-                        Text(feedbackMemo)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
                     }
-                }
-                
-                // MARK: Diagnosis Section
-                sectionHeader("운동 진단")
-                
-                VStack(spacing: 12) {
-                    infoCard(
-                        title: "운동 결과",
-                        value: exerciseResultTitle, valueColor: exerciseResultColor,
-                        detail: exerciseResultDetail
-                    )
                     
-                    caloriesInfoCard(
-                        title: "소모 칼로리",
-                        value: caloriesValue,
-                        detail: caloriesDetail,
-                        trend: caloriesTrend
-                    )
-                }
-                
-                // MARK: Today Workout Data
-                sectionHeader("운동 데이터")
-                
-                // Heart Rate Card
-                card {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("심박수")
-                            .fontWeight(.medium)
-                        
-                        Divider()
-                            .padding(.horizontal, 2)
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("평균 심박수 \(hrAverage) BPM")
+                    // Distance
+                    card {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("주행거리")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                            
+                            Text(distance)
+                                .font(.title3)
+                                .fontWeight(.bold)
+                                .foregroundStyle(.blue)
+                            
+                            Text(distanceDetail)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    
+                    // Condition
+                    card {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("컨디션")
+                                .fontWeight(.medium)
+                            
+                            Text(conditionTitle)
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
                             
-                            Text("최고 \(hrMax), 최저 \(hrMin)")
+                            Text(conditionDetail)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
-                        
-                        if hrBars.isEmpty {
-                            Text("심박 데이터가 없습니다")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        } else {
-                            HeartRatePillChart(
-                                values: hrBars,
-                                maxLabel: hrMaxLabel.isEmpty ? " " : hrMaxLabel,
-                                minLabel: hrMinLabel.isEmpty ? " " : hrMinLabel,
-                                xLabels: hrXAxisLabels
-                            )
-                        }
                     }
                 }
-                
-                // Avg Speed
-                card {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("평균 주행속도")
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                        
-                        Text(avgSpeed)
-                            .font(.title3)
-                            .fontWeight(.bold)
-                            .foregroundStyle(.blue)
-                        
-                        Text(avgSpeedDetail)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
+                .padding()
+            }
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text(todayTitleString)
+                        .font(.title3)
+                        .foregroundStyle(.black)
+                        .fontWeight(.bold)
                 }
                 
-                // Distance
-                card {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("주행거리")
-                            .font(.headline)
-                            .fontWeight(.semibold)
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
                         
-                        Text(distance)
-                            .font(.title3)
-                            .fontWeight(.bold)
-                            .foregroundStyle(.blue)
-                        
-                        Text(distanceDetail)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                
-                // Condition
-                card {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("컨디션")
-                            .fontWeight(.medium)
-                        
-                        Text(conditionTitle)
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                        
-                        Text(conditionDetail)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                    } label: {
+                        Image(systemName: "calendar")
+                            .foregroundStyle(Color("Chevron"))
                     }
                 }
             }
-            .padding()
-        }
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text("2025년 11월 3일 월요일")
-                    .font(.title3)
-                    .foregroundStyle(.black)
-                    .fontWeight(.bold)
+            .onAppear {
+                loadToday()
+            }
+            .onChange(of: store.lastUpdatedVersion) { _, _ in
+                let key = todayCheckDateString
+                guard let payload = store.cache[key] else { return }
+                apply(payload: payload)
             }
             
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    
-                } label: {
-                    Image(systemName: "calendar")
-                        .foregroundStyle(Color("Chevron"))
-                }
-            }
+            .background(Color(.systemGroupedBackground))
         }
-        .onAppear {
-            loadToday()
-        }
-        .onChange(of: store.lastUpdatedVersion) { _, _ in
-            let key = todayCheckDateString
-            guard let payload = store.cache[key] else { return }
-            apply(payload: payload)
-        }
-
-        .background(Color(.systemGroupedBackground))
     }
     
     @MainActor

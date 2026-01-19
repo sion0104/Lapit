@@ -3,9 +3,19 @@ import SwiftUI
 struct PlanResultView: View {
     let onBack: () -> Void
     let plan: WorkoutPlan
+    let rawMarkdown: String
     
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    
     @State private var goToMyPlan: Bool = false
+    @State private var isSaving: Bool = false
+    @State private var saveError: String?
+    
+    private var checkDate: String {
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
+        return tomorrow.toYMDLocal()
+    }
     
     var body: some View {
         ScrollView {
@@ -103,15 +113,62 @@ struct PlanResultView: View {
             AppButton(
                 title: "내일 플래너에 등록",
                 isEnabled: true) {
-                    goToMyPlan = true
+                    Task { await saveAndGoMyPlan() }
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .padding()
         }
         .navigationBarBackButtonHidden(true)
         .navigationDestination(isPresented: $goToMyPlan) {
-            MyWorkoutPlanView(initialPlan: plan)
+            MyWorkoutPlanView(checkDate: checkDate)
         }
+    }
+    
+    private func saveAndGoMyPlan() async {
+        await MainActor.run {
+            isSaving = true
+            saveError = nil
+        }
+
+        let memoToSave = ""
+        
+        do {
+            _ = try await APIClient.shared.saveDailyPlan(
+                checkDate: checkDate,
+                plan: rawMarkdown,
+                memo: memoToSave
+            )
+
+            let checklist = buildChecklistItems(from: plan)
+            _ = try DailyPlanLocalStore.upsert(
+                checkDate: checkDate,
+                parsed: plan,
+                checklist: checklist,
+                memo: memoToSave,
+                context: modelContext
+            )
+
+            await MainActor.run {
+                isSaving = false
+                goToMyPlan = true
+            }
+        } catch {
+            await MainActor.run {
+                isSaving = false
+                saveError = error.userMessage
+            }
+        }
+    }
+
+
+
+    private func buildChecklistItems(from plan: WorkoutPlan) -> [PlanCheckItem] {
+        var result: [PlanCheckItem] = []
+        result.append(.init(text: "워밍업: \(plan.warmupText)", isDone: false))
+        for item in plan.mainItems {
+            result.append(.init(text: item, isDone: false))
+        }
+        return result
     }
     
     @ViewBuilder
@@ -133,24 +190,13 @@ struct PlanResultView: View {
     }
 }
 
-#Preview {
-    PlanResultView(
-        onBack: { },
-        plan: WorkoutPlan(
-            dateTitle: "11월 4일 운동 계획",
-            summaryTitle: "스피드 내구 강화 (벨로토름/고강도)",
-            summaryDescription: """
-최고속 유지 구간을 10% 연장하는 데 초점이 있어요.
-후반 스프린트 하락 억제가 핵심입니다.
-""", trainingContent: "운동내용",
-            avgHRText: "150 ~ 160 BPM (ZR)",
-            maxSpeedText: "60km/h 이상 4회",
-            tesGoalText: "85점+",
-            warmupText: "Z2 10' → Z3 5' / 켄던스 95–100",
-            mainItems: [
-                "1. 고속 주행 90\" @ 60–63km/h (RPE 8–9)\n→ 회복 3' @ Z2",
-                "2. 플라잉 스타트 200m × 4\n(출발 가속 최대, 기어비 평소 +1단 시도)"
-            ]
-        )
-    )
+private extension Date {
+    func toYMDLocal() -> String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "ko_KR")
+        f.timeZone = .current
+        f.dateFormat = "yyyy-MM-dd"
+        return f.string(from: self)
+    }
 }
+

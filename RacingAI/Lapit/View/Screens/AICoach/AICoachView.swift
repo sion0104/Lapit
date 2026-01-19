@@ -3,10 +3,13 @@ import SwiftUI
 struct AICoachView: View {
     let onBack: () -> Void
     
+    @Environment(\.modelContext) private var modelContext
+    
     @State private var goGenerator = false
     @State private var goMyPlan = false
     
-    @State private var myPlan: WorkoutPlan?
+    @State private var checkDateForNav: String = ""
+    
     @State private var isChecking = false
     @State private var errorMessage: String?
 
@@ -83,14 +86,8 @@ struct AICoachView: View {
                     }
                 }
             }
-            // ✅ "있음" → MyWorkoutPlanView
             .navigationDestination(isPresented: $goMyPlan) {
-                if let plan = myPlan {
-                    MyWorkoutPlanView(initialPlan: plan)
-                } else {
-                    // 방어
-                    Text("계획을 불러오는 중이에요…")
-                }
+                MyWorkoutPlanView(checkDate: checkDateForNav)
             }
             .navigationDestination(isPresented: $goGenerator) {
                 let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
@@ -120,13 +117,24 @@ struct AICoachView: View {
                 }
                 return
             }
+            
+            let rawMarkdown = normalizeMarkdown(planString)
 
             let title = "\(tomorrow.monthKorean()) \(tomorrow.day())일 운동 계획"
-            let parsed = try WorkoutPlanParser.parse(raw: planString, dateTitle: title)
+            let parsed = try WorkoutPlanParser.parse(raw: rawMarkdown, dateTitle: title)
+            
+            let checklist = buildChecklistItems(from: parsed)
+            _ = try DailyPlanLocalStore.upsert(
+                checkDate: checkDate,
+                parsed: parsed,
+                checklist: checklist,
+                memo: "",
+                context: modelContext
+            )
 
             await MainActor.run {
                 isChecking = false
-                myPlan = parsed
+                checkDateForNav = checkDate
                 goMyPlan = true
             }
 
@@ -150,12 +158,29 @@ struct AICoachView: View {
             }
         }
     }
+    
+    private func buildChecklistItems(from plan: WorkoutPlan) -> [PlanCheckItem] {
+        var result: [PlanCheckItem] = []
+        result.append(.init(text: "워밍업: \(plan.warmupText)", isDone: false))
+        for item in plan.mainItems {
+            result.append(.init(text: item, isDone: false))
+        }
+        return result
+    }
+
+    private func normalizeMarkdown(_ raw: String) -> String {
+        var text = raw
+        text = text.replacingOccurrences(of: "\\n", with: "\n")
+        text = text.replacingOccurrences(of: "\r\n", with: "\n")
+        text = text.replacingOccurrences(of: "\r", with: "\n")
+        return text
+    }
 }
 
 private extension Date {
     func toYMDLocal() -> String {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
+        f.locale = Locale(identifier: "ko_KR")
         f.timeZone = .current
         f.dateFormat = "yyyy-MM-dd"
         return f.string(from: self)
