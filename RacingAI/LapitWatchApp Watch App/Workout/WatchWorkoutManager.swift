@@ -19,6 +19,40 @@ final class WatchWorkoutManager: NSObject, ObservableObject {
     private var lastSentAt: Date?
     
     private var isStopping: Bool = false
+    
+    // WatchWorkoutManager 내부에 추가
+    private var pendingStartCommandId: String?
+    private var pendingStartCommand: WorkoutCommand?
+
+    func setPendingCommandId(command: WorkoutCommand, commandId: String) {
+        // start에 대해 running ACK를 정확히 보내기 위해 저장
+        if command == .startCycling {
+            pendingStartCommand = command
+            pendingStartCommandId = commandId
+        }
+    }
+
+    func sendAck(command: WorkoutCommand, commandId: String, status: WorkoutAckStatus, message: String?) {
+        guard WCSession.isSupported() else { return }
+        let s = WCSession.default
+        guard s.activationState == .activated else { return }
+
+        let ack = WorkoutAck(
+            command: command,
+            commandId: commandId,
+            status: status,
+            timestamp: Date(),
+            message: message
+        )
+
+        guard let data = try? JSONEncoder().encode(ack),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return }
+
+        s.sendMessage(json, replyHandler: nil) { error in
+            print("❌ ACK send error:", error)
+        }
+    }
+
 
     override private init() {
         super.init()
@@ -155,7 +189,7 @@ final class WatchWorkoutManager: NSObject, ObservableObject {
     }
 
     private func makePayload(now: Date) -> LiveMetricsPayload {
-        guard let builder = workoutBuilder else {
+        guard workoutBuilder != nil else {
             return LiveMetricsPayload(
                 timestamp: now,
                 heartRateBPM: nil,
@@ -213,12 +247,35 @@ extension WatchWorkoutManager: HKWorkoutSessionDelegate {
     nonisolated func workoutSession(_ workoutSession: HKWorkoutSession,
                                     didChangeTo toState: HKWorkoutSessionState,
                                     from fromState: HKWorkoutSessionState,
-                                    date: Date) { }
+                                    date: Date) {
+        Task { @MainActor in
+            // “진짜 running” 시점
+            if toState == .running,
+               let cmd = self.pendingStartCommand,
+               let cmdId = self.pendingStartCommandId {
+                self.sendAck(command: cmd, commandId: cmdId, status: .started, message: nil)
+                self.pendingStartCommand = nil
+                self.pendingStartCommandId = nil
+            }
+
+            // ended 상태는 stop 쪽에서 이미 ack를 보내고 있지만,
+            // 필요하면 여기서도 추가 방어 가능
+        }
+    }
 
     nonisolated func workoutSession(_ workoutSession: HKWorkoutSession,
                                     didFailWithError error: Error) {
         Task { @MainActor in
             print("❌ workoutSession failed:", error)
+
+            // start pending이 있었는데 실패했다면 failed ACK
+            if let cmd = self.pendingStartCommand,
+               let cmdId = self.pendingStartCommandId {
+                self.sendAck(command: cmd, commandId: cmdId, status: .failed, message: error.localizedDescription)
+                self.pendingStartCommand = nil
+                self.pendingStartCommandId = nil
+            }
+
             await self.cleanupAfter()
         }
     }

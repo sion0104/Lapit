@@ -471,7 +471,7 @@ private extension Data {
     }
 }
 
-private extension APIClient {
+extension APIClient {
     func attachAuthorizationIfNeeded(to request: inout URLRequest) {
         guard let raw = TokenStore.shared.loadAuthorizationValue() else {
             request.setValue(nil, forHTTPHeaderField: "Authorization")

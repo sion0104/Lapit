@@ -17,6 +17,29 @@ final class CyclingDashboardLiveState: ObservableObject {
     private var lastValidSpeedMps: Double? = nil
     private var lastSpeedAt: Date? = nil
     var speedHoldSec: TimeInterval = 2.0
+    
+    @Published private(set) var watchDeliveryText: String = ""
+    @Published private(set) var watchDeliveryDetail: String = ""
+
+    func bindWatchDelivery(_ state: PhoneWorkoutReceiver.DeliveryState) {
+        switch state {
+        case .idle:
+            watchDeliveryText = ""
+            watchDeliveryDetail = ""
+        case .waitingForWatch:
+            watchDeliveryText = "워치 연결 대기"
+            watchDeliveryDetail = "명령 전달을 시도 중입니다."
+        case .sending(let cmd, let attempt):
+            watchDeliveryText = "명령 전송 중"
+            watchDeliveryDetail = "\(cmd.rawValue) (시도 \(attempt))"
+        case .acked(let ack):
+            watchDeliveryText = "워치 응답: \(ack.status.rawValue)"
+            watchDeliveryDetail = "\(ack.command.rawValue)"
+        case .failed(let msg):
+            watchDeliveryText = "전송 실패"
+            watchDeliveryDetail = msg
+        }
+    }
 
     func reset() {
         currentDistanceMeters = nil

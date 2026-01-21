@@ -3,6 +3,8 @@ import SwiftUI
 struct CalendarView: View {
     @Environment(\.dismiss) private var dismiss
     private let calendar = Calendar.current
+    
+    @StateObject private var vm = CalendarMonthScoreViewModel()
 
     private let scoreByDate: [Date: Int]
     private let codeByDate: [Date: String]
@@ -125,6 +127,10 @@ struct CalendarView: View {
         .onAppear {
             selectedDate = calendar.startOfDay(for: Date())
             currentMonth = startOfMonth(Date())
+            vm.load(month: currentMonth)
+        }
+        .onChange(of: currentMonth) { _, newValue in
+            vm.load(month: newValue)
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -174,10 +180,9 @@ struct CalendarView: View {
                             day: day,
                             month: month,
                             selectedDate: $selectedDate,
-                            score: day.flatMap { scoreByDate[calendar.startOfDay(for: $0)] },
+                            score: day.flatMap { vm.scoreByDate[calendar.startOfDay(for:  $0)] },
                             isPreview: isPreview,
                             onTap: { tappedDay in
-                                // ✅ preview는 탭 불가 (위에서 allowsHitTesting(false)로 막아둠)
                                 selectedDate = calendar.startOfDay(for: tappedDay)
                                 onSelect(tappedDay)
                                 dismiss()

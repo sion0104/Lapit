@@ -70,8 +70,10 @@ final class CyclingRideViewModel: ObservableObject {
         switch status {
         case .running:
             pause()
+            PhoneWorkoutReceiver.shared.sendEventually(.pause)
         case .paused:
             resume()
+            PhoneWorkoutReceiver.shared.sendEventually(.resume)
         default:
             break
         }
@@ -86,6 +88,7 @@ final class CyclingRideViewModel: ObservableObject {
         resetTimeState()
 
         status = .idle
+        PhoneWorkoutReceiver.shared.sendEventually(.stop)
     }
 
     /// 카운트다운 취소
@@ -133,6 +136,7 @@ final class CyclingRideViewModel: ObservableObject {
         elapsedSeconds = 0
         
         onRunningStarted?()
+        PhoneWorkoutReceiver.shared.sendEventually(.startCycling)
     }
 
     private func pause() {
