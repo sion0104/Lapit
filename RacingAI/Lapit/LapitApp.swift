@@ -14,5 +14,10 @@ struct LapitApp: App {
                 .environmentObject(bodyInfoStore)
                 .environmentObject(userSessionStore)
         }
+        .modelContainer(
+            for: [
+                DailyPlanEntity.self
+            ]
+        )
     }
 }

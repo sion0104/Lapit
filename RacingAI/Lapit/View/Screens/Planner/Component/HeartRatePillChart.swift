@@ -39,13 +39,6 @@ struct HeartRatePillChart: View {
                     let rawBarWidth = (chartW - CGFloat(count - 1) * spacing) / CGFloat(count)
                     let barWidth = max(minBarWidth, rawBarWidth - 2)
 
-                    // ✅ 선과 캡슐 사이 여백(이 값만 키워도 “안 넘는 느낌”이 확 좋아집니다)
-                    let lineGap: CGFloat = 4
-
-                    // top/bottom은 “선 기준”으로 간격을 둠
-                    let topInset = lineGap
-                    let bottomInset = lineGap
-                    let usableH = max(1, h - topInset - bottomInset)
 
                     // 상단/하단 라인
                     Path { p in

@@ -31,11 +31,6 @@ struct CDMetricGrid: View {
                             Text(distanceText)
                                 .font(.title3)
                                 .monospacedDigit()
-                            
-                            Spacer()
-                            Text(distanceHint)
-                                .font(.caption)
-                                .foregroundStyle(.mint)
                         }
                     }
 
@@ -49,11 +44,6 @@ struct CDMetricGrid: View {
                             Text(speedText)
                                 .font(.title3)
                                 .monospacedDigit()
-                            
-                            Spacer()
-                            Text(paceHint)
-                                .font(.caption)
-                                .foregroundStyle(.mint)
                         }
                     }
                 }

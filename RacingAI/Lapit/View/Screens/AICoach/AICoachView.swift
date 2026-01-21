@@ -109,8 +109,19 @@ struct AICoachView: View {
 
         do {
             let res: CommonResponse<DailyAIPlanPayload> = try await APIClient.shared.fetchDailyAIPlan(checkDate: checkDate)
+            
+            print("plan raw =", String(describing: res.data.plan))
 
-            guard let planString = res.data.plan, !planString.isEmpty else {
+            let planTrimmed = res.data.plan?
+                .replacingOccurrences(of: "\\n", with: "\n")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+
+            let isNoPlan =
+                (planTrimmed == nil) ||
+                planTrimmed!.isEmpty ||
+                planTrimmed!.lowercased() == "null"
+
+            guard !isNoPlan else {
                 await MainActor.run {
                     isChecking = false
                     goGenerator = true
@@ -118,19 +129,26 @@ struct AICoachView: View {
                 return
             }
             
-            let rawMarkdown = normalizeMarkdown(planString)
+            let rawMarkdown = normalizeMarkdown(planTrimmed!)
 
             let title = "\(tomorrow.monthKorean()) \(tomorrow.day())일 운동 계획"
             let parsed = try WorkoutPlanParser.parse(raw: rawMarkdown, dateTitle: title)
             
             let checklist = buildChecklistItems(from: parsed)
-            _ = try DailyPlanLocalStore.upsert(
-                checkDate: checkDate,
-                parsed: parsed,
-                checklist: checklist,
-                memo: "",
-                context: modelContext
-            )
+            
+            try await MainActor.run {
+                _ = try DailyPlanLocalStore.replace(
+                    checkDate: checkDate,
+                    parsed: parsed,
+                    checklist: checklist,
+                    memo: "",
+                    context: modelContext
+                )
+                try DailyPlanLocalStore.debugPrintAll(context: modelContext)
+                
+                let justSaved = try DailyPlanLocalStore.fetch(by: checkDate, context: modelContext)
+                   print("✅ justSaved =", justSaved != nil, "checkDate =", checkDate)
+            }
 
             await MainActor.run {
                 isChecking = false
@@ -139,15 +157,17 @@ struct AICoachView: View {
             }
 
         } catch let apiError as APIError {
-            await MainActor.run { isChecking = false }
             if case .serverStatusCode(let statusCode, _) = apiError, statusCode == 404 {
                 await MainActor.run {
+                    isChecking = false
+                    errorMessage = nil
                     goGenerator = true
                 }
                 return
             }
 
             await MainActor.run {
+                isChecking = false
                 errorMessage = apiError.userMessage
             }
 

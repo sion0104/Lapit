@@ -131,7 +131,7 @@ struct PlanResultView: View {
         }
 
         let memoToSave = ""
-        
+
         do {
             _ = try await APIClient.shared.saveDailyPlan(
                 checkDate: checkDate,
@@ -139,14 +139,17 @@ struct PlanResultView: View {
                 memo: memoToSave
             )
 
-            let checklist = buildChecklistItems(from: plan)
-            _ = try DailyPlanLocalStore.upsert(
-                checkDate: checkDate,
-                parsed: plan,
-                checklist: checklist,
-                memo: memoToSave,
-                context: modelContext
-            )
+            let checklistToSave = buildChecklistItems(from: plan)
+
+            try await MainActor.run {
+                _ = try DailyPlanLocalStore.replace(
+                    checkDate: checkDate,
+                    parsed: plan,
+                    checklist: checklistToSave,
+                    memo: memoToSave,
+                    context: modelContext
+                )
+            }
 
             await MainActor.run {
                 isSaving = false
@@ -159,8 +162,6 @@ struct PlanResultView: View {
             }
         }
     }
-
-
 
     private func buildChecklistItems(from plan: WorkoutPlan) -> [PlanCheckItem] {
         var result: [PlanCheckItem] = []

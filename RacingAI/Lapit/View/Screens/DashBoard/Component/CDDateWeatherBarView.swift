@@ -27,5 +27,6 @@ struct CDDateWeatherBarView: View {
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
             vm.refreshDateOnly()
         }
+        .padding(.vertical, 10)
     }
 }

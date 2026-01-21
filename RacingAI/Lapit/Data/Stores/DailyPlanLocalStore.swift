@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 
+@MainActor
 enum DailyPlanLocalStore {
 
     static func fetch(by checkDate: String, context: ModelContext) throws -> DailyPlanEntity? {
@@ -44,6 +45,39 @@ enum DailyPlanLocalStore {
             context.insert(entity)
             try context.save()
             return entity
+        }
+    }
+    
+    static func delete(checkDate: String, context: ModelContext) throws {
+        if let existing = try fetch(by: checkDate, context: context) {
+            context.delete(existing)
+            try context.save()
+        }
+    }
+    
+    static func replace(
+        checkDate: String,
+        parsed: WorkoutPlan,
+        checklist: [PlanCheckItem],
+        memo: String,
+        context: ModelContext
+    ) throws -> DailyPlanEntity {
+        try delete(checkDate: checkDate, context: context)
+        return try upsert(
+            checkDate: checkDate,
+            parsed: parsed,
+            checklist: checklist,
+            memo: memo,
+            context: context
+        )
+    }
+    
+    @MainActor
+    static func debugPrintAll(context: ModelContext) throws {
+        let all = try context.fetch(FetchDescriptor<DailyPlanEntity>())
+        print("📦 DailyPlanEntity count =", all.count)
+        if let first = all.first {
+            print("📦 first.checkDate =", first.checkDate)
         }
     }
 }

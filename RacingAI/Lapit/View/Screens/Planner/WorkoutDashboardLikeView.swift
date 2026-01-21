@@ -3,11 +3,11 @@ import SwiftUI
 struct WorkoutDashboardLikeView: View {
     @EnvironmentObject private var store: WorkoutDailyStore
     
+    private let calendar = Calendar(identifier: .gregorian)
+    
     @State private var isLoading: Bool = false
     @State private var errorMessage: String? = nil
-        
-    @State private var score: Int = 85
-    
+            
     @State private var feedbackMemo: String = "오늘 작성된 내용이 없습니다"
     
     @State private var exerciseResultTitle: String = "-"
@@ -37,6 +37,14 @@ struct WorkoutDashboardLikeView: View {
     @State private var caloriesTrend: CaloriesTrend = .none
     @State private var exerciseResultColor: Color = .primary
     
+    @State private var score: Int = 85
+    
+    @State private var didWorkoutToday: Bool = false
+    
+    @State private var goCalendar: Bool = false
+    @State private var selectedDay: Date = Calendar(identifier: .gregorian).startOfDay(for: Date())
+
+    
     private var todayDate: Date {
         let cal = Calendar(identifier: .gregorian)
         let now = Date()
@@ -44,16 +52,16 @@ struct WorkoutDashboardLikeView: View {
     }
 
     private var todayCheckDateString: String {
-        WorkoutDateFormatter.checkDateString(Date())
+        WorkoutDateFormatter.checkDateString(selectedDay)
     }
-    
+
     private var todayTitleString: String {
         let df = DateFormatter()
         df.calendar = Calendar(identifier: .gregorian)
         df.locale = Locale(identifier: "ko_KR")
         df.timeZone = TimeZone(identifier: "Asia/Seoul")
         df.dateFormat = "yyyy년 M월 d일 EEEE"
-        return df.string(from: Date())
+        return df.string(from: selectedDay)
     }
 
     private enum CaloriesTrend {
@@ -68,8 +76,8 @@ struct WorkoutDashboardLikeView: View {
                 VStack(spacing: 20) {
                     WorkoutScoreGaugeView(
                         score: score,
+                        didWorkout: didWorkoutToday,
                         title: "운동 점수",
-                        message: "훈련을 잘 하고 있어요!",
                         ringScale: 1.18
                     )
                     .frame(height: 175)
@@ -121,7 +129,6 @@ struct WorkoutDashboardLikeView: View {
                     // MARK: Today Workout Data
                     sectionHeader("운동 데이터")
                     
-                    // Heart Rate Card
                     card {
                         VStack(alignment: .leading, spacing: 10) {
                             Text("심박수")
@@ -184,28 +191,10 @@ struct WorkoutDashboardLikeView: View {
                                 .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundStyle(.blue)
-                            
-                            Text(distanceDetail)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
                         }
                     }
                     
-                    // Condition
-                    card {
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("컨디션")
-                                .fontWeight(.medium)
-                            
-                            Text(conditionTitle)
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                            
-                            Text(conditionDetail)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
+                    Spacer(minLength: 24)
                 }
                 .padding()
             }
@@ -219,7 +208,7 @@ struct WorkoutDashboardLikeView: View {
                 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        
+                        goCalendar = true
                     } label: {
                         Image(systemName: "calendar")
                             .foregroundStyle(Color("Chevron"))
@@ -227,21 +216,32 @@ struct WorkoutDashboardLikeView: View {
                 }
             }
             .onAppear {
-                loadToday()
+                selectedDay = Calendar(identifier: .gregorian).startOfDay(for: Date())
+                load(for: selectedDay)
             }
             .onChange(of: store.lastUpdatedVersion) { _, _ in
-                let key = todayCheckDateString
+                let key = WorkoutDateFormatter.checkDateString(selectedDay)
                 guard let payload = store.cache[key] else { return }
                 apply(payload: payload)
             }
-            
             .background(Color(.systemGroupedBackground))
+            .navigationDestination(isPresented: $goCalendar) {
+                CalendarView(
+                    scoreByDate: makeScoreByDate(),
+                    codeByDate: makeCodeByDate(),
+                    onSelect: { date in
+                        selectedDay = calendar.startOfDay(for: date)
+                        goCalendar = false
+                        load(for: selectedDay)
+                    }
+                )
+            }
         }
     }
     
     @MainActor
-    private func loadToday() {
-        let checkDate = todayCheckDateString
+    private func load(for date: Date) {
+        let checkDate = WorkoutDateFormatter.checkDateString(date)
 
         if let cached = store.cache[checkDate] {
             apply(payload: cached)
@@ -253,10 +253,13 @@ struct WorkoutDashboardLikeView: View {
     @MainActor
     private func apply(payload: WorkoutDailyPayload) {
 
-        // ✅ 운동 여부(파워 0으로 판단하지 말 것)
         let hasDetails = !payload.details.isEmpty
         let todayKcal = Int(payload.totalCaloriesKcal.rounded())
         let didWorkout = hasDetails || payload.durationSec > 0 || todayKcal > 0
+        didWorkoutToday = didWorkout
+        if didWorkout == false {
+            score = 0
+        }
 
         // -----------------------------
         // 1) 심박 (details 기반)
@@ -325,6 +328,24 @@ struct WorkoutDashboardLikeView: View {
         let distanceKm = payload.totalDistance / 1000.0
         distance = String(format: "%.1f km", distanceKm)
         distanceDetail = "이번주 목표까지 10km 남았습니다"
+        
+        // -----------------------------
+        // 3.5) 운동 점수(TS) 계산
+        // -----------------------------
+        if didWorkout {
+            let targetSpeedKmh: Double? = nil
+            let targetPowerW: Double? = nil
+
+            score = WorkoutScoreCalculator.calculate(
+                avgSpeedKmh: avgSpeedKmh,
+                avgPowerW: payload.avgPower,
+                targetSpeedKmh: targetSpeedKmh,
+                targetPowerW: targetPowerW
+            )
+        } else {
+            score = 0
+        }
+
 
         // -----------------------------
         // 4) 운동 결과 색/타이틀
@@ -456,6 +477,48 @@ struct WorkoutDashboardLikeView: View {
             Spacer()
         }
         .padding(.top, 24)
+    }
+    
+    private func makeScoreByDate() -> [Date: Int] {
+        var dict: [Date: Int] = [:]
+        for (_, payload) in store.cache {
+            if let first = payload.details.first,
+               let d = WorkoutDateFormatter.backendStringDate(first.measureAt) {
+                let day = calendar.startOfDay(for: d)
+
+                let avgSpeedKmh = payload.avgSpeed * 3.6
+                let didWorkout = !payload.details.isEmpty || payload.durationSec > 0 || payload.totalCaloriesKcal > 0
+
+                if didWorkout {
+                    dict[day] = WorkoutScoreCalculator.calculate(
+                        avgSpeedKmh: avgSpeedKmh,
+                        avgPowerW: payload.avgPower,
+                        targetSpeedKmh: nil,
+                        targetPowerW: nil
+                    )
+                } else {
+                    dict[day] = 0
+                }
+            }
+        }
+        return dict
+    }
+
+    private func makeCodeByDate() -> [Date: String] {
+        var dict: [Date: String] = [:]
+        for (_, payload) in store.cache {
+            if let first = payload.details.first,
+               let d = WorkoutDateFormatter.backendStringDate(first.measureAt) {
+                let day = calendar.startOfDay(for: d)
+
+                if let plan = payload.dailyPlan, !plan.memo.isEmpty {
+                    dict[day] = plan.memo
+                } else {
+                    dict[day] = "해당 날짜의 기록이 없습니다."
+                }
+            }
+        }
+        return dict
     }
 }
 

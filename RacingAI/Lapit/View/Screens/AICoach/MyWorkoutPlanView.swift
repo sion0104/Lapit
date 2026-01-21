@@ -13,36 +13,37 @@ struct MyWorkoutPlanView: View {
     @State private var memo: String = ""
     @State private var errorMessage: String?
 
-    // (기존 탭 UI 유지용) - 실제 날짜 리스트는 나중에 확장 가능
-    private let dates = ["11월 2일", "11월 3일", "11월 4일"]
-    @State private var selectedIndex: Int = 1
+    @State private var selectedCheckDate: String
+    
+    init(checkDate: String) {
+        self.checkDate = checkDate
+        _selectedCheckDate = State(initialValue: checkDate)
+    }
+
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
 
-                Text(checkDate.toKoreanMonthDay())
-                    .font(.title3)
-                    .fontWeight(.medium)
+               
 
-                if let errorMessage {
-                    Text(errorMessage)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-
-                // (기존 날짜 세그먼트 UI 유지)
                 HStack {
-                    ForEach(dates.indices, id: \.self) { idx in
-                        Button { selectedIndex = idx } label: {
-                            Text(dates[idx])
-                                .font(selectedIndex == idx ? .callout : .subheadline)
-                                .fontWeight(selectedIndex == idx ? .medium : .regular)
+                    ForEach(segmentDates.indices, id: \.self) { idx in
+                        let date = segmentDates[idx]
+                        let isSelected = (selectedCheckDate == MyWorkoutPlanView.yyyyMMddStatic(date))
+
+                        Button {
+                            selectedCheckDate = MyWorkoutPlanView.yyyyMMddStatic(date)
+                            load(for: selectedCheckDate)
+                        } label: {
+                            Text(label(for: date))
+                                .font(isSelected ? .callout : .subheadline)
+                                .fontWeight(isSelected ? .medium : .regular)
                                 .padding(.vertical, 10)
                                 .padding(.horizontal, 37)
                                 .background(
                                     RoundedRectangle(cornerRadius: 100)
-                                        .foregroundStyle(selectedIndex == idx ? Color("MainColor") : Color.clear)
+                                        .foregroundStyle(isSelected ? Color("MainColor") : Color.clear)
                                 )
                         }
                         .foregroundStyle(.primary)
@@ -84,9 +85,9 @@ struct MyWorkoutPlanView: View {
 
                             Divider().padding(.horizontal, 2)
 
-                            metricRow(title: "평균 HR", value: entity.avgHRText)
-                            metricRow(title: "최고속 구간", value: entity.maxSpeedText)
-                            metricRow(title: "Training Efficiency Score 목표", value: entity.tesGoalText)
+                            planCheckRow(text: "평균 HR: \(entity.avgHRText)")
+                            planCheckRow(text: "최고속 구간: \(entity.maxSpeedText)")
+                            planCheckRow(text: "TES 목표: \(entity.tesGoalText)")
                         }
                         .padding()
                         .frame(maxWidth: .infinity)
@@ -99,63 +100,18 @@ struct MyWorkoutPlanView: View {
                                 .fontWeight(.semibold)
 
                             Divider().padding(.horizontal, 2)
+                            
+                            Text("워밍업")
+                                .font(.caption)
 
-                            metricRow(title: "워밍업", value: entity.warmupText)
+                            planCheckRow(text: entity.warmupText)
 
                             Text("메인")
                                 .font(.caption)
 
-                            ForEach(entity.mainItems.indices, id: \.self) { i in
-                                Text(entity.mainItems[i])
-                                    .font(.body)
-                                    .fontWeight(.medium)
+                            ForEach(entity.mainItems, id: \.self) { item in
+                                planCheckRow(text: item)
                             }
-                        }
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 15))
-
-                        // ✅ 체크리스트(원하신 “String + Bool 리스트”)
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("세부 계획 체크")
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-
-                            Divider().padding(.horizontal, 2)
-
-                            ForEach(checklist.indices, id: \.self) { idx in
-                                Button {
-                                    checklist[idx].isDone.toggle()
-                                    saveLocalOnly()
-                                } label: {
-                                    HStack(alignment: .top, spacing: 10) {
-                                        Image(systemName: checklist[idx].isDone ? "checkmark.circle.fill" : "circle")
-                                        Text(checklist[idx].text)
-                                            .font(.body)
-                                            .multilineTextAlignment(.leading)
-                                    }
-                                }
-                                .foregroundStyle(.primary)
-                            }
-                        }
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 15))
-
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("메모")
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-
-                            TextField("메모를 입력하세요", text: $memo, axis: .vertical)
-                                .textFieldStyle(.roundedBorder)
-
-                            Button("메모 저장") {
-                                saveLocalOnly()
-                            }
-                            .buttonStyle(.borderedProminent)
                         }
                         .padding()
                         .frame(maxWidth: .infinity)
@@ -164,9 +120,11 @@ struct MyWorkoutPlanView: View {
                     }
 
                 } else {
-                    Text("저장된 계획을 불러오는 중이에요...")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+                    if let errorMessage {
+                        Text(errorMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
             .padding()
@@ -189,16 +147,35 @@ struct MyWorkoutPlanView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        .task { load() }
+        .task {
+            await MainActor.run { load(for: selectedCheckDate) }
+        }
     }
-
-    private func load() {
+    
+    private func load(for dateString: String) {
         do {
-            let e = try DailyPlanLocalStore.fetch(by: checkDate, context: modelContext)
+            let e = try DailyPlanLocalStore.fetch(by: dateString, context: modelContext)
             self.entity = e
-            self.checklist = e?.checklist ?? []
             self.memo = e?.memo ?? ""
             self.errorMessage = (e == nil) ? "저장된 계획을 찾지 못했어요." : nil
+
+            guard let e else {
+                self.checklist = []
+                return
+            }
+
+            let planTexts =
+                ["워밍업: \(e.warmupText)"]
+                + e.mainItems.map { "메인: \($0)" }
+                + ["평균 HR: \(e.avgHRText)",
+                   "최고속 구간: \(e.maxSpeedText)",
+                   "TES 목표: \(e.tesGoalText)"]
+
+            let saved = Dictionary(uniqueKeysWithValues: e.checklist.map { ($0.text, $0.isDone) })
+
+            self.checklist = planTexts.map { text in
+                PlanCheckItem(text: text, isDone: saved[text] ?? false)
+            }
         } catch {
             self.errorMessage = error.localizedDescription
         }
@@ -226,6 +203,82 @@ struct MyWorkoutPlanView: View {
                 .fontWeight(.medium)
         }
     }
+    
+    private func planCheckRow(text: String) -> some View {
+        let isDone = checklistIsDone(for: text)
+
+        return Button {
+            toggleChecklist(text: text)
+            saveLocalOnly()
+        } label: {
+            HStack(alignment: .top, spacing: 10) {
+                Image(systemName: isDone ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(Color(red: 0.24, green: 0.24, blue: 0.25))
+                    .font(.system(size: 18, weight: .semibold))
+
+                Text(text)
+                    .font(.body)
+                    .fontWeight(.medium)
+                    .multilineTextAlignment(.leading)
+
+                Spacer()
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(.primary)
+    }
+
+    private func checklistIsDone(for text: String) -> Bool {
+        checklist.first(where: { $0.text == text })?.isDone ?? false
+    }
+
+    private func toggleChecklist(text: String) {
+        if let idx = checklist.firstIndex(where: { $0.text == text }) {
+            checklist[idx].isDone.toggle()
+        } else {
+            // 세부 계획에서 새로 등장한 항목이면 자동 생성
+            checklist.append(.init(text: text, isDone: true))
+        }
+    }
+    
+    private var segmentDates: [Date] {
+        let cal = Calendar.current
+        let base = parseYYYYMMDD(selectedCheckDate) ?? cal.startOfDay(for: Date())
+        let baseDay = cal.startOfDay(for: base)
+
+        return [
+            cal.date(byAdding: .day, value: -1, to: baseDay)!,
+            baseDay,
+            cal.date(byAdding: .day, value: 1, to: baseDay)!
+        ]
+    }
+    
+    private func parseYYYYMMDD(_ s: String) -> Date? {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.timeZone = .current
+        f.dateFormat = "yyyy-MM-dd"
+        return f.date(from: s)
+    }
+
+    private func label(for date: Date) -> String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "ko_KR")
+        f.timeZone = .current
+        f.dateFormat = "M월 d일"
+        return f.string(from: date)
+    }
+
+    private static func yyyyMMddStatic(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "ko_KR")
+        f.timeZone = .current
+        f.dateFormat = "yyyy-MM-dd"
+        return f.string(from: date)
+    }
+    
+    
 }
 
 private extension String {

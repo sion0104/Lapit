@@ -46,7 +46,12 @@ struct CDSessionHeroCard: View {
             RoundedRectangle(cornerRadius: 100, style: .continuous)
                 .stroke(Color.white, lineWidth: 1)
         )
+        .padding(.horizontal, 20)
     }
+}
+
+#Preview {
+    CDSessionHeroCard(durationText: "01H 02M 03S", status: .running, onStart: {}, onPauseResume: {}, onStop: {}, onCancelCountdown: {})
 }
 
 

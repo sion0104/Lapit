@@ -111,19 +111,6 @@ struct CyclingDashboardView: View {
                                 bpmDeltaText: live.bpmDeltaText,
                                 caloriesText: caloriesText
                             )
-                            
-                            Divider()
-                                .foregroundStyle(.circle)
-                            
-                            Button {
-                                guard !needsLogin else { showLogin = true; return}
-                            } label: {
-                                Text("자세히 보기")
-                                    .font(.caption)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 5)
-                                    .foregroundColor(.secondaryFont)
-                            }
                         }
                         .fullScreenCover(isPresented: $showLogin) {
                             NavigationStack {
@@ -147,20 +134,6 @@ struct CyclingDashboardView: View {
                             )
                     )
                     .shadow(color: .shadow, radius: 4, x: 0, y: -2)
-                    
-                    CDStatusSection(
-                        conditionTitle: state.conditionTitle,
-                        conditionLevelText: state.conditionLevelText,
-                        conditionDesc: state.conditionDesc,
-                        scoreTitle: state.exerciseScoreTitle,
-                        scoreLabel: state.exerciseScoreLabel,
-                        scoreValue: state.exerciseScoreValue,
-                        scoreDesc: state.exerciseScoreDesc,
-                        avgTitle: state.avgExerciseTitle,
-                        avgTimeText: state.avgExerciseTimeText,
-                        avgDesc: state.avgExerciseDesc
-                    )
-                    .padding(.top, 15)
                 }
                 .padding()
             }
