@@ -24,6 +24,21 @@ final class CalendarMonthScoreViewModel: ObservableObject {
         }
     }
     
+    func applyInjected(scoreByDate: [Date: Int], codeByDate: [Date: String]) {
+        var mergedScore = self.scoreByDate
+        for (d, v) in scoreByDate {
+            mergedScore[calendar.startOfDay(for: d)] = v
+        }
+
+        var mergedCode = self.codeByDate
+        for (d, v) in codeByDate {
+            mergedCode[calendar.startOfDay(for: d)] = v
+        }
+
+        self.scoreByDate = mergedScore
+        self.codeByDate = mergedCode
+    }
+    
     private func loadInternal(month: Date) async {
         errorMessage = nil
         

@@ -62,7 +62,6 @@ struct CalendarView: View {
     }
     
     private var calendarMaxHeight: CGFloat {
-        // 6주(42칸) 기준
         let cellHeight: CGFloat = 72
         let rowCount: CGFloat = 6
         let rowSpacing: CGFloat = 8
@@ -74,13 +73,14 @@ struct CalendarView: View {
             (rowSpacing * (rowCount - 1)) +
             (dividerHeight * dividerCount)
 
-        let weekdayHeight: CGFloat = 24
-        let topSpacing: CGFloat = 12
-        let bottomSpacing: CGFloat = 12
+        let weekdayHeight: CGFloat = 70
+        let headerGap: CGFloat = 10
+        let bottomGap: CGFloat = 12
+        let previewSlack: CGFloat = 120
 
-        // 현재달 + 프리뷰가 살짝 보일 여유
-        return weekdayHeight + gridHeight + topSpacing + bottomSpacing + 80
+        return weekdayHeight + headerGap + gridHeight + bottomGap + previewSlack
     }
+
 
 
     init(
@@ -127,7 +127,16 @@ struct CalendarView: View {
         .onAppear {
             selectedDate = calendar.startOfDay(for: Date())
             currentMonth = startOfMonth(Date())
+
+            vm.applyInjected(scoreByDate: scoreByDate, codeByDate: codeByDate)
+
             vm.load(month: currentMonth)
+        }
+        .onReceive(WorkoutEventBus.shared.subject) { event in
+            switch event {
+            case .workoutSaved:
+                vm.load(month: currentMonth)
+            }
         }
         .onChange(of: currentMonth) { _, newValue in
             vm.load(month: newValue)

@@ -59,6 +59,14 @@ enum WorkoutDateFormatter {
         df.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
         return df.date(from: string)
     }
+    
+    static func checkDateToDate(_ str: String) -> Date? {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "ko_KR")
+        f.timeZone = TimeZone(identifier: "Asia/Seoul")
+        f.dateFormat = "yyyy-MM-dd"
+        return f.date(from: str)
+    }
 }
 
 

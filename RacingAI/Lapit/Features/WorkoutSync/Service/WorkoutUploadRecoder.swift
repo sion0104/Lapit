@@ -35,10 +35,10 @@ final class WorkoutUploadRecorder: ObservableObject {
         workoutType: String,
         durationSec: Int,
         latestProvider: @escaping () -> LiveMetricsPayload?
-    ) async throws {
+    ) async throws -> String {
 
-        guard let startTime else { return }
-        guard isRecording else { return }
+        guard let startTime else { throw NSError(domain: "WorkoutUploadRecorder", code: 0) }
+        guard isRecording else { throw NSError(domain: "WorkoutUploadRecorder", code: 1) }
 
         isStopping = true
 
@@ -61,10 +61,12 @@ final class WorkoutUploadRecorder: ObservableObject {
             durationSec: computedDurationSec
         )
 
-
         try await APIClient.shared.postVoid("/v1/workout", body: request)
 
+        let checkDate = WorkoutDateFormatter.checkDateString(startTime)
+
         reset()
+        return checkDate
     }
 
     func reset() {

@@ -224,6 +224,17 @@ struct WorkoutDashboardLikeView: View {
                 guard let payload = store.cache[key] else { return }
                 apply(payload: payload)
             }
+            .onReceive(WorkoutEventBus.shared.subject) { event in
+                switch event {
+                case .workoutSaved(let checkDate):
+                    let currentKey = WorkoutDateFormatter.checkDateString(selectedDay)
+                    if currentKey == checkDate {
+                        store.forceReload(checkDate: checkDate)
+                    } else {
+                        store.preload(checkDate: checkDate)
+                    }
+                }
+            }
             .background(Color(.systemGroupedBackground))
             .navigationDestination(isPresented: $goCalendar) {
                 CalendarView(
@@ -481,43 +492,41 @@ struct WorkoutDashboardLikeView: View {
     
     private func makeScoreByDate() -> [Date: Int] {
         var dict: [Date: Int] = [:]
-        for (_, payload) in store.cache {
-            if let first = payload.details.first,
-               let d = WorkoutDateFormatter.backendStringDate(first.measureAt) {
-                let day = calendar.startOfDay(for: d)
 
-                let avgSpeedKmh = payload.avgSpeed * 3.6
-                let didWorkout = !payload.details.isEmpty || payload.durationSec > 0 || payload.totalCaloriesKcal > 0
+        for (checkDate, payload) in store.cache {
+            guard let day = WorkoutDateFormatter.checkDateToDate(checkDate) else { continue }
+            let dayStart = calendar.startOfDay(for: day)
 
-                if didWorkout {
-                    dict[day] = WorkoutScoreCalculator.calculate(
-                        avgSpeedKmh: avgSpeedKmh,
-                        avgPowerW: payload.avgPower,
-                        targetSpeedKmh: nil,
-                        targetPowerW: nil
-                    )
-                } else {
-                    dict[day] = 0
-                }
-            }
+            let avgSpeedKmh = payload.avgSpeed * 3.6
+            let didWorkout = !payload.details.isEmpty || payload.durationSec > 0 || payload.totalCaloriesKcal > 0
+
+            dict[dayStart] = didWorkout
+            ? WorkoutScoreCalculator.calculate(
+                avgSpeedKmh: avgSpeedKmh,
+                avgPowerW: payload.avgPower,
+                targetSpeedKmh: nil,
+                targetPowerW: nil
+              )
+            : 0
         }
+
         return dict
     }
 
     private func makeCodeByDate() -> [Date: String] {
         var dict: [Date: String] = [:]
-        for (_, payload) in store.cache {
-            if let first = payload.details.first,
-               let d = WorkoutDateFormatter.backendStringDate(first.measureAt) {
-                let day = calendar.startOfDay(for: d)
 
-                if let plan = payload.dailyPlan, !plan.memo.isEmpty {
-                    dict[day] = plan.memo
-                } else {
-                    dict[day] = "해당 날짜의 기록이 없습니다."
-                }
+        for (checkDate, payload) in store.cache {
+            guard let day = WorkoutDateFormatter.checkDateToDate(checkDate) else { continue }
+            let dayStart = calendar.startOfDay(for: day)
+
+            if let plan = payload.dailyPlan, !plan.memo.isEmpty {
+                dict[dayStart] = plan.memo
+            } else {
+                dict[dayStart] = "해당 날짜의 기록이 없습니다."
             }
         }
+
         return dict
     }
 }

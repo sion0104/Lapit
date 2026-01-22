@@ -59,11 +59,14 @@ final class CyclingDashboardStore: ObservableObject {
         receiver.sendEventually(.stop)
 
         do {
-            try await recorder.stopAndUpload(
+            let checkDate = try await recorder.stopAndUpload(
                 workoutType: "cycling",
                 durationSec: max(1, durationSec),
                 latestProvider: latestProvider
             )
+
+            WorkoutEventBus.shared.subject.send(.workoutSaved(checkDate: checkDate))
+
         } catch {
             print("❌ upload failed:", error)
         }
@@ -72,6 +75,7 @@ final class CyclingDashboardStore: ObservableObject {
         live.reset()
         isStopping = false
     }
+
 
     func handleIncomingPayload(_ payload: LiveMetricsPayload) {
         guard isSessionActive, !isStopping else { return }
