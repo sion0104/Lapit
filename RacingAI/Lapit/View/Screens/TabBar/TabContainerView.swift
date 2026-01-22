@@ -1,8 +1,7 @@
 import SwiftUI
 
 struct TabContainerView: View {
-    @State private var selection: AppTab = .exercise
-    @State private var isTabBarHidden: Bool = false
+    @StateObject private var router = TabRouter()
     
     @StateObject private var rideVM = CyclingRideViewModel()
     @StateObject private var workoutDailyStore = WorkoutDailyStore()
@@ -11,34 +10,40 @@ struct TabContainerView: View {
 
     var body: some View {
         GeometryReader { proxy in
-            let tabBarTotalHeight = isTabBarHidden ? 0 : tabBarContentHeight
+            let tabBarTotalHeight = router.isTabBarHidden ? 0 : tabBarContentHeight
 
             ZStack(alignment: .bottom) {
                 Group {
-                    switch selection {
+                    switch router.selection {
                     case .exercise:
                         CyclingDashboardView(rideVM: rideVM)
+                            .environmentObject(router)
 
                     case .planner:
                         WorkoutDashboardLikeView()
                             .environmentObject(workoutDailyStore)
+                            .environmentObject(router)
 
                     case .aiCoach:
                         AICoachView(onBack: {})
+                            .environmentObject(router)
 
                     case .settings:
                         MypageSettingView()
+                            .environmentObject(router)
                     }
                 }
                 .safeAreaPadding(.bottom, tabBarTotalHeight)
                 .onPreferenceChange(TabBarHiddenPreferenceKey.self) { hidden in
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        isTabBarHidden = hidden
+                    Task { @MainActor in
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            router.isTabBarHidden = hidden
+                        }
                     }
                 }
 
-                if !isTabBarHidden {
-                    CustomTabBarView(tabs: AppTab.allCases, selection: $selection)
+                if !router.isTabBarHidden {
+                    CustomTabBarView(tabs: AppTab.allCases, selection: $router.selection)
                         .frame(height: tabBarContentHeight)
                 }
             }

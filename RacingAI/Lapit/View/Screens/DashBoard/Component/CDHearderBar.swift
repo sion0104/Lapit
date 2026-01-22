@@ -2,13 +2,16 @@ import SwiftUI
 
 struct CDHeaderBar: View {
     @EnvironmentObject private var userSession: UserSessionStore
+    @EnvironmentObject private var tabRouter: TabRouter
     
     let onProfileTap: () -> Void
     let onSettingsTap: () -> Void
 
     var body: some View {
         HStack(spacing: 10) {
-            Button(action: onProfileTap) {
+            Button{
+                tabRouter.goSettings()
+            } label: {
                 HStack(spacing: 10) {
                     profileView
                         .frame(width: 30, height: 30)
@@ -31,7 +34,9 @@ struct CDHeaderBar: View {
 
             Spacer()
 
-            Button(action: onSettingsTap) {
+            Button{
+                tabRouter.goSettings()
+            } label: {
                 Image(systemName: "gearshape")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(.primary)

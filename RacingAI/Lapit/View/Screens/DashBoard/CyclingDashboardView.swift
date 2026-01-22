@@ -25,11 +25,8 @@ struct CyclingDashboardView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading) {
                     CDHeaderBar(
-                        onProfileTap: {
-                            if needsLogin { showLogin = true }
-                            else { showSettings = true }
-                        },
-                        onSettingsTap: { showSettings = true }
+                        onProfileTap: {},
+                        onSettingsTap: {}
                     )
 
                     VStack {
