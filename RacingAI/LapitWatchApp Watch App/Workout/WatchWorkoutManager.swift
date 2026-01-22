@@ -23,6 +23,9 @@ final class WatchWorkoutManager: NSObject, ObservableObject {
     // WatchWorkoutManager 내부에 추가
     private var pendingStartCommandId: String?
     private var pendingStartCommand: WorkoutCommand?
+    
+    private var lastQueuedUserInfoAt: Date?
+    var minUserInfoIntervalSec: TimeInterval = 2.0
 
     func setPendingCommandId(command: WorkoutCommand, commandId: String) {
         // start에 대해 running ACK를 정확히 보내기 위해 저장
@@ -180,14 +183,34 @@ final class WatchWorkoutManager: NSObject, ObservableObject {
 
         do {
             let data = try JSONEncoder().encode(payload)
-            session.sendMessageData(data, replyHandler: nil) { error in
-                print("❌ sendMessageData error:", error)
+
+            if session.isReachable {
+                session.sendMessageData(data, replyHandler: nil) { error in
+                    print("❌ sendMessageData error:", error)
+                    self.enqueuePayloadIfNeeded(session: session, data: data)
+                }
+                return
             }
+
+            enqueuePayloadIfNeeded(session: session, data: data)
+
         } catch {
             print("❌ encode error:", error)
         }
     }
 
+    private func enqueuePayloadIfNeeded(session: WCSession, data: Data) {
+        let now = Date()
+
+        if let last = lastQueuedUserInfoAt,
+           now.timeIntervalSince(last) < minUserInfoIntervalSec {
+            return
+        }
+
+        lastQueuedUserInfoAt = now
+        session.transferUserInfo(["payloadData": data])
+    }
+    
     private func makePayload(now: Date) -> LiveMetricsPayload {
         guard workoutBuilder != nil else {
             return LiveMetricsPayload(

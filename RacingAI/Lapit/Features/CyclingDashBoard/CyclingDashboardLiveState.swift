@@ -18,6 +18,10 @@ final class CyclingDashboardLiveState: ObservableObject {
     private var lastSpeedAt: Date? = nil
     var speedHoldSec: TimeInterval = 2.0
     
+    private var lastValidDistanceMeters: Double? = nil
+    private var lastDistanceAt: Date? = nil
+    var distanceHoldSec: TimeInterval = 3.0
+    
     @Published private(set) var watchDeliveryText: String = ""
     @Published private(set) var watchDeliveryDetail: String = ""
 
@@ -54,13 +58,15 @@ final class CyclingDashboardLiveState: ObservableObject {
         lastValidBPM = nil
         lastValidSpeedMps = nil
         lastSpeedAt = nil
+        
+        lastValidDistanceMeters = nil
+        lastDistanceAt = nil
     }
 
     func update(with payload: LiveMetricsPayload) {
-        currentDistanceMeters = payload.distanceMeters
         currentCaloriesKcal = payload.activeEnergyKcal
 
-        let now = payload.timestamp
+        var now = payload.timestamp
         if let sp = payload.speedMps, sp > 0 {
             lastValidSpeedMps = sp
             lastSpeedAt = now
@@ -74,6 +80,23 @@ final class CyclingDashboardLiveState: ObservableObject {
                 currentSpeedMps = payload.speedMps
             }
         }
+        
+        now = payload.timestamp
+
+        if let d = payload.distanceMeters, d > 0 {
+            lastValidDistanceMeters = d
+            lastDistanceAt = now
+            currentDistanceMeters = d
+        } else {
+            if let lastAt = lastDistanceAt,
+               now.timeIntervalSince(lastAt) <= distanceHoldSec,
+               let hold = lastValidDistanceMeters {
+                currentDistanceMeters = hold
+            } else {
+                currentDistanceMeters = payload.distanceMeters
+            }
+        }
+
 
         let bpm = MetricFormatter.bpmInt(payload.heartRateBPM)
         guard bpm > 0 else { return }

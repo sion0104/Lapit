@@ -165,5 +165,19 @@ extension PhoneWorkoutReceiver: WCSessionDelegate {
             self.completeIfMatches(ack)
         }
     }
+    
+    nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any] = [:]) {
+        // Watch에서 transferUserInfo로 보낸 payload 수신
+        guard let data = userInfo["payloadData"] as? Data else { return }
+
+        do {
+            let payload = try JSONDecoder().decode(LiveMetricsPayload.self, from: data)
+            Task { @MainActor in
+                self.latest = payload
+            }
+        } catch {
+            print("❌ decode userInfo payload fail:", error)
+        }
+    }
 }
 
