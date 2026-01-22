@@ -48,7 +48,7 @@ private extension AICoachPlanViewModel {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        let dateString = date.toYMD()
+        let dateString = date.toYMDLocal()
         let body = TrainingPlanRequest(user_id: userId, date: dateString)
         request.httpBody = try JSONEncoder().encode(body)
 
@@ -191,25 +191,6 @@ private extension AICoachPlanViewModel {
             }
         }
         return result
-    }
-}
-
-private extension Date {
-    func toYMD() -> String {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.timeZone = TimeZone(secondsFromGMT: 0)
-        f.dateFormat = "yyyy-MM-dd"
-        return f.string(from: self)
-    }
-    
-    func monthKorean() -> String {
-        let c = Calendar.current
-        return "\(c.component(.month, from: self))월"
-    }
-    
-    func day() -> Int {
-        Calendar.current.component(.day, from: self)
     }
 }
 

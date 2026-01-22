@@ -201,28 +201,41 @@ extension APIClient {
         guard let url = URL(string: path, relativeTo: baseURL) else {
             throw APIError.invalidURL
         }
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept") // ✅ 추가
         request.httpBody = try JSONEncoder().encode(body)
-        
+
         attachAuthorizationIfNeeded(to: &request)
-        
+
         print("➡️ [APIClient] Request: POST \(url.absoluteString)")
         logRequestBody(request)
-        
+
         let (data, response) = try await session.data(for: request)
-        
+
         guard let http = response as? HTTPURLResponse else {
             throw APIError.unknown
         }
-        
+
+        print("⬅️ [APIClient] Response statusCode: \(http.statusCode)")
+        if let bodyString = String(data: data, encoding: .utf8) {
+            print("📦 [APIClient] Response body:\n\(bodyString)")
+        } else {
+            print("📦 [APIClient] Response body: <non-utf8> \(data.count) bytes")
+        }
+
         guard (200..<300).contains(http.statusCode) else {
             throw APIError.serverStatusCode(http.statusCode, data)
         }
-        
-        return try JSONDecoder().decode(T.self, from: data)
+
+        do {
+            return try JSONDecoder().decode(T.self, from: data)
+        } catch {
+            // ✅ 디코딩 실패 이유를 콘솔에서 바로 확인 가능
+            throw APIError.decoding(error)
+        }
     }
 }
 
@@ -497,35 +510,38 @@ extension APIClient {
 extension APIClient {
     func fetchDailyAIPlan(checkDate: String) async throws -> CommonResponse<DailyAIPlanPayload> {
         let items = [URLQueryItem(name: "checkDate", value: checkDate)]
-        
+
         guard let base = URL(string: "/v1/daily-plan/ai", relativeTo: APIConfig.baseURL) else {
             throw APIError.invalidURL
         }
         var components = URLComponents(url: base, resolvingAgainstBaseURL: true)
         components?.queryItems = items
-        
-        guard let url = components?.url else {
-            throw APIError.invalidURL
-        }
-        
+        guard let url = components?.url else { throw APIError.invalidURL }
+
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
+
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+        request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
+        request.setValue("no-cache", forHTTPHeaderField: "Pragma")
+
         attachAuthorizationIfNeeded(to: &request)
-        
+
         print("➡️ [APIClient] Request: GET \(url.absoluteString)")
-        
+
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw APIError.unknown }
-        
+
         print("⬅️ [APIClient] Response statusCode: \(http.statusCode)")
-        
+
         guard (200..<300).contains(http.statusCode) else {
             throw APIError.serverStatusCode(http.statusCode, data)
         }
-        
+
         return try JSONDecoder().decode(CommonResponse<DailyAIPlanPayload>.self, from: data)
     }
 }
+
 
 extension APIClient {
     func postVoid<Body: Encodable>(

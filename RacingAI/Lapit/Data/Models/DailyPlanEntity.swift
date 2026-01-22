@@ -14,6 +14,8 @@ final class DailyPlanEntity {
     var maxSpeedText: String
     var tesGoalText: String
     var warmupText: String
+    
+    var isCommitted: Bool
 
     @Attribute(.externalStorage) var mainItemsData: Data
 
@@ -27,7 +29,8 @@ final class DailyPlanEntity {
         checkDate: String,
         parsed: WorkoutPlan,
         checklist: [PlanCheckItem],
-        memo: String
+        memo: String,
+        isCommitted: Bool = false
     ) {
         self.checkDate = checkDate
 
@@ -45,6 +48,7 @@ final class DailyPlanEntity {
 
         self.memo = memo
         self.updatedAt = Date()
+        self.isCommitted = isCommitted
     }
 
     var mainItems: [String] {

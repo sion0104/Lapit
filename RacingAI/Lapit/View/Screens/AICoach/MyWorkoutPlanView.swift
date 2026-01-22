@@ -154,6 +154,9 @@ struct MyWorkoutPlanView: View {
     
     private func load(for dateString: String) {
         do {
+            print("🔎 load(for:) dateString =", dateString)
+            try DailyPlanLocalStore.debugPrintAll(context: modelContext)
+
             let e = try DailyPlanLocalStore.fetch(by: dateString, context: modelContext)
             self.entity = e
             self.memo = e?.memo ?? ""

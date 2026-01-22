@@ -12,6 +12,9 @@ struct AICoachView: View {
     
     @State private var isChecking = false
     @State private var errorMessage: String?
+    
+    @State private var goPreview = false
+    @State private var previewResult: WorkoutPlanResult? = nil
 
     var body: some View {
         NavigationStack {
@@ -93,6 +96,19 @@ struct AICoachView: View {
                 let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
                 AICoachPlanView(onBack: onBack, date: tomorrow)
             }
+            .navigationDestination(isPresented: $goPreview) {
+                if let result = previewResult {
+                    PlanResultView(
+                        onBack: onBack,
+                        plan: result.parsed,
+                        rawMarkdown: result.rawMarkdown,
+                        checkDate: checkDateForNav,
+                        modelContext: modelContext
+                    )
+                    .tabBarHidden(true)
+                }
+            }
+
         }
     }
 
@@ -107,10 +123,25 @@ struct AICoachView: View {
             goGenerator = false
         }
 
+        // ✅ 1) 로컬 우선
+        do {
+            if let local = try DailyPlanLocalStore.fetch(by: checkDate, context: modelContext) {
+                print("✅ local exists -> goMyPlan:", local.checkDate)
+                await MainActor.run {
+                    isChecking = false
+                    checkDateForNav = checkDate
+                    goMyPlan = true
+                }
+                return
+            }
+        } catch {
+            print("⚠️ local fetch error:", error)
+            // 로컬 fetch 실패여도 서버 조회는 진행
+        }
+
+        // ✅ 2) 서버 조회
         do {
             let res: CommonResponse<DailyAIPlanPayload> = try await APIClient.shared.fetchDailyAIPlan(checkDate: checkDate)
-            
-            print("plan raw =", String(describing: res.data.plan))
 
             let planTrimmed = res.data.plan?
                 .replacingOccurrences(of: "\\n", with: "\n")
@@ -121,6 +152,7 @@ struct AICoachView: View {
                 planTrimmed!.isEmpty ||
                 planTrimmed!.lowercased() == "null"
 
+            // ✅ 서버에 없으면 생성 화면
             guard !isNoPlan else {
                 await MainActor.run {
                     isChecking = false
@@ -128,26 +160,23 @@ struct AICoachView: View {
                 }
                 return
             }
-            
+
+            // ✅ 서버에 있으면 파싱 후 로컬 저장 → MyWorkoutPlan
             let rawMarkdown = normalizeMarkdown(planTrimmed!)
 
             let title = "\(tomorrow.monthKorean()) \(tomorrow.day())일 운동 계획"
             let parsed = try WorkoutPlanParser.parse(raw: rawMarkdown, dateTitle: title)
-            
             let checklist = buildChecklistItems(from: parsed)
-            
+
             try await MainActor.run {
-                _ = try DailyPlanLocalStore.replace(
+                _ = try DailyPlanLocalStore.upsert(
                     checkDate: checkDate,
                     parsed: parsed,
                     checklist: checklist,
                     memo: "",
+                    isCommitted: true,
                     context: modelContext
                 )
-                try DailyPlanLocalStore.debugPrintAll(context: modelContext)
-                
-                let justSaved = try DailyPlanLocalStore.fetch(by: checkDate, context: modelContext)
-                   print("✅ justSaved =", justSaved != nil, "checkDate =", checkDate)
             }
 
             await MainActor.run {
@@ -160,7 +189,6 @@ struct AICoachView: View {
             if case .serverStatusCode(let statusCode, _) = apiError, statusCode == 404 {
                 await MainActor.run {
                     isChecking = false
-                    errorMessage = nil
                     goGenerator = true
                 }
                 return
@@ -170,11 +198,10 @@ struct AICoachView: View {
                 isChecking = false
                 errorMessage = apiError.userMessage
             }
-
         } catch {
             await MainActor.run {
                 isChecking = false
-                errorMessage = error.userMessage
+                errorMessage = error.localizedDescription
             }
         }
     }
@@ -197,7 +224,7 @@ struct AICoachView: View {
     }
 }
 
-private extension Date {
+extension Date {
     func toYMDLocal() -> String {
         let f = DateFormatter()
         f.locale = Locale(identifier: "ko_KR")

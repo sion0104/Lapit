@@ -3,7 +3,8 @@ import SwiftUI
 struct AICoachPlanView: View {
     @EnvironmentObject private var userSession: UserSessionStore
     @StateObject private var vm = AICoachPlanViewModel()
-    
+    @Environment(\.modelContext) private var modelContext
+
     let onBack: () -> Void
     let date: Date
     
@@ -15,8 +16,14 @@ struct AICoachPlanView: View {
                     .tabBarHidden(true)
                 
             case .loaded(let result):
-                PlanResultView(onBack: onBack, plan: result.parsed, rawMarkdown: result.rawMarkdown)
-                    .tabBarHidden(true)
+                let checkDate = date.toYMDLocal()
+                PlanResultView(
+                    onBack: onBack,
+                    plan: result.parsed,
+                    rawMarkdown: result.rawMarkdown,
+                    checkDate: checkDate,
+                    modelContext: modelContext
+                )
                 
             case .failed(let message):
                 ErrorPlanView(message: message) {

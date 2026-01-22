@@ -17,6 +17,7 @@ enum DailyPlanLocalStore {
         parsed: WorkoutPlan,
         checklist: [PlanCheckItem],
         memo: String,
+        isCommitted: Bool,
         context: ModelContext
     ) throws -> DailyPlanEntity {
         if let existing = try fetch(by: checkDate, context: context) {
@@ -32,6 +33,7 @@ enum DailyPlanLocalStore {
             existing.checklist = checklist
             existing.memo = memo
             existing.updatedAt = Date()
+            existing.isCommitted = isCommitted
 
             try context.save()
             return existing
@@ -40,7 +42,8 @@ enum DailyPlanLocalStore {
                 checkDate: checkDate,
                 parsed: parsed,
                 checklist: checklist,
-                memo: memo
+                memo: memo,
+                isCommitted: isCommitted
             )
             context.insert(entity)
             try context.save()
@@ -60,6 +63,7 @@ enum DailyPlanLocalStore {
         parsed: WorkoutPlan,
         checklist: [PlanCheckItem],
         memo: String,
+        isCommitted: Bool,
         context: ModelContext
     ) throws -> DailyPlanEntity {
         try delete(checkDate: checkDate, context: context)
@@ -68,6 +72,7 @@ enum DailyPlanLocalStore {
             parsed: parsed,
             checklist: checklist,
             memo: memo,
+            isCommitted: isCommitted,
             context: context
         )
     }
@@ -76,8 +81,7 @@ enum DailyPlanLocalStore {
     static func debugPrintAll(context: ModelContext) throws {
         let all = try context.fetch(FetchDescriptor<DailyPlanEntity>())
         print("📦 DailyPlanEntity count =", all.count)
-        if let first = all.first {
-            print("📦 first.checkDate =", first.checkDate)
-        }
+        let dates = all.map { $0.checkDate }.sorted()
+        print("📦 checkDates =", dates)
     }
 }

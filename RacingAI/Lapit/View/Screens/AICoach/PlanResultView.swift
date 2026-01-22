@@ -1,21 +1,20 @@
 import SwiftUI
+import SwiftData
 
 struct PlanResultView: View {
     let onBack: () -> Void
     let plan: WorkoutPlan
     let rawMarkdown: String
+    let checkDate: String
+    let modelContext: ModelContext
     
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
+
     
     @State private var goToMyPlan: Bool = false
     @State private var isSaving: Bool = false
     @State private var saveError: String?
     
-    private var checkDate: String {
-        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
-        return tomorrow.toYMDLocal()
-    }
     
     var body: some View {
         ScrollView {
@@ -79,6 +78,11 @@ struct PlanResultView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .alert("저장 실패", isPresented: .constant(saveError != nil)) {
+            Button("확인") { saveError = nil }
+        } message: {
+            Text(saveError ?? "")
+        }
         .navigationBarBackButtonHidden(true)
         .padding()
         .toolbar {
@@ -133,32 +137,38 @@ struct PlanResultView: View {
         let memoToSave = ""
 
         do {
-            _ = try await APIClient.shared.saveDailyPlan(
-                checkDate: checkDate,
-                plan: rawMarkdown,
-                memo: memoToSave
-            )
+            _ = try await APIClient.shared.saveDailyPlan(checkDate: checkDate, plan: rawMarkdown, memo: memoToSave)
 
             let checklistToSave = buildChecklistItems(from: plan)
 
             try await MainActor.run {
-                _ = try DailyPlanLocalStore.replace(
+                _ = try DailyPlanLocalStore.upsert(
                     checkDate: checkDate,
                     parsed: plan,
                     checklist: checklistToSave,
                     memo: memoToSave,
+                    isCommitted: true,
                     context: modelContext
                 )
             }
 
+            // ✅ 반드시 재조회로 커밋 확인
+            let confirmed = try await MainActor.run {
+                try DailyPlanLocalStore.fetch(by: checkDate, context: modelContext)
+            }
+
+            guard confirmed != nil else {
+                throw NSError(domain: "LocalSave", code: 1, userInfo: [
+                    NSLocalizedDescriptionKey: "로컬 저장이 완료되지 않았습니다. (SwiftData fetch 결과 nil)"
+                ])
+            }
+
             await MainActor.run {
-                isSaving = false
                 goToMyPlan = true
             }
         } catch {
             await MainActor.run {
-                isSaving = false
-                saveError = error.userMessage
+                saveError = error.localizedDescription
             }
         }
     }
@@ -188,16 +198,6 @@ struct PlanResultView: View {
                 .font(.body)
                 .fontWeight(.medium)
         }
-    }
-}
-
-private extension Date {
-    func toYMDLocal() -> String {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "ko_KR")
-        f.timeZone = .current
-        f.dateFormat = "yyyy-MM-dd"
-        return f.string(from: self)
     }
 }
 
