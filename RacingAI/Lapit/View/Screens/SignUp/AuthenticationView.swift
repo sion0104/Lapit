@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AuthenticationView: View {
     @EnvironmentObject var store: UserInfoStore
+    @Environment(\.dismiss) private var dismiss
     
     @State private var userId: String = ""
     @State private var password: String = ""
@@ -17,20 +18,11 @@ struct AuthenticationView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            
-            Text("AI 운동 플래너")
-                .padding(.top, 32)
-            
-            Text("사용자 인증")
-                .font(.title2)
-                .fontWeight(.bold)
-            
             VStack (alignment: .leading){
                 Text("아이디")
                     .fontWeight(.medium)
                 AppTextField(text: $userId, placeholder: "아이디를 입력해 주세요.", keyboard: .emailAddress, submitLabel: .next, error: userIdError)
             }
-            .padding(.top, 32)
             
             VStack(alignment: .leading){
                 Text("비밀번호")
@@ -62,6 +54,26 @@ struct AuthenticationView: View {
             .buttonStyle(PrimaryButtonStyle())
         }
         .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                HStack(spacing: 5) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(.black)
+                    }
+                    .disabled(isCheckingId)
+                    .opacity(isCheckingId ? 0.4 : 1)
+
+                    Text("회원가입")
+                        .font(.title3)
+                        .foregroundStyle(Color("Chevron"))
+                        .fontWeight(.medium)
+                }
+            }
+        }
     }
     
     private var isFormInputFilled: Bool {
