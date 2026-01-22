@@ -1,9 +1,7 @@
 import SwiftUI
 
 struct CDDateWeatherBarView: View {
-//    @StateObject private var vm = DateWeatherViewModel()
-    @StateObject private var vm = DateWeatherAPIViewModel()
-
+    @StateObject private var vm = DateWeatherViewModel()
 
     var body: some View {
         HStack {
@@ -26,6 +24,7 @@ struct CDDateWeatherBarView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
             vm.refreshDateOnly()
+            Task { await vm.refreshWeather() }
         }
         .padding(.vertical, 10)
     }

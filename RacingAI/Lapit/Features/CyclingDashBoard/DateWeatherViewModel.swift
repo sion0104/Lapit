@@ -2,49 +2,41 @@ import Foundation
 import CoreLocation
 import WeatherKit
 
-final class DateWeatherViewModel: NSObject, ObservableObject {
+@MainActor
+final class DateWeatherViewModel: ObservableObject {
 
     @Published var dateText: String = ""
     @Published var todayText: String = ""
     @Published var weatherText: String = "날씨 불러오는 중…"
 
-    private let locationManager = CLLocationManager()
+    private let locationProvider = LocationProvider()
     private let weatherService = WeatherService()
 
-    override init() {
-        super.init()
-        locationManager.delegate = self
-        updateDateTexts()
-    }
-
-    // View에서 호출
     func onAppear() async {
         updateDateTexts()
-        requestLocation()
+        await refreshWeather()
     }
 
     func refreshDateOnly() {
         updateDateTexts()
     }
 
-    private func requestLocation() {
-        // 권한 상태에 따라 처리
-        switch locationManager.authorizationStatus {
-        case .notDetermined:
-            locationManager.requestWhenInUseAuthorization()
+    func refreshWeather() async {
+        do {
+            weatherText = "날씨 불러오는 중…"
 
-        case .authorizedWhenInUse, .authorizedAlways:
-            locationManager.requestLocation()
+            let loc = try await locationProvider.requestLocationOnce()
+            let weather = try await weatherService.weather(for: loc)
 
-        case .restricted, .denied:
-            Task { @MainActor in
-                self.weatherText = "위치 권한 필요"
-            }
+            let conditionText = weather.currentWeather.condition.koreanText
+            let tempC = Int(weather.currentWeather.temperature.converted(to: .celsius).value.rounded())
 
-        @unknown default:
-            Task { @MainActor in
-                self.weatherText = "권한 확인 불가"
-            }
+            weatherText = "\(conditionText) \(tempC)°C"
+        } catch let e as LocationProvider.LocationError {
+            weatherText = e.localizedDescription
+        } catch {
+            // WeatherKit/네트워크/권한 등 기타 에러
+            weatherText = "날씨 가져오기 실패"
         }
     }
 
@@ -54,57 +46,8 @@ final class DateWeatherViewModel: NSObject, ObservableObject {
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.dateFormat = "M월 d일"
 
-        // UI 업데이트는 MainActor에서
-        Task { @MainActor in
-            self.dateText = formatter.string(from: now)
-            self.todayText = "오늘"
-        }
-    }
-
-    private func fetchWeather(for location: CLLocation) async {
-        do {
-            let weather = try await weatherService.weather(for: location)
-
-            let conditionText = weather.currentWeather.condition.koreanText
-            let tempC = Int(weather.currentWeather.temperature.converted(to: .celsius).value.rounded())
-
-            await MainActor.run {
-                self.weatherText = "\(conditionText) \(tempC)°C"
-            }
-        } catch {
-            await MainActor.run {
-                self.weatherText = "날씨 가져오기 실패"
-            }
-        }
-    }
-}
-
-extension DateWeatherViewModel: CLLocationManagerDelegate {
-
-    nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        switch manager.authorizationStatus {
-        case .authorizedWhenInUse, .authorizedAlways:
-            manager.requestLocation()
-        case .denied, .restricted:
-            Task { @MainActor in
-                self.weatherText = "위치 권한 필요"
-            }
-        default:
-            break
-        }
-    }
-
-    nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let loc = locations.last else { return }
-        Task {
-            await self.fetchWeather(for: loc)
-        }
-    }
-
-    nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        Task { @MainActor in
-            self.weatherText = "위치 오류"
-        }
+        dateText = formatter.string(from: now)
+        todayText = "오늘"
     }
 }
 
