@@ -11,13 +11,9 @@ struct WithdrawalView: View {
     let onComplete: () -> Void
 
     var body: some View {
-        VStack(spacing: 0) {
-            VStack {
-                Spacer()
+        VStack(spacing: 20) {
                 Text("탈퇴 전 아래 내용을 꼭 확인해주세요")
                     .font(.title3)
-                Spacer()
-            }
             
             VStack(spacing: 10) {
                 Text("· 탈퇴 시 회원님의 모든 훈련 기록과 분석 데이터가 즉시 삭제되며, 복구가 불가능합니다.")
@@ -43,11 +39,13 @@ struct WithdrawalView: View {
         }
         .padding()
         .navigationBarBackButtonHidden(true)
+        .preference(key: TabBarHiddenPreferenceKey.self, value: true)
         .safeAreaInset(edge: .bottom, content: {
             AppButton(title: isWithdrawing ? "탈퇴 처리 중..." : "탈퇴하기", isEnabled: !isWithdrawing) {
                 showWidthdrawAlert = true
             }
             .padding()
+            .buttonStyle(PrimaryButtonStyle())
         })
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -94,5 +92,6 @@ struct WithdrawalView: View {
 }
 
 #Preview {
-    TermOfUserView(onBack: {})
+    WithdrawalView(onBack: {}, onComplete: {})
+        .environmentObject(UserSessionStore())
 }
