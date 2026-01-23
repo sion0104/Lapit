@@ -90,23 +90,6 @@
 		ADFCCF2F2F0EBA6C00265C0E /* Lapit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lapit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		AD6CAE202F1E5F90003C403B /* Exceptions for "Lapit" folder in "Lapit" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = ADFCCF2E2F0EBA6C00265C0E /* Lapit */;
-		};
-		ADA3E0FE2F213D3000C6A95B /* Exceptions for "LapitWatchApp WatchApp Extension" folder in "LapitWatchApp WatchApp Extension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = ADA3E0F02F213D3000C6A95B /* LapitWatchApp WatchApp Extension */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		AD475B0D2EFDCC42007A7A82 /* LapitWatchApp Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -120,17 +103,11 @@
 		};
 		ADA3E0F22F213D3000C6A95B /* LapitWatchApp WatchApp Extension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				ADA3E0FE2F213D3000C6A95B /* Exceptions for "LapitWatchApp WatchApp Extension" folder in "LapitWatchApp WatchApp Extension" target */,
-			);
 			path = "LapitWatchApp WatchApp Extension";
 			sourceTree = "<group>";
 		};
 		ADFCCF302F0EBA6C00265C0E /* Lapit */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				AD6CAE202F1E5F90003C403B /* Exceptions for "Lapit" folder in "Lapit" target */,
-			);
 			path = Lapit;
 			sourceTree = "<group>";
 		};

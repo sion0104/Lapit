@@ -216,7 +216,6 @@ struct WorkoutDashboardLikeView: View {
                 }
             }
             .onAppear {
-                selectedDay = Calendar(identifier: .gregorian).startOfDay(for: Date())
                 load(for: selectedDay)
             }
             .onChange(of: store.lastUpdatedVersion) { _, _ in

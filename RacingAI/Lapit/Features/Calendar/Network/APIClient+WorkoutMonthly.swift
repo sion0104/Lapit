@@ -1,7 +1,6 @@
 import Foundation
 
 extension APIClient {
-    /// GET /v1/workout/monthly?month=YYYY-MM
     func fetchWorkoutMonthly(month: String) async throws -> WorkoutMonthlyResponseDTO {
         let items = [URLQueryItem(name: "month", value: month)]
         

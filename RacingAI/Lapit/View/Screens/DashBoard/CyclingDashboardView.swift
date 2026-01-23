@@ -109,13 +109,17 @@ struct CyclingDashboardView: View {
         }
 
         .task {
-            await userSession.fetchUserIfNeeded()
+            guard userSession.isLoggedIn else { return }
+            try? await userSession.refreshUser()
         }
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
             case .active:
                 rideVM.handleScenePhaseChange(.active)
-                Task { await userSession.fetchUserIfNeeded() }
+                Task {
+                    guard userSession.isLoggedIn else { return }
+                    try? await userSession.refreshUser()
+                }
             case .inactive:
                 rideVM.handleScenePhaseChange(.inactive)
             case .background:

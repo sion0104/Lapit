@@ -6,14 +6,24 @@ final class TokenStore {
 
     private enum Key {
         static let accessToken = "accessToken"
-        static let refreshToken = "refreshToken"
         static let grantType = "grantType"
+
+        // Keychain keys
+        static let refreshToken = "refreshToken"
     }
+
+    private let keychain = KeychainStore.shared
 
     func save(grantType: String, accessToken: String, refreshToken: String) {
         UserDefaults.standard.set(accessToken, forKey: Key.accessToken)
-        UserDefaults.standard.set(refreshToken, forKey: Key.refreshToken)
         UserDefaults.standard.set(grantType, forKey: Key.grantType)
+
+        do {
+            try keychain.set(refreshToken, forKey: Key.refreshToken)
+        } catch {
+            // Keychain 저장 실패는 치명적이니 로그 남기고 필요시 앱 정책에 따라 처리
+            print("❗️Keychain save failed:", error)
+        }
     }
 
     func loadAccessToken() -> String? {
@@ -21,35 +31,32 @@ final class TokenStore {
     }
 
     func loadRefreshToken() -> String? {
-        UserDefaults.standard.string(forKey: Key.refreshToken)
+        do {
+            return try keychain.get(Key.refreshToken)
+        } catch {
+            print("❗️Keychain read failed:", error)
+            return nil
+        }
     }
 
     func clear() {
         UserDefaults.standard.removeObject(forKey: Key.accessToken)
-        UserDefaults.standard.removeObject(forKey: Key.refreshToken)
+        UserDefaults.standard.removeObject(forKey: Key.grantType)
+
+        do {
+            try keychain.remove(Key.refreshToken)
+        } catch {
+            print("❗️Keychain remove failed:", error)
+        }
     }
 
     func loadAuthorizationValue() -> String? {
         guard
             let accessToken = loadAccessToken(),
             !accessToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        else {
-            return nil
-        }
+        else { return nil }
 
         let grantType = UserDefaults.standard.string(forKey: Key.grantType) ?? "Bearer"
         return "\(grantType) \(accessToken)"
     }
 }
-
-extension TokenStore {
-    func debugPrintTokenStatus(context: String = "") {
-        let access = loadAccessToken()
-        let refresh = loadRefreshToken()
-
-        print("🧪 [TokenStore DEBUG] \(context)")
-        print("  - accessToken:", access == nil ? "nil" : "exists (\(access!.count) chars)")
-        print("  - refreshToken:", refresh == nil ? "nil" : "exists (\(refresh!.count) chars)")
-    }
-}
-

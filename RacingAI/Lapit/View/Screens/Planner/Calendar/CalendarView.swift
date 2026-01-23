@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct CalendarView: View {
-    @Environment(\.dismiss) private var dismiss
     private let calendar = Calendar.current
     
     @StateObject private var vm = CalendarMonthScoreViewModel()
@@ -129,13 +128,14 @@ struct CalendarView: View {
             currentMonth = startOfMonth(Date())
 
             vm.applyInjected(scoreByDate: scoreByDate, codeByDate: codeByDate)
-
+            
+            CalendarScoreCache.shared.clearAll()
             vm.load(month: currentMonth)
         }
         .onReceive(WorkoutEventBus.shared.subject) { event in
             switch event {
             case .workoutSaved:
-                vm.load(month: currentMonth)
+                vm.load(month: currentMonth, forceRefresh: true)
             }
         }
         .onChange(of: currentMonth) { _, newValue in
@@ -144,7 +144,9 @@ struct CalendarView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 HStack(spacing: 5) {
-                    Button { dismiss() } label: {
+                    Button {
+                        
+                    } label: {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundStyle(.black)
@@ -185,16 +187,19 @@ struct CalendarView: View {
                         let index = week * 7 + dayIndex
                         let day = days[index]
 
+                        let score = day.flatMap { vm.scoreByDate[calendar.startOfDay(for: $0)] }
+                        let canTap = (score ?? 0) > 0
+
                         DayCell(
                             day: day,
                             month: month,
                             selectedDate: $selectedDate,
-                            score: day.flatMap { vm.scoreByDate[calendar.startOfDay(for:  $0)] },
+                            score: score,
                             isPreview: isPreview,
                             onTap: { tappedDay in
+                                guard canTap else { return }
                                 selectedDate = calendar.startOfDay(for: tappedDay)
                                 onSelect(tappedDay)
-                                dismiss()
                             }
                         )
                     }
@@ -374,23 +379,24 @@ private struct DayCell: View {
 
     var body: some View {
         let isToday = day.map { calendar.isDateInToday($0) } ?? false
+        let hasWorkout = (score ?? 0) > 0
 
         Button {
             if let day { onTap(day) }
         } label: {
             ZStack {
-                // 날짜 숫자: 셀 내부 좌상단
+                // ✅ 날짜 숫자: "기존 위치 그대로"(패딩 없이 좌상단)
                 VStack {
                     HStack {
                         Text(dayNumberString(day))
                             .font(.system(size: 12, weight: .medium))
-                            .foregroundStyle(isToday && !isPreview ? .mint : (isPreview ? .secondary : .black))
+                            .foregroundStyle(dayNumberColor(isToday: isToday, hasWorkout: hasWorkout))
                         Spacer()
                     }
                     Spacer()
                 }
 
-                // 점수
+                // ✅ 점수: 있을 때만 표시 + 살짝 위로
                 if let score {
                     VStack {
                         Spacer()
@@ -398,7 +404,7 @@ private struct DayCell: View {
                             .font(.title3)
                             .fontWeight(.bold)
                             .foregroundStyle(isPreview ? .mint : .black)
-                            .padding(.bottom, 6)
+                            .padding(.bottom, 14) // 숫자만 조절해서 위/아래 이동
                     }
                 }
             }
@@ -406,11 +412,17 @@ private struct DayCell: View {
             .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
-        .disabled(day == nil)
+        .disabled(day == nil || (score ?? 0) == 0)
     }
 
     private func dayNumberString(_ date: Date?) -> String {
         guard let date else { return "" }
         return String(calendar.component(.day, from: date))
+    }
+
+    private func dayNumberColor(isToday: Bool, hasWorkout: Bool) -> some ShapeStyle {
+        if isPreview { return AnyShapeStyle(.secondary) }
+        if isToday { return AnyShapeStyle(.mint) }
+        return AnyShapeStyle(hasWorkout ? .black : .gray)
     }
 }

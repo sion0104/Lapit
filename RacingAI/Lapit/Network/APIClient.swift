@@ -242,41 +242,46 @@ extension APIClient {
 extension APIClient {
     func postWithQuery<T: Decodable>(
         _ path: String,
-        queryItems: [URLQueryItem]
+        queryItems: [URLQueryItem],
+        attachAuth: Bool = true   // ✅ 추가
     ) async throws -> T {
         guard let base = URL(string: path, relativeTo: baseURL) else {
             throw APIError.invalidURL
         }
-        
+
         var components = URLComponents(url: base, resolvingAgainstBaseURL: true)
         components?.queryItems = queryItems
-        
+
         guard let url = components?.url else {
             throw APIError.invalidURL
         }
-        
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        
+
         print("➡️ [APIClient] Request: POST \(url.absoluteString)")
-        
-        attachAuthorizationIfNeeded(to: &request)
+
+        if attachAuth {
+            attachAuthorizationIfNeeded(to: &request)
+        } else {
+            request.setValue(nil, forHTTPHeaderField: "Authorization")
+            print("🔐 [APIClient] Authorization skipped (attachAuth=false)")
+        }
 
         let (data, response) = try await session.data(for: request)
-        
+
         guard let http = response as? HTTPURLResponse else {
             throw APIError.unknown
         }
-        
+
         print("⬅️ [APIClient] Response statusCode: \(http.statusCode)")
 
         guard (200..<300).contains(http.statusCode) else {
-           throw APIError.serverStatusCode(http.statusCode, data)
-       }
+            throw APIError.serverStatusCode(http.statusCode, data)
+        }
 
-       return try JSONDecoder().decode(T.self, from: data)
+        return try JSONDecoder().decode(T.self, from: data)
     }
 }
 
@@ -648,5 +653,7 @@ private extension APIClient {
         print("📨 [APIClient] Body(Binary): \(body.count) bytes")
     }
 }
+
+
 
 

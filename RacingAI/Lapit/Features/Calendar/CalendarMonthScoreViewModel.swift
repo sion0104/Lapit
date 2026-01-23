@@ -6,24 +6,23 @@ final class CalendarMonthScoreViewModel: ObservableObject {
     @Published private(set) var codeByDate: [Date: String] = [:]
     @Published private(set) var isLoading: Bool = false
     @Published private(set) var errorMessage: String?
-    
+
     private let repo: CalendarScoreRepository
     private let calendar = Calendar.current
-    
     private var currentTask: Task<Void, Never>?
-    
+
     init(repo: CalendarScoreRepository = CalendarScoreRepository()) {
         self.repo = repo
     }
-    
-    func load(month: Date) {
+
+    func load(month: Date, forceRefresh: Bool = false) {
         currentTask?.cancel()
         currentTask = Task { [weak self] in
             guard let self else { return }
-            await self.loadInternal(month: month)
+            await self.loadInternal(month: month, forceRefresh: forceRefresh)
         }
     }
-    
+
     func applyInjected(scoreByDate: [Date: Int], codeByDate: [Date: String]) {
         var mergedScore = self.scoreByDate
         for (d, v) in scoreByDate {
@@ -38,88 +37,107 @@ final class CalendarMonthScoreViewModel: ObservableObject {
         self.scoreByDate = mergedScore
         self.codeByDate = mergedCode
     }
-    
-    private func loadInternal(month: Date) async {
+
+    private func loadInternal(month: Date, forceRefresh: Bool) async {
         errorMessage = nil
-        
+
         let monthKey = monthKeyString(month)
-        
-        // 1) 캐시 즉시 반영 (있으면 바로 화면에 점수 뜸)
+        let apiMonth = apiMonthString(month)
+
+        // 1) 캐시 즉시 반영
         if let cached = CalendarScoreCache.shared.load(monthKey: monthKey) {
             apply(cache: cached)
         }
-        
-        // 2) stale이면 네트워크 갱신
-        let needsRefresh = repo.shouldRefresh(monthKey: monthKey)
+
+        // 2) stale이면 네트워크 갱신 (forceRefresh면 무조건)
+        let needsRefresh = forceRefresh ? true : repo.shouldRefresh(monthKey: monthKey)
         guard needsRefresh else {
-            // 인접월 프리패치(캐시가 없거나 stale이면 백그라운드로 받아둠)
             prefetchAdjacentMonths(of: month)
             return
         }
-        
+
         isLoading = true
         defer { isLoading = false }
-        
+
         do {
-            let refreshed = try await repo.getMonth(monthKey: monthKey, forceRefresh: true)
+            let refreshed = try await repo.getMonth(
+                monthKey: monthKey,
+                apiMonth: apiMonth,
+                forceRefresh: true
+            )
             apply(cache: refreshed)
             prefetchAdjacentMonths(of: month)
         } catch {
             errorMessage = error.localizedDescription
         }
     }
-    
+
     private func apply(cache: CalendarScoreCache.MonthCache) {
-        // String("yyyy-MM-dd") -> Date -> [Date:Int] 변환
-        var newScore: [Date: Int] = [:]
-        var newCode: [Date: String] = [:]
-        
+        var mergedScore = self.scoreByDate
+        var mergedCode  = self.codeByDate
+
         for (k, v) in cache.scoreByDate {
             if let d = parseDay(k) {
-                newScore[calendar.startOfDay(for: d)] = v
+                let key = calendar.startOfDay(for: d)
+                // injected(대시보드 기준)이 이미 있으면 그대로 유지
+                if mergedScore[key] == nil {
+                    mergedScore[key] = v
+                }
             }
         }
+
         for (k, v) in cache.codeByDate {
             if let d = parseDay(k) {
-                newCode[calendar.startOfDay(for: d)] = v
+                let key = calendar.startOfDay(for: d)
+                mergedCode[key] = v
             }
         }
-        
-        self.scoreByDate = newScore
-        self.codeByDate = newCode
+
+        self.scoreByDate = mergedScore
+        self.codeByDate = mergedCode
     }
-    
+
+
     private func prefetchAdjacentMonths(of month: Date) {
         let next = calendar.date(byAdding: .month, value: 1, to: month) ?? month
         let prev = calendar.date(byAdding: .month, value: -1, to: month) ?? month
-        
+
+        let nextKey = monthKeyString(next)
+        let nextApiMonth = apiMonthString(next)
+
+        let prevKey = monthKeyString(prev)
+        let prevApiMonth = apiMonthString(prev)
+
         Task.detached { [repo] in
-            let nextKey = await self.monthKeyString(next)
-            if repo.shouldRefresh(monthKey: nextKey), CalendarScoreCache.shared.load(monthKey: nextKey) == nil {
-                _ = try? await repo.getMonth(monthKey: nextKey, forceRefresh: true)
+            if repo.shouldRefresh(monthKey: nextKey),
+               CalendarScoreCache.shared.load(monthKey: nextKey) == nil {
+                _ = try? await repo.getMonth(monthKey: nextKey, apiMonth: nextApiMonth, forceRefresh: true)
             }
         }
-        
+
         Task.detached { [repo] in
-            let prevKey = await self.monthKeyString(prev)
-            if repo.shouldRefresh(monthKey: prevKey), CalendarScoreCache.shared.load(monthKey: prevKey) == nil {
-                _ = try? await repo.getMonth(monthKey: prevKey, forceRefresh: true)
+            if repo.shouldRefresh(monthKey: prevKey),
+               CalendarScoreCache.shared.load(monthKey: prevKey) == nil {
+                _ = try? await repo.getMonth(monthKey: prevKey, apiMonth: prevApiMonth, forceRefresh: true)
             }
         }
     }
-    
+
     private func monthKeyString(_ date: Date) -> String {
-        // "yyyy-MM"
         let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
+        f.locale = Locale(identifier: "ko_KR")
         f.dateFormat = "yyyy-MM"
         return f.string(from: date)
     }
-    
+
     private func parseDay(_ str: String) -> Date? {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
+        f.locale = Locale(identifier: "ko_KR")
         f.dateFormat = "yyyy-MM-dd"
         return f.date(from: str)
+    }
+
+    private func apiMonthString(_ date: Date) -> String {
+        String(calendar.component(.month, from: date)) // "1"..."12"
     }
 }

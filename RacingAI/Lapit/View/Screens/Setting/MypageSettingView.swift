@@ -4,6 +4,10 @@ struct MypageSettingView: View {
     @EnvironmentObject private var userSession: UserSessionStore
     @State private var path = NavigationPath()
     
+    private var isLoggedIn: Bool {
+        userSession.user != nil
+    }
+    
     var body: some View {
         NavigationStack(path: $path){
             ScrollView {
@@ -14,21 +18,23 @@ struct MypageSettingView: View {
                     
                     ProfileSectionView()
                     
-                    SettingSection(title: "설정") {
-                        VStack(spacing: 0) {
-                            Button {
-                                path.append(AppRoute.passwordVerify(.editInfo))
-                            } label: {
-                                SettingRowContentView(title: "회원정보 변경")
+                    if isLoggedIn {
+                        SettingSection(title: "설정") {
+                            VStack(spacing: 0) {
+                                Button {
+                                    path.append(AppRoute.passwordVerify(.editInfo))
+                                } label: {
+                                    SettingRowContentView(title: "회원정보 변경")
+                                }
+                                Divider().padding(.leading)
+
+                                Button {
+                                    path.append(AppRoute.passwordVerify(.changePassword))
+                                } label: {
+                                    SettingRowContentView(title: "사용자 비밀번호 설정")
+                                }
+                                Divider().padding(.leading)
                             }
-                            Divider().padding(.leading)
-                            
-                            Button {
-                                path.append(AppRoute.passwordVerify(.changePassword))
-                            } label: {
-                                SettingRowContentView(title: "사용자 비밀번호 설정")
-                            }
-                            Divider().padding(.leading)
                         }
                     }
                     
@@ -101,8 +107,8 @@ struct MypageSettingView: View {
                 }
             }
             .task {
-                guard userSession.user == nil else { return }
-                await userSession.fetchUserIfNeeded()
+                guard userSession.isLoggedIn else { return }
+                try? await userSession.refreshUser()
             }
         }
     }

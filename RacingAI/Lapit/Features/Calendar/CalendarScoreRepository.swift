@@ -9,17 +9,20 @@ final class CalendarScoreRepository {
         self.cache = cache
     }
     
-    /// 1) 캐시 있으면 즉시 반환 (만료여도 우선 표시 가능)
-    /// 2) stale이면 네트워크로 갱신 후 저장
-    func getMonth(monthKey: String, forceRefresh: Bool = false) async throws -> CalendarScoreCache.MonthCache {
+    func getMonth(
+        monthKey: String,
+        apiMonth: String,
+        forceRefresh: Bool = false
+    ) async throws -> CalendarScoreCache.MonthCache {
+
         if !forceRefresh, let cached = cache.load(monthKey: monthKey) {
-            // stale 여부는 상위(vm)에서 판단해도 되고, 여기서 바로 refresh 해도 됨
             return cached
         }
-        
-        let res = try await api.fetchWorkoutMonthly(month: monthKey)
+
+        let res = try await api.fetchWorkoutMonthly(month: apiMonth)
+
         let (scoreByDate, codeByDate) = mapScores(items: res.data)
-        
+
         let newCache = CalendarScoreCache.MonthCache(
             fetchedAt: Date(),
             scoreByDate: scoreByDate,
@@ -28,7 +31,7 @@ final class CalendarScoreRepository {
         cache.save(monthKey: monthKey, cache: newCache)
         return newCache
     }
-    
+
     func shouldRefresh(monthKey: String) -> Bool {
         cache.isStale(monthKey: monthKey)
     }

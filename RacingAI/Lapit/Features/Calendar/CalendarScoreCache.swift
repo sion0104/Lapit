@@ -79,4 +79,12 @@ final class CalendarScoreCache {
     private func isExpired(_ cache: MonthCache) -> Bool {
         Date().timeIntervalSince(cache.fetchedAt) > ttl
     }
+    
+    func clearAll() {
+        queue.async(flags: .barrier) { [weak self] in
+            self?.memory.removeAll()
+        }
+        let dir = cacheDir()
+        try? FileManager.default.removeItem(at: dir)
+    }
 }
