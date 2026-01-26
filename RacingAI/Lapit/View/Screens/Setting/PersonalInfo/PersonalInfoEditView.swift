@@ -54,6 +54,7 @@ struct PersonalInfoEditView: View {
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
+        .preference(key: TabBarHiddenPreferenceKey.self, value: true)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 HStack(spacing: 5) {

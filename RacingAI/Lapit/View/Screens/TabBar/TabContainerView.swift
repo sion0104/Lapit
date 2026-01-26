@@ -47,7 +47,7 @@ struct TabContainerView: View {
                         .frame(height: tabBarContentHeight)
                 }
             }
-            .onAppear {
+            .task {
                 workoutDailyStore.preloadTodayIfNeeded()
             }
             .ignoresSafeArea(.keyboard)

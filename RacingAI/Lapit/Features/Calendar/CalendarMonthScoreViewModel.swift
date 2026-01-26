@@ -79,10 +79,7 @@ final class CalendarMonthScoreViewModel: ObservableObject {
         for (k, v) in cache.scoreByDate {
             if let d = parseDay(k) {
                 let key = calendar.startOfDay(for: d)
-                // injected(대시보드 기준)이 이미 있으면 그대로 유지
-                if mergedScore[key] == nil {
-                    mergedScore[key] = v
-                }
+                mergedScore[key] = v
             }
         }
 

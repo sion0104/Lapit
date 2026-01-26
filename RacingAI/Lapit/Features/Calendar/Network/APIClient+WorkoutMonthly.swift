@@ -22,6 +22,13 @@ extension APIClient {
         guard let http = response as? HTTPURLResponse else { throw APIError.unknown }
         
         print("⬅️ [APIClient] Response statusCode: \(http.statusCode)")
+        if !(200..<300).contains(http.statusCode) {
+            if let body = String(data: data, encoding: .utf8) {
+                print("❌ [APIClient] Error body: \(body)")
+            }
+            throw APIError.serverStatusCode(http.statusCode, data)
+        }
+
         guard (200..<300).contains(http.statusCode) else {
             throw APIError.serverStatusCode(http.statusCode, data)
         }

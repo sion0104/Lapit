@@ -20,17 +20,29 @@ final class WatchCommandReceiver: NSObject, @preconcurrency WCSessionDelegate {
                  activationDidCompleteWith activationState: WCSessionActivationState,
                  error: Error?) { }
 
-    // 즉시성
-    @MainActor func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
+    func sessionReachabilityDidChange(_ session: WCSession) { }
+
+    @MainActor
+    func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
         handle(dict: message)
     }
 
-    // “워치 앱이 꺼져 있어도” eventually 전달되는 큐
-    @MainActor func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any] = [:]) {
+    func session(_ session: WCSession,
+                 didReceiveMessage message: [String : Any],
+                 replyHandler: @escaping ([String : Any]) -> Void) {
+        Task { @MainActor in
+            handle(dict: message)
+            replyHandler([:]) // 필요 없으면 빈 응답
+        }
+    }
+
+    @MainActor
+    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any] = [:]) {
         handle(dict: userInfo)
     }
 
-    @MainActor private func handle(dict: [String: Any]) {
+    @MainActor
+    private func handle(dict: [String: Any]) {
         guard let raw = dict["command"] as? String,
               let cmd = WorkoutCommand(rawValue: raw) else {
             print("❌ command parse fail")
@@ -39,7 +51,7 @@ final class WatchCommandReceiver: NSObject, @preconcurrency WCSessionDelegate {
 
         let commandId = (dict["commandId"] as? String) ?? UUID().uuidString
 
-        // 1) received ACK (iPhone 재시도 빨리 멈추게)
+        // 1) received ACK
         WatchWorkoutManager.shared.sendAck(command: cmd, commandId: commandId, status: .received, message: nil)
 
         // 2) 실제 수행
@@ -62,5 +74,3 @@ final class WatchCommandReceiver: NSObject, @preconcurrency WCSessionDelegate {
         }
     }
 }
-
-

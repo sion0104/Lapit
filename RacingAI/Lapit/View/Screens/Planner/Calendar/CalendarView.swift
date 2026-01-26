@@ -129,8 +129,7 @@ struct CalendarView: View {
 
             vm.applyInjected(scoreByDate: scoreByDate, codeByDate: codeByDate)
             
-            CalendarScoreCache.shared.clearAll()
-            vm.load(month: currentMonth)
+            vm.load(month: currentMonth, forceRefresh: true)
         }
         .onReceive(WorkoutEventBus.shared.subject) { event in
             switch event {

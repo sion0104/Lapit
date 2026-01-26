@@ -48,7 +48,7 @@ final class CalendarScoreCache {
     // MARK: - Disk
     private func cacheDir() -> URL {
         let base = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
-        let dir = base.appendingPathComponent("CalendarMonthCache", isDirectory: true)
+        let dir = base.appendingPathComponent("CalendarMonthCache_v2", isDirectory: true)
 
         if !FileManager.default.fileExists(atPath: dir.path) {
             try? FileManager.default.createDirectory(

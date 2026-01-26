@@ -3,7 +3,11 @@ import HealthKit
 import WatchConnectivity
 
 @MainActor
-final class WatchWorkoutManager: NSObject, ObservableObject {
+final class WatchWorkoutManager: NSObject, ObservableObject, WCSessionDelegate {
+    nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: (any Error)?) {
+        
+    }
+    
     static let shared = WatchWorkoutManager()
     
     @Published private(set) var isRunning: Bool = false
@@ -49,17 +53,22 @@ final class WatchWorkoutManager: NSObject, ObservableObject {
         )
 
         guard let data = try? JSONEncoder().encode(ack),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return }
+              let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else { return }
 
-        s.sendMessage(json, replyHandler: nil) { error in
-            print("❌ ACK send error:", error)
+        if s.isReachable {
+            s.sendMessage(json, replyHandler: nil) { error in
+                print("❌ ACK sendMessage error:", error)
+                s.transferUserInfo(["ackData": data])
+            }
+        } else {
+            // ✅ 워치가 백그라운드/폰이 일시 단절이어도 eventually 전달
+            s.transferUserInfo(["ackData": data])
         }
     }
 
 
     override private init() {
         super.init()
-        activateWCSessionIfNeeded()
     }
     
     private func activateWCSessionIfNeeded(){
@@ -322,18 +331,6 @@ extension WatchWorkoutManager: HKLiveWorkoutBuilderDelegate {
             let payload = self.makePayload(now: now)
             self.lastPayload = payload
             self.sendToPhone(payload)
-        }
-    }
-}
-
-extension WatchWorkoutManager: WCSessionDelegate {
-    nonisolated func session(_ session: WCSession,
-                             activationDidCompleteWith activationState: WCSessionActivationState,
-                             error: Error?) {
-        if let error {
-            print("❌ WCSession activate error:", error)
-        } else {
-            print("✅ WCSession activated:", activationState.rawValue)
         }
     }
 }

@@ -74,23 +74,28 @@ final class PhoneWorkoutReceiver: NSObject, ObservableObject {
 
     // MARK: - Retry core
 
+    private let maxAttempts = 10
+
     private func retryLoop() async {
         guard var p = pending else { return }
 
         while !Task.isCancelled, pending?.commandId == p.commandId {
+            if p.attempt >= maxAttempts {
+                deliveryState = .failed("워치 연결이 불안정해 명령 전송을 중단했어요. 워치에서 앱을 열고 다시 시도해 주세요.")
+                pending = nil
+                return
+            }
+
             p.attempt += 1
             pending = p
             deliveryState = .sending(command: p.command, attempt: p.attempt)
 
             let immediateSent = sendMessageIfReachable(command: p.command, commandId: p.commandId)
-
             if !immediateSent {
-                // Reachable 아니면 “배송 예약”
                 enqueueUserInfo(command: p.command, commandId: p.commandId)
                 deliveryState = .waitingForWatch
             }
 
-            // backoff: 0.5 → 1 → 2 → 3 → 5 (상한 5s)
             let delay = min(5.0, 0.5 * pow(2.0, Double(min(p.attempt - 1, 4))))
             try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
         }
@@ -167,7 +172,15 @@ extension PhoneWorkoutReceiver: WCSessionDelegate {
     }
     
     nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any] = [:]) {
-        // Watch에서 transferUserInfo로 보낸 payload 수신
+
+        if let ackData = userInfo["ackData"] as? Data,
+           let ack = try? JSONDecoder().decode(WorkoutAck.self, from: ackData) {
+            Task { @MainActor in
+                self.completeIfMatches(ack)
+            }
+            return
+        }
+
         guard let data = userInfo["payloadData"] as? Data else { return }
 
         do {

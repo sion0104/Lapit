@@ -123,10 +123,9 @@ struct AICoachView: View {
             goGenerator = false
         }
 
-        // ✅ 1) 로컬 우선
+        // ✅ 1) 오늘 하루 동안은 로컬에 있으면 서버 조회 없이 바로 이동
         do {
-            if let local = try DailyPlanLocalStore.fetch(by: checkDate, context: modelContext) {
-                print("✅ local exists -> goMyPlan:", local.checkDate)
+            if let _ = try DailyPlanLocalStore.fetch(by: checkDate, context: modelContext) {
                 await MainActor.run {
                     isChecking = false
                     checkDateForNav = checkDate
@@ -135,11 +134,11 @@ struct AICoachView: View {
                 return
             }
         } catch {
+            // 로컬 fetch 실패면 서버 조회로 넘어감
             print("⚠️ local fetch error:", error)
-            // 로컬 fetch 실패여도 서버 조회는 진행
         }
 
-        // ✅ 2) 서버 조회
+        // ✅ 2) 로컬에 없을 때만 서버 조회
         do {
             let res: CommonResponse<DailyAIPlanPayload> = try await APIClient.shared.fetchDailyAIPlan(checkDate: checkDate)
 
@@ -152,7 +151,6 @@ struct AICoachView: View {
                 planTrimmed!.isEmpty ||
                 planTrimmed!.lowercased() == "null"
 
-            // ✅ 서버에 없으면 생성 화면
             guard !isNoPlan else {
                 await MainActor.run {
                     isChecking = false
@@ -161,9 +159,7 @@ struct AICoachView: View {
                 return
             }
 
-            // ✅ 서버에 있으면 파싱 후 로컬 저장 → MyWorkoutPlan
             let rawMarkdown = normalizeMarkdown(planTrimmed!)
-
             let title = "\(tomorrow.monthKorean()) \(tomorrow.day())일 운동 계획"
             let parsed = try WorkoutPlanParser.parse(raw: rawMarkdown, dateTitle: title)
             let checklist = buildChecklistItems(from: parsed)
@@ -198,6 +194,7 @@ struct AICoachView: View {
                 isChecking = false
                 errorMessage = apiError.userMessage
             }
+
         } catch {
             await MainActor.run {
                 isChecking = false
@@ -205,6 +202,7 @@ struct AICoachView: View {
             }
         }
     }
+
     
     private func buildChecklistItems(from plan: WorkoutPlan) -> [PlanCheckItem] {
         var result: [PlanCheckItem] = []

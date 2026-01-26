@@ -17,7 +17,7 @@ actor TokenRefresher {
         }
 
         let task = Task<Void, Error> {
-            defer { Task { await self.clearInFlight() } }
+            defer { Task { self.clearInFlight() } }
 
             guard let refresh = TokenStore.shared.loadRefreshToken(),
                   !refresh.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty

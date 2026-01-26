@@ -4,9 +4,6 @@ struct WorkoutDashboardLikeView: View {
     @EnvironmentObject private var store: WorkoutDailyStore
     
     private let calendar = Calendar(identifier: .gregorian)
-    
-    @State private var isLoading: Bool = false
-    @State private var errorMessage: String? = nil
             
     @State private var feedbackMemo: String = "오늘 작성된 내용이 없습니다"
     
@@ -51,7 +48,7 @@ struct WorkoutDashboardLikeView: View {
         return cal.startOfDay(for: now)
     }
 
-    private var todayCheckDateString: String {
+    private var selectedCheckDateString: String {
         WorkoutDateFormatter.checkDateString(selectedDay)
     }
 
@@ -215,9 +212,6 @@ struct WorkoutDashboardLikeView: View {
                     }
                 }
             }
-            .onAppear {
-                load(for: selectedDay)
-            }
             .onChange(of: store.lastUpdatedVersion) { _, _ in
                 let key = WorkoutDateFormatter.checkDateString(selectedDay)
                 guard let payload = store.cache[key] else { return }
@@ -245,6 +239,12 @@ struct WorkoutDashboardLikeView: View {
                         load(for: selectedDay)
                     }
                 )
+            }
+        }
+        .overlay {
+            if store.loadingKeys.contains(selectedCheckDateString),
+               store.cache[selectedCheckDateString] == nil {
+                LoadingOverlayView(text: "운동 데이터를 불러오는 중…")
             }
         }
     }
