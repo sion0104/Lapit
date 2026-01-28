@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TermsView: View {
     @EnvironmentObject var store: UserInfoStore
+    @EnvironmentObject private var userSession: UserSessionStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var terms: [GetTermsListRes] = []
@@ -59,13 +60,9 @@ struct TermsView: View {
                     dismiss()
                 },
                 rightAction: {
-                    if canGoNext {
-                        Task {
-                            await signUp()
-                        }
-                    } else {
-                        showValidationAlert = true
-                    }
+                    guard !isSigningUp else { return }
+                    if canGoNext { Task { await signUp() } }
+                    else { showValidationAlert = true }
                 })
         }
         .alert("약관 동의 필요", isPresented: $showValidationAlert) {
@@ -244,6 +241,8 @@ private extension TermsView {
                 param: req,
                 profileImageData: store.profileImageData
             )
+            
+            try await userSession.login(username: req.username, password: req.password)
             
             await MainActor.run {
                 isSigningUp = false
