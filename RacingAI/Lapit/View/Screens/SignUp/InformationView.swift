@@ -25,9 +25,7 @@ struct InformationView: View {
     
     private var canGoNext: Bool {
         !store.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !store.birth.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        birthError == nil &&
-        store.gender != nil
+        birthError == nil
     }
     
     var body: some View {
@@ -80,7 +78,7 @@ struct InformationView: View {
         .alert("입력 확인", isPresented: $showValidationAlert) {
             Button("확인", role: .cancel) {}
         } message: {
-            Text("이름, 생년월일, 성별을 모두 입력/선택해야 다음 단계로 넘어갈 수 있어요.")
+            Text("이름은 필수 항목입니다.")
         }
     }
 }
@@ -169,10 +167,6 @@ private extension InformationView {
                 Text("생년월일")
                     .font(.callout)
                     .fontWeight(.medium)
-                Text("*")
-                    .font(.callout)
-                    .fontWeight(.medium)
-                    .foregroundStyle(.red)
             }
             AppTextField(
                 text: $store.birth,
@@ -193,6 +187,12 @@ private extension InformationView {
                         store.birth = formatted
                         return
                     }
+                    
+                    if formatted.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        birthError = nil
+                        return
+                    }
+                    
                     birthError = validateBirthIntermediate(formatted)
                     
                     if formatted.count == 10, birthError == nil {
@@ -209,10 +209,6 @@ private extension InformationView {
                 Text("성별")
                     .font(.callout)
                     .fontWeight(.medium)
-                Text("*")
-                    .font(.callout)
-                    .fontWeight(.medium)
-                    .foregroundStyle(.red)
             }
             HStack {
                 GenderOptionView(title: "남성", isSelected: store.gender == .male) {

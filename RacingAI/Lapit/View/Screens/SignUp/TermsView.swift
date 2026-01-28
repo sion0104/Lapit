@@ -229,7 +229,7 @@ private extension TermsView {
     }
     
     func signUp() async {
-        guard let req = store.makeSignUpRequ(terms: terms) else {
+        guard let req = store.makeSignUpReq(terms: terms) else {
             await MainActor.run {
                 signUpErrorMessage = "회원가입 정보가 완전하지 않습니다. 이전 단계 입력을 다시 확인해주세요."
                 showSignUpErrorAlert = true

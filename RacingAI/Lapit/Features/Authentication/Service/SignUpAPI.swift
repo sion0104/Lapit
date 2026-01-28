@@ -4,8 +4,8 @@ struct SignUpReq: Encodable {
     let username: String
     let password: String
     let name: String
-    let birthDate: String
-    let gender: String
+    let birthDate: String?
+    let gender: String?
     let agreeYn: String
     let termsList: [SignUpTerms]
 }

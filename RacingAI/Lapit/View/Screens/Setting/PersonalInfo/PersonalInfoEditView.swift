@@ -29,9 +29,7 @@ struct PersonalInfoEditView: View {
 
     private var canSave: Bool {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !birth.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        birthError == nil &&
-        gender != nil
+        birthError == nil
     }
 
     var body: some View {
@@ -85,11 +83,19 @@ struct PersonalInfoEditView: View {
             if let user = userSession.user {
                 username = user.username
                 name = user.name
-                birth = user.birthDate.replacingOccurrences(of: "-", with: ".")
-                if user.gender.uppercased().contains("M") {
-                    gender = .male
-                } else if user.gender.uppercased().contains("F") {
-                    gender = .female
+                
+                if let bd = user.birthDate, !bd.isEmpty {
+                    birth = bd.replacingOccurrences(of: "-", with: ".")
+                } else {
+                    birth = ""
+                }
+
+                if let g = user.gender?.uppercased() {
+                    if g.contains("M") { gender = .male }
+                    else if g.contains("F") { gender = .female }
+                    else { gender = nil}
+                } else {
+                    gender = nil
                 }
             }
         }
@@ -223,6 +229,12 @@ private extension PersonalInfoEditView {
                     birth = formatted
                     return
                 }
+                
+                if formatted.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    birthError = nil
+                    return
+                }
+                
                 birthError = validateBirthIntermediate(formatted)
                 if formatted.count == 10, birthError == nil {
                     birthError = validateBirthFinal(formatted)
@@ -325,15 +337,14 @@ private extension PersonalInfoEditView {
         isSaving = true
         defer { isSaving = false }
         
-        let birthForAPI = birth.replacingOccurrences(of: ".", with: "-")
+        let trimmedBirth = birth.trimmingCharacters(in: .whitespacesAndNewlines)
+        let birthForAPI: String? = trimmedBirth.isEmpty ? nil : trimmedBirth.replacingOccurrences(of: ".", with: "-")
         
-        let genderCode: String
+        let genderCode: String?
         switch gender {
         case .male: genderCode = "M"
             case .female: genderCode = "F"
-        case .none:
-            saveError = "성별을 선택해주세요."
-            return
+        case .none: genderCode = nil
         }
         
         let req = ModifyUserInfoReq(

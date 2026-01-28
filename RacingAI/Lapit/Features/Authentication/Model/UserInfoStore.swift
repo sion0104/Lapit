@@ -24,25 +24,27 @@ final class UserInfoStore: ObservableObject {
 }
 
 extension UserInfoStore {
-    func makeSignUpRequ(
+    func makeSignUpReq(
         terms: [GetTermsListRes]
     ) -> SignUpReq? {
         guard
             !id.isEmpty,
             !password.isEmpty,
-            !name.isEmpty,
-            !birth.isEmpty,
-            let gender
+            !name.isEmpty
         else {
             return nil
         }
         
-        let birthForAPI = birth.replacingOccurrences(of: ".", with: "-")
+        let trimmedBirth = birth.trimmingCharacters(in: .whitespacesAndNewlines)
+        let birthForAPI: String? = trimmedBirth.isEmpty
+        ? nil
+        : trimmedBirth.replacingOccurrences(of: ".", with: "-")
         
-        let genderCode: String
+        let genderCode: String?
         switch gender {
         case .male: genderCode = "M"
         case .female: genderCode = "F"
+        case .none: genderCode = nil
         }
         
         let termsList: [SignUpTerms] = terms.map { term in

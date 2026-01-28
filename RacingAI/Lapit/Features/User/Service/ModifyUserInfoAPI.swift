@@ -2,8 +2,8 @@ import Foundation
 
 struct ModifyUserInfoReq: Encodable {
     let name: String
-    let birthDate: String
-    let gender: String
+    let birthDate: String?
+    let gender: String?
 }
 
 protocol ModifyUserInfoAPIProtocol {
