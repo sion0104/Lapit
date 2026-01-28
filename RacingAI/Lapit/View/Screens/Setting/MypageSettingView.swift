@@ -18,6 +18,15 @@ struct MypageSettingView: View {
                     
                     ProfileSectionView()
                     
+                    HStack {
+                        Spacer()
+                        Text("운동 데이터를 Apple Health와 연동합니다")
+                            .frame(alignment: .center)
+                            .font(.subheadline)
+                            .foregroundStyle(.good)
+                        Spacer()
+                    }
+                   
                     if isLoggedIn {
                         SettingSection(title: "설정") {
                             VStack(spacing: 0) {
