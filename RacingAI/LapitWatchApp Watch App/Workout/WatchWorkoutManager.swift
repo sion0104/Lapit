@@ -12,6 +12,9 @@ final class WatchWorkoutManager: NSObject, ObservableObject, WCSessionDelegate {
     
     @Published private(set) var isRunning: Bool = false
     @Published private(set) var lastPayload: LiveMetricsPayload?
+    
+    @Published var sendStatusText: String = ""
+    @Published var lastSendResultAt: Date?
 
     private let healthStore = HKHealthStore()
     private var workoutSession: HKWorkoutSession?
@@ -30,6 +33,62 @@ final class WatchWorkoutManager: NSObject, ObservableObject, WCSessionDelegate {
     
     private var lastQueuedUserInfoAt: Date?
     var minUserInfoIntervalSec: TimeInterval = 2.0
+    
+    func sendMockMetricsForDebug() {
+        let payload = LiveMetricsPayload(
+            timestamp: Date(),
+            heartRateBPM: 132,
+            activeEnergyKcal: 88,
+            distanceMeters: 1200,
+            speedMps: 5.2
+        )
+
+        lastPayload = payload
+        sendStatusText = "Sending..."
+        lastSendResultAt = Date()
+
+        sendToPhoneWithFallback(payload)
+    }
+    
+    private func sendToPhoneWithFallback(_ payload: LiveMetricsPayload) {
+        guard WCSession.isSupported() else {
+            sendStatusText = "WCSession not supported"
+            return
+        }
+
+        let session = WCSession.default
+        guard session.activationState == .activated else {
+            activateWCSessionIfNeeded()
+            enqueuePayloadIfNeeded(session: session, data: (try? JSONEncoder().encode(payload)) ?? Data())
+            sendStatusText = "Queued (activating session)"
+            return
+        }
+
+        do {
+            let data = try JSONEncoder().encode(payload)
+
+            if session.isReachable {
+                session.sendMessageData(data, replyHandler: { [weak self] _ in
+                    Task { @MainActor in
+                        self?.sendStatusText = "Sent (reachable)"
+                        self?.lastSendResultAt = Date()
+                    }
+                }, errorHandler: { [weak self] error in
+                    Task { @MainActor in
+                        self?.sendStatusText = "Send failed → queued"
+                        self?.lastSendResultAt = Date()
+                    }
+                    self?.enqueuePayloadIfNeeded(session: session, data: data)
+                })
+            } else {
+                enqueuePayloadIfNeeded(session: session, data: data)
+                sendStatusText = "Queued (not reachable)"
+                lastSendResultAt = Date()
+            }
+        } catch {
+            sendStatusText = "Encode failed"
+        }
+    }
 
     func setPendingCommandId(command: WorkoutCommand, commandId: String) {
         // start에 대해 running ACK를 정확히 보내기 위해 저장
@@ -61,7 +120,6 @@ final class WatchWorkoutManager: NSObject, ObservableObject, WCSessionDelegate {
                 s.transferUserInfo(["ackData": data])
             }
         } else {
-            // ✅ 워치가 백그라운드/폰이 일시 단절이어도 eventually 전달
             s.transferUserInfo(["ackData": data])
         }
     }
@@ -69,6 +127,7 @@ final class WatchWorkoutManager: NSObject, ObservableObject, WCSessionDelegate {
 
     override private init() {
         super.init()
+        activateWCSessionIfNeeded()
     }
     
     private func activateWCSessionIfNeeded(){
