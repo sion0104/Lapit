@@ -26,6 +26,9 @@ struct CDDateWeatherBarView: View {
             vm.refreshDateOnly()
             Task { await vm.refreshWeather() }
         }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            Task { await vm.refreshWeather() }
+        }
         .padding(.vertical, 10)
     }
 }
