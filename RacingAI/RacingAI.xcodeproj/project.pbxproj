@@ -647,6 +647,7 @@
 				DEVELOPMENT_TEAM = Z64WN83V4Y;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "운동 기록과 심박수 등 건강 데이터를 읽어 운동 분석과 기록 제공에 사용합니다.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "운동 기록 저장 및 활동 데이터 업데이트를 위해 건강 데이터 쓰기 권한이 필요합니다.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "날씨 정보 업데이트를 위한 위치 데이터 권한이 필요합니다.";
@@ -656,6 +657,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -687,6 +689,7 @@
 				DEVELOPMENT_TEAM = Z64WN83V4Y;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "운동 기록과 심박수 등 건강 데이터를 읽어 운동 분석과 기록 제공에 사용합니다.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "운동 기록 저장 및 활동 데이터 업데이트를 위해 건강 데이터 쓰기 권한이 필요합니다.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "날씨 정보 업데이트를 위한 위치 데이터 권한이 필요합니다.";
@@ -696,6 +699,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
