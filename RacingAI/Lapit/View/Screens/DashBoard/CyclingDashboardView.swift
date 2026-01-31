@@ -32,6 +32,11 @@ struct CyclingDashboardView: View {
                     VStack {
                         CDCard {
                             CDDateWeatherBarView()
+                            
+                            HealthKitDisclosurePill()
+                                .padding(.horizontal, 20)
+                                .padding(.top, 6)
+                                .padding(.bottom, 4)
 
                             CDSessionHeroCard(
                                 durationText: rideVM.duration,

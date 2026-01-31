@@ -18,14 +18,8 @@ struct MypageSettingView: View {
                     
                     ProfileSectionView()
                     
-                    HStack {
-                        Spacer()
-                        Text("운동 데이터를 Apple Health와 연동합니다")
-                            .frame(alignment: .center)
-                            .font(.subheadline)
-                            .foregroundStyle(.good)
-                        Spacer()
-                    }
+                    HealthKitDisclosureCard()
+                        .padding(.top, 4)
                    
                     if isLoggedIn {
                         SettingSection(title: "설정") {
@@ -122,6 +116,34 @@ struct MypageSettingView: View {
         }
     }
 }
+
+private struct HealthKitDisclosureCard: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Image(systemName: "heart.fill")
+                    .font(.subheadline)
+                Text("Apple Health / HealthKit 연동")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+            }
+
+            Text("본 앱은 심박수 및 운동 기록을 Apple 건강(HealthKit)에서 읽어와 운동 화면에 표시합니다.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(Color.white.opacity(0.6), lineWidth: 1)
+        )
+    }
+}
+
 
 #Preview {
     MypageSettingView()
