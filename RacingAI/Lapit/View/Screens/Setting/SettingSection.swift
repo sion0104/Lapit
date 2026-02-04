@@ -1,4 +1,4 @@
-import SwiftUICore
+import SwiftUI
 
 struct SettingSection<Content: View>: View {
     let title: String

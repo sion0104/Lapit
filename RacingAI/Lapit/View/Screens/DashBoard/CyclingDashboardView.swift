@@ -33,6 +33,10 @@ struct CyclingDashboardView: View {
                         CDCard {
                             CDDateWeatherBarView()
                             
+                            AppleWeatherAttributionView()
+                                .padding(.horizontal, 20)
+                                .padding(.bottom, 4)
+                            
                             HealthKitDisclosurePill()
                                 .padding(.horizontal, 20)
                                 .padding(.top, 6)
